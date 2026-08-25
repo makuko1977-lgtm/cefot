@@ -1,0 +1,19 @@
+# Blueprint de Render (https://render.com/docs/blueprint-spec).
+# Al conectar este repositorio en Render y elegir "New > Blueprint", detecta
+# este archivo y deja el servicio casi configurado solo — solo falta rellenar
+# DATABASE_URL a mano con la cadena de conexión de tu base de datos gratuita
+# (Neon, Supabase...), como se explica en el README.
+services:
+  - type: web
+    name: cefot2-seccion3
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_URL
+        sync: false # se rellena a mano en el panel de Render (dato sensible)

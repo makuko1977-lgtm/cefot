@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Súper Administrador · CEFOT-2</title>
+<link rel="stylesheet" href="/shared/app.css">
+<style>
+  .grid-secciones{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:12px;
+    margin-top:6px;
+  }
+  .seccion-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    cursor:pointer;
+    transition:border-color .12s, transform .12s;
+  }
+  .seccion-card:hover{border-color:var(--accent); transform:translateY(-1px);}
+  .seccion-card.vacia{cursor:default; opacity:.55;}
+  .seccion-card.vacia:hover{border-color:var(--border); transform:none;}
+  .seccion-card .cia{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.5px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:4px;
+  }
+  .seccion-card h4{margin:0 0 6px; font-family:var(--font-display); font-size:16px;}
+  .seccion-card .jefe{font-size:12.5px; color:var(--text-dim);}
+  .seccion-card .jefe.sin-crear{font-style:italic;}
+  .seccion-card .mini-stats{
+    display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;
+  }
+  .seccion-card .mini-stat{
+    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+    background:var(--panel-2); border-radius:6px; padding:2px 6px;
+  }
+  .cia-block{margin-bottom:22px;}
+  .cia-block h3{font-size:14px; margin:0 0 10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px;}
+  .resumen-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
+  .resumen-stat{background:var(--panel-2); border-radius:10px; padding:12px 14px;}
+  .resumen-stat .num{font-family:var(--font-display); font-size:22px; font-weight:700;}
+  .resumen-stat .lbl{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.4px;}
+  .hint{font-size:11.5px; color:var(--text-dim);}
+  .hint.warn{color:var(--warn);}
+  .readonly-badge{
+    display:inline-block; font-size:11px; font-weight:600; letter-spacing:.4px;
+    text-transform:uppercase; color:var(--warn); background:var(--warn-soft);
+    border-radius:999px; padding:3px 10px; margin-bottom:14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">SA</div>
+      <div>
+        <h1>CEFOT-2 · Súper Administrador</h1>
+        <div class="sub">Alta de secciones y resumen de solo lectura</div>
+      </div>
+    </div>
+    <div id="topActions" style="display:flex; gap:8px; align-items:center;"></div>
+  </header>
+
+  <div class="panel corner-accent" style="margin-bottom:22px;">
+    <h3>Dar de alta una sección nueva</h3>
+    <div class="panel-sub">Elige compañía y sección, y crea a su jefe de sección. A partir de ese momento, ese jefe de sección entra con su propia URL y solo puede cargar los datos de SU sección.</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="scCompaniaInput">Compañía</label>
+        <select id="scCompaniaInput">
+          <option value="1">1ª Compañía</option>
+          <option value="2">2ª Compañía</option>
+          <option value="3" selected>3ª Compañía</option>
+          <option value="4">4ª Compañía</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="scSeccionInput">Sección</label>
+        <select id="scSeccionInput">
+          <option value="1">Sección 1</option>
+          <option value="2">Sección 2</option>
+          <option value="3" selected>Sección 3</option>
+          <option value="4">Sección 4</option>
+          <option value="5">Sección 5</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="scDniInput">DNI del jefe de sección</label>
+        <input type="text" id="scDniInput" autocapitalize="characters">
+      </div>
+      <div class="field">
+        <label for="scNombreInput">Nombre completo</label>
+        <input type="text" id="scNombreInput">
+      </div>
+      <div class="field">
+        <label for="scPasswordInput">Contraseña inicial</label>
+        <input type="text" id="scPasswordInput" placeholder="Mínimo 6 caracteres">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn primary" id="scCreateBtn" type="button">Crear sección</button>
+      <span class="form-msg" id="scFormMsg"></span>
+    </div>
+  </div>
+
+  <div class="panel corner-accent">
+    <h3>Secciones</h3>
+    <div class="panel-sub">Las casillas en color ya tienen jefe de sección dado de alta; las apagadas todavía están libres. Pulsa una casilla creada para ver su resumen (solo lectura).</div>
+    <div id="ciaBlocks"></div>
+  </div>
+</div>
+
+<div id="resumenModal" class="modal-overlay hidden">
+  <div class="modal-card" style="max-width:640px;">
+    <div class="modal-header">
+      <h3 id="resumenTitle">Resumen de sección</h3>
+      <button type="button" class="modal-close" id="resumenCloseBtn">&times;</button>
+    </div>
+    <div class="readonly-badge">Datos y actividad</div>
+    <div id="resumenBody">Cargando…</div>
+
+    <div class="panel-sub" id="editWrap" style="margin-top:22px; padding-top:18px; border-top:1px solid var(--border);">
+      <h4 style="margin:0 0 10px;">Editar sección</h4>
+      <div class="field-grid">
+        <div class="field">
+          <label for="secEditNombreInput">Nombre de la sección</label>
+          <input type="text" id="secEditNombreInput">
+        </div>
+        <div class="field">
+          <label for="secEditJefeNombreInput">Nombre del jefe de sección</label>
+          <input type="text" id="secEditJefeNombreInput">
+        </div>
+        <div class="field">
+          <label for="secEditDniInput">DNI del jefe de sección</label>
+          <input type="text" id="secEditDniInput" autocapitalize="characters">
+        </div>
+        <div class="field">
+          <label for="secEditPasswordInput">Nueva contraseña</label>
+          <input type="text" id="secEditPasswordInput" placeholder="Dejar en blanco para no cambiarla">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="secEditSaveBtn" type="button">Guardar cambios</button>
+        <span class="form-msg" id="secEditMsg"></span>
+      </div>
+    </div>
+
+    <div class="panel danger-zone" style="margin-top:18px;">
+      <h4 style="margin:0 0 6px;">Eliminar sección</h4>
+      <div class="panel-sub">Borra esta sección por completo: su jefe de sección, sus jefes de pelotón y todo su roster, sanciones, rebajes y refuerzos. No se puede deshacer.</div>
+      <div class="form-actions" id="secDeleteOpenWrap" style="margin-top:10px;">
+        <button class="btn danger-ghost" id="secDeleteOpenBtn" type="button">Eliminar sección…</button>
+      </div>
+      <div id="secDeleteConfirmWrap" class="hidden" style="margin-top:10px;">
+        <div class="field" style="margin-bottom:12px;">
+          <label for="secDeleteConfirmInput">Escribe «ELIMINAR SECCION» para confirmar</label>
+          <input type="text" id="secDeleteConfirmInput" autocomplete="off" placeholder="ELIMINAR SECCION">
+        </div>
+        <div class="form-actions">
+          <button class="btn danger-ghost" id="secDeleteConfirmBtn" type="button" disabled>Eliminar definitivamente</button>
+          <button class="btn ghost" id="secDeleteCancelBtn" type="button">Cancelar</button>
+          <span class="form-msg" id="secDeleteMsg"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var COMPANIAS = [1, 2, 3, 4];
+  var SECCIONES = [1, 2, 3, 4, 5];
+  var currentUser = null;
+  var seccionesPorId = {};
+
+  var ciaBlocks = document.getElementById("ciaBlocks");
+  var topActions = document.getElementById("topActions");
+  var scCreateBtn = document.getElementById("scCreateBtn");
+  var scFormMsg = document.getElementById("scFormMsg");
+  var resumenModal = document.getElementById("resumenModal");
+  var resumenTitle = document.getElementById("resumenTitle");
+  var resumenBody = document.getElementById("resumenBody");
+  var currentResumenId = null;
+
+  var secEditNombreInput = document.getElementById("secEditNombreInput");
+  var secEditJefeNombreInput = document.getElementById("secEditJefeNombreInput");
+  var secEditDniInput = document.getElementById("secEditDniInput");
+  var secEditPasswordInput = document.getElementById("secEditPasswordInput");
+  var secEditSaveBtn = document.getElementById("secEditSaveBtn");
+  var secEditMsg = document.getElementById("secEditMsg");
+
+  var secDeleteOpenWrap = document.getElementById("secDeleteOpenWrap");
+  var secDeleteOpenBtn = document.getElementById("secDeleteOpenBtn");
+  var secDeleteConfirmWrap = document.getElementById("secDeleteConfirmWrap");
+  var secDeleteConfirmInput = document.getElementById("secDeleteConfirmInput");
+  var secDeleteConfirmBtn = document.getElementById("secDeleteConfirmBtn");
+  var secDeleteCancelBtn = document.getElementById("secDeleteCancelBtn");
+  var secDeleteMsg = document.getElementById("secDeleteMsg");
+
+  function resetDeleteConfirm(){
+    secDeleteConfirmWrap.classList.add("hidden");
+    secDeleteOpenWrap.classList.remove("hidden");
+    secDeleteConfirmInput.value = "";
+    secDeleteConfirmBtn.disabled = true;
+    secDeleteMsg.textContent = "";
+    secDeleteMsg.className = "form-msg";
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function renderTopActions(){
+    var quien = currentUser ? (currentUser.nombre + " (" + currentUser.dni + ")") : "";
+    topActions.innerHTML =
+      (quien ? '<span class="meta-note">' + escapeHtml(quien) + '</span>' : "") +
+      (currentUser && currentUser.tenant && currentUser.tenant.role === "admin"
+        ? '<button class="btn small ghost" id="miSeccionBtn">Ir a mi sección</button>'
+        : "") +
+      '<button class="btn small ghost" id="logoutBtn">Cerrar sesión</button>';
+    if (currentUser && currentUser.tenant && currentUser.tenant.role === "admin"){
+      document.getElementById("miSeccionBtn").addEventListener("click", function(){
+        location.href = "/admin.html";
+      });
+    }
+    document.getElementById("logoutBtn").addEventListener("click", function(){
+      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
+    });
+  }
+
+  function renderGrid(){
+    var html = "";
+    COMPANIAS.forEach(function(cia){
+      html += '<div class="cia-block"><h3>' + cia + 'ª Compañía</h3><div class="grid-secciones">';
+      SECCIONES.forEach(function(sec){
+        var id = cia + "-" + sec;
+        var s = seccionesPorId[id];
+        if (s){
+          html +=
+            '<div class="seccion-card" data-id="' + id + '">' +
+              '<div class="cia">Sección ' + sec + '</div>' +
+              '<h4>' + escapeHtml(s.jefeSeccion ? s.jefeSeccion.nombre : "—") + '</h4>' +
+              '<div class="jefe">' + escapeHtml(s.jefeSeccion ? s.jefeSeccion.dni : "") + '</div>' +
+              '<div class="mini-stats">' +
+                '<span class="mini-stat">' + s.totales.alumnos + ' alumnos</span>' +
+                '<span class="mini-stat">' + s.totales.sanciones + ' sanciones</span>' +
+              '</div>' +
+            '</div>';
+        } else {
+          html +=
+            '<div class="seccion-card vacia">' +
+              '<div class="cia">Sección ' + sec + '</div>' +
+              '<h4>Sin crear</h4>' +
+              '<div class="jefe sin-crear">Todavía no tiene jefe de sección</div>' +
+            '</div>';
+        }
+      });
+      html += '</div></div>';
+    });
+    ciaBlocks.innerHTML = html;
+    ciaBlocks.querySelectorAll(".seccion-card[data-id]").forEach(function(card){
+      card.addEventListener("click", function(){
+        abrirResumen(card.getAttribute("data-id"));
+      });
+    });
+  }
+
+  function cargarSecciones(){
+    return fetch("/api/superadmin/secciones").then(function(r){
+      if (!r.ok) throw new Error("No se han podido cargar las secciones.");
+      return r.json();
+    }).then(function(data){
+      seccionesPorId = {};
+      (data.secciones || []).forEach(function(s){ seccionesPorId[s.id] = s; });
+      renderGrid();
+    });
+  }
+
+  function abrirResumen(id){
+    currentResumenId = id;
+    resumenModal.classList.remove("hidden");
+    resumenTitle.textContent = "Resumen · " + id;
+    resumenBody.innerHTML = "Cargando…";
+    secEditMsg.textContent = "";
+    secEditMsg.className = "form-msg";
+    secEditPasswordInput.value = "";
+    resetDeleteConfirm();
+    fetch("/api/superadmin/secciones/" + encodeURIComponent(id) + "/resumen").then(function(r){
+      if (!r.ok) throw new Error("No se ha podido cargar el resumen.");
+      return r.json();
+    }).then(function(t){
+      resumenTitle.textContent = t.nombre;
+      var refuerzosPendHtml = t.sanciones.refuerzosPendientes > 0
+        ? '<div class="hint warn" style="margin-bottom:12px;">' + t.sanciones.refuerzosPendientes + ' sanción(es) con medida "Refuerzo" todavía sin generar.</div>'
+        : "";
+      resumenBody.innerHTML =
+        '<div class="resumen-grid">' +
+          '<div class="resumen-stat"><div class="num">' + t.roster.total + '</div><div class="lbl">Alumnos</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.jefesDePeloton.length + '</div><div class="lbl">Jefes de pelotón</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.sanciones.total + '</div><div class="lbl">Sanciones</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.sanciones.leves + '</div><div class="lbl">Leves</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.sanciones.graves + '</div><div class="lbl">Graves</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.sanciones.sinMedida + '</div><div class="lbl">Sin medida</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.rebajes.total + '</div><div class="lbl">Rebajes</div></div>' +
+          '<div class="resumen-stat"><div class="num">' + t.refuerzos.total + '</div><div class="lbl">Refuerzos</div></div>' +
+        '</div>' +
+        refuerzosPendHtml +
+        '<div class="panel-sub"><strong>Jefe de sección:</strong> ' + escapeHtml(t.jefeSeccion ? (t.jefeSeccion.nombre + " (" + t.jefeSeccion.dni + ")") : "—") + '</div>' +
+        '<div class="panel-sub"><strong>Roster actualizado:</strong> ' + (t.roster.actualizadoEn ? new Date(t.roster.actualizadoEn).toLocaleString("es-ES") : "—") + '</div>' +
+        '<div class="panel-sub"><strong>Jefes de pelotón:</strong> ' + (t.jefesDePeloton.length ? t.jefesDePeloton.map(function(u){ return escapeHtml(u.nombre); }).join(", ") : "—") + '</div>';
+
+      secEditNombreInput.value = t.nombre || "";
+      secEditJefeNombreInput.value = t.jefeSeccion ? t.jefeSeccion.nombre : "";
+      secEditDniInput.value = t.jefeSeccion ? t.jefeSeccion.dni : "";
+    }).catch(function(){
+      resumenBody.innerHTML = '<div class="form-msg error">No se ha podido cargar el resumen.</div>';
+    });
+  }
+
+  document.getElementById("resumenCloseBtn").addEventListener("click", function(){
+    resumenModal.classList.add("hidden");
+  });
+  resumenModal.addEventListener("click", function(e){
+    if (e.target === resumenModal) resumenModal.classList.add("hidden");
+  });
+
+  secEditSaveBtn.addEventListener("click", function(){
+    if (!currentResumenId) return;
+    var body = {
+      nombreSeccion: secEditNombreInput.value.trim(),
+      nombre: secEditJefeNombreInput.value.trim(),
+      dni: secEditDniInput.value.trim(),
+      password: secEditPasswordInput.value
+    };
+    secEditSaveBtn.disabled = true;
+    fetch("/api/superadmin/secciones/" + encodeURIComponent(currentResumenId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        secEditSaveBtn.disabled = false;
+        if (!res.ok){
+          secEditMsg.textContent = res.data.error || "No se han podido guardar los cambios.";
+          secEditMsg.className = "form-msg error";
+          return;
+        }
+        secEditMsg.textContent = "Cambios guardados.";
+        secEditMsg.className = "form-msg ok";
+        secEditPasswordInput.value = "";
+        cargarSecciones();
+        abrirResumen(currentResumenId);
+      }).catch(function(){
+        secEditSaveBtn.disabled = false;
+        secEditMsg.textContent = "Error de conexión con el servidor.";
+        secEditMsg.className = "form-msg error";
+      });
+  });
+
+  secDeleteOpenBtn.addEventListener("click", function(){
+    secDeleteOpenWrap.classList.add("hidden");
+    secDeleteConfirmWrap.classList.remove("hidden");
+  });
+  secDeleteCancelBtn.addEventListener("click", resetDeleteConfirm);
+  secDeleteConfirmInput.addEventListener("input", function(){
+    secDeleteConfirmBtn.disabled = secDeleteConfirmInput.value.trim() !== "ELIMINAR SECCION";
+  });
+  secDeleteConfirmBtn.addEventListener("click", function(){
+    if (!currentResumenId) return;
+    secDeleteConfirmBtn.disabled = true;
+    fetch("/api/superadmin/secciones/" + encodeURIComponent(currentResumenId), {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmacion: secDeleteConfirmInput.value.trim() })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok){
+          secDeleteConfirmBtn.disabled = false;
+          secDeleteMsg.textContent = res.data.error || "No se ha podido eliminar la sección.";
+          secDeleteMsg.className = "form-msg error";
+          return;
+        }
+        resumenModal.classList.add("hidden");
+        currentResumenId = null;
+        cargarSecciones();
+      }).catch(function(){
+        secDeleteConfirmBtn.disabled = false;
+        secDeleteMsg.textContent = "Error de conexión con el servidor.";
+        secDeleteMsg.className = "form-msg error";
+      });
+  });
+
+  scCreateBtn.addEventListener("click", function(){
+    var body = {
+      compania: document.getElementById("scCompaniaInput").value,
+      seccion: document.getElementById("scSeccionInput").value,
+      dni: document.getElementById("scDniInput").value.trim(),
+      nombre: document.getElementById("scNombreInput").value.trim(),
+      password: document.getElementById("scPasswordInput").value
+    };
+    if (!body.dni || !body.nombre || body.password.length < 6){
+      scFormMsg.textContent = "DNI, nombre y una contraseña de al menos 6 caracteres son obligatorios.";
+      scFormMsg.className = "form-msg error";
+      return;
+    }
+    scCreateBtn.disabled = true;
+    fetch("/api/superadmin/secciones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        scCreateBtn.disabled = false;
+        if (!res.ok){
+          scFormMsg.textContent = res.data.error || "No se ha podido crear la sección.";
+          scFormMsg.className = "form-msg error";
+          return;
+        }
+        scFormMsg.textContent = "Sección creada correctamente.";
+        scFormMsg.className = "form-msg ok";
+        document.getElementById("scDniInput").value = "";
+        document.getElementById("scNombreInput").value = "";
+        document.getElementById("scPasswordInput").value = "";
+        cargarSecciones();
+      }).catch(function(){
+        scCreateBtn.disabled = false;
+        scFormMsg.textContent = "Error de conexión con el servidor.";
+        scFormMsg.className = "form-msg error";
+      });
+  });
+
+  fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
+    if (!me){ location.href = "/login.html"; return; }
+    if (!me.superAdmin){
+      location.href = (me.tenant && me.tenant.role === "admin") ? "/admin.html" : "/instructor.html";
+      return;
+    }
+    currentUser = me;
+    renderTopActions();
+    cargarSecciones().catch(function(){
+      ciaBlocks.innerHTML = '<div class="empty-state">No se han podido cargar las secciones. Recarga la página.</div>';
+    });
+  }).catch(function(){ location.href = "/login.html"; });
+
+})();
+</script>
+
+</body>
+</html>

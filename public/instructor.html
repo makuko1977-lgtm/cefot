@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instructor · CEFOT-2 BAL/3ª CÍA</title>
+<link rel="stylesheet" href="/shared/app.css">
+<style>
+  .app{max-width:760px;}
+  .search-results{margin-top:6px;}
+  .search-result-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:8px 10px; font-size:12.5px; border-bottom:1px solid var(--border); cursor:pointer;
+  }
+  .search-result-item:last-child{border-bottom:none;}
+  .search-result-item:hover{background:var(--accent-soft);}
+  .confirm-card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:28px; text-align:center; box-shadow:var(--shadow);}
+  .confirm-card .big-ok{font-size:34px; margin-bottom:6px;}
+  .confirm-card h3{font-family:var(--font-display); margin:0 0 6px;}
+  .confirm-card p{color:var(--text-dim); font-size:13.5px; margin:0 0 20px;}
+  .confirm-detail{text-align:left; background:var(--panel-2); border:1px solid var(--border-light); border-radius:10px; padding:14px 16px; margin-bottom:20px; font-size:12.5px;}
+  .confirm-detail dl{display:grid; grid-template-columns:max-content 1fr; gap:4px 10px; margin:0;}
+  .confirm-detail dt{color:var(--text-dim);}
+  .confirm-detail dd{margin:0;}
+  .firma-pad-wrap{border:1.5px dashed var(--border); border-radius:10px; background:#fff; overflow:hidden;}
+  .firma-pad-wrap canvas{width:100%; height:180px; display:block; touch-action:none; cursor:crosshair;}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark" id="brandMark">S·3</div>
+      <div>
+        <h1 id="brandTitleInstr">CEFOT-2 · BAL/3ª CÍA</h1>
+        <div class="sub">Parte de sanción — <span id="userNombre"></span></div>
+      </div>
+    </div>
+    <button type="button" class="btn ghost" id="logoutBtn">Cerrar sesión</button>
+  </header>
+
+  <div class="tabbar hidden" id="instrTabbar">
+    <button type="button" id="tabBtnSancion" class="active">Nueva sanción</button>
+    <button type="button" id="tabBtnFicha" class="hidden">Ficha del alumno</button>
+    <button type="button" id="tabBtnRebRef" class="hidden">Rebajes / Refuerzos</button>
+  </div>
+
+  <div id="panelSancion">
+  <div id="formWrap">
+    <div class="panel corner-accent">
+      <h3>Nueva sanción</h3>
+      <div class="panel-sub">Busca al alumno, rellena los datos de la infracción y guarda el parte. No puedes ver el listado de sanciones ni el roster completo — solo dar de alta.</div>
+
+      <div class="field-grid">
+        <div class="field" style="grid-column:1/-1;">
+          <label>Alumno(s)</label>
+          <div class="mode-toggle">
+            <button type="button" class="mode-btn active" id="modeIndividualBtn" data-mode="individual">Individual</button>
+            <button type="button" class="mode-btn" id="modeMultipleBtn" data-mode="multiple">Múltiple</button>
+          </div>
+
+          <div id="individualWrap">
+            <input type="text" id="cadeteInput" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+            <div class="multi-list search-results hidden" id="cadeteResults"></div>
+            <div class="cadet-preview" id="cadetePreview"></div>
+            <div class="hint error hidden" id="cadeteHint">No se ha encontrado ningún alumno con ese texto. Búscalo y selecciónalo de la lista.</div>
+          </div>
+
+          <div id="multipleWrap" class="hidden">
+            <input type="search" id="multiSearch" placeholder="Buscar alumnos para añadir a la sanción...">
+            <div class="multi-list" id="multiResults"></div>
+            <div class="chip-row" id="multiChips"></div>
+            <div class="hint error hidden" id="multiHint">Selecciona al menos un alumno.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="sanFecha">Día</label>
+          <input type="date" id="sanFecha">
+        </div>
+        <div class="field">
+          <label for="sanLugar">Lugar</label>
+          <input type="text" id="sanLugar" value="ACTO">
+        </div>
+        <div class="field">
+          <label for="sanHora">Hora</label>
+          <input type="time" id="sanHora" value="08:00">
+        </div>
+
+        <div class="field">
+          <label for="sanTipoFalta">Tipo de falta</label>
+          <select id="sanTipoFalta">
+            <option value="">Seleccionar…</option>
+            <option value="LEVE">Leve</option>
+            <option value="GRAVE">Grave</option>
+          </select>
+        </div>
+
+        <div class="field-row" style="grid-column:1/-1;">
+          <div class="field narrow">
+            <label for="sanEmpleo">Empleo</label>
+            <select id="sanEmpleo">
+              <option value="">—</option>
+              <option value="CAP">CAP</option>
+              <option value="BG">BG</option>
+              <option value="SGT1">SGT1</option>
+              <option value="SGTO">SGTO</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="sanProfNombreInput">Nombre (profesor)</label>
+            <input type="text" id="sanProfNombreInput" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="sanProfApellidosInput">Apellidos (profesor)</label>
+            <input type="text" id="sanProfApellidosInput" autocomplete="off">
+          </div>
+          <div class="field narrow">
+            <label for="sanProfDniInput">DNI</label>
+            <input type="text" id="sanProfDniInput">
+          </div>
+        </div>
+
+        <div class="field" style="grid-column:1/-1;">
+          <label for="sanFundamento">Fundamento legal (según tipo de falta)</label>
+          <select id="sanFundamento" disabled>
+            <option value="">Elige primero el tipo de falta…</option>
+          </select>
+        </div>
+
+        <div class="field" style="grid-column:1/-1;">
+          <label for="sanMotivoInput">Motivo de la sanción / descripción de los hechos</label>
+          <input type="text" id="sanMotivoInput" placeholder="Ej. Falta de interés en la instrucción" autocomplete="off">
+        </div>
+
+        <div class="field" style="grid-column:1/-1;">
+          <label for="sanMedidaInput">Medida correctora</label>
+          <select id="sanMedidaInput"><option value="">Seleccionar…</option></select>
+        </div>
+
+        <div class="field-row hidden" id="arrestoFields" style="grid-column:1/-1;">
+          <div class="field">
+            <label for="arrestoFechaIni">Fecha inicio arresto</label>
+            <input type="date" id="arrestoFechaIni">
+          </div>
+          <div class="field">
+            <label for="arrestoFechaFin">Fecha fin arresto</label>
+            <input type="date" id="arrestoFechaFin">
+          </div>
+          <div class="field narrow">
+            <label for="arrestoDias">Días de arresto</label>
+            <input type="number" id="arrestoDias" min="1" step="1" readonly>
+          </div>
+        </div>
+        <div class="hint error hidden" id="arrestoHint" style="grid-column:1/-1;">Indica la fecha de inicio y fin del arresto (la fecha de fin debe ser igual o posterior a la de inicio).</div>
+
+        <div class="field" style="grid-column:1/-1;">
+          <label for="sanObservaciones">Observaciones (opcional)</label>
+          <textarea id="sanObservaciones" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="hint error hidden" id="sanFormHint" style="margin-bottom:12px;">Revisa los campos: alumno(s), fecha, tipo de falta, fundamento legal y motivo son obligatorios.</div>
+
+      <div class="form-actions">
+        <button class="btn primary" id="sanSaveBtn">Guardar sanción</button>
+        <button class="btn ghost" id="sanClearBtn" type="button">Limpiar formulario</button>
+        <span class="form-msg" id="sanFormMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmWrap" class="hidden">
+    <div class="confirm-card corner-accent">
+      <div class="big-ok">✓</div>
+      <h3>Sanción registrada</h3>
+      <p>El parte se ha guardado correctamente y ya es visible para el administrador.</p>
+      <div class="confirm-detail" id="confirmDetail"></div>
+      <button class="btn ghost hidden" id="confirmFirmarBtn" type="button" style="margin-bottom:10px;">Firmar y generar documento</button>
+      <button class="btn primary" id="confirmNewBtn" type="button">Registrar otra sanción</button>
+    </div>
+  </div>
+  </div>
+
+  <div id="panelFicha" class="hidden">
+    <div class="panel corner-accent">
+      <h3>Ficha del alumno</h3>
+      <div class="panel-sub" id="fichaInstrPanelSub">Busca al alumno para ver su ficha.</div>
+      <div class="field" style="margin-bottom:14px;">
+        <label for="fichaInstrInput">Alumno</label>
+        <input type="text" id="fichaInstrInput" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+        <div class="multi-list search-results hidden" id="fichaInstrResults"></div>
+      </div>
+
+      <div id="fichaInstrDetalle" class="hidden">
+        <div class="modal-body">
+          <div class="ficha-photo-col hidden" id="fichaInstrFotoCol">
+            <div class="ficha-photo-wrap">
+              <img id="fichaInstrFotoImg" class="hidden" alt="Foto del alumno" />
+              <div id="fichaInstrFotoPlaceholder" class="ficha-photo-placeholder">Sin foto</div>
+            </div>
+            <div class="ficha-photo-actions">
+              <button type="button" class="btn small ghost hidden" id="fichaInstrTakePhotoBtn">Hacer foto</button>
+              <button type="button" class="btn small ghost hidden" id="fichaInstrUploadPhotoBtn">Subir foto</button>
+              <input type="file" id="fichaInstrUploadPhotoInput" accept="image/*" class="hidden" />
+              <button type="button" class="btn small danger-ghost hidden" id="fichaInstrRemovePhotoBtn">Quitar foto</button>
+            </div>
+            <div id="fichaInstrCameraWrap" class="ficha-camera-wrap hidden">
+              <video id="fichaInstrCameraVideo" autoplay playsinline muted></video>
+              <div class="ficha-camera-actions">
+                <button type="button" class="btn small primary" id="fichaInstrCaptureBtn">Capturar</button>
+                <button type="button" class="btn small ghost" id="fichaInstrCameraCancelBtn">Cancelar</button>
+              </div>
+            </div>
+            <canvas id="fichaInstrCameraCanvas" class="hidden"></canvas>
+            <div class="form-msg" id="fichaInstrFotoMsg"></div>
+          </div>
+
+          <div class="ficha-fields-col">
+            <div class="ficha-fields-grid" id="fichaInstrFieldsGrid"></div>
+          </div>
+        </div>
+
+        <div class="ficha-attach hidden" id="fichaInstrAttachBlock">
+          <h4>Adjuntos (PDF o imagen)</h4>
+          <div class="ficha-attach-list" id="fichaInstrAttachList"></div>
+          <button type="button" class="btn small ghost" id="fichaInstrAttachAddBtn">Añadir archivo…</button>
+          <input type="file" id="fichaInstrAttachInput" accept="application/pdf,image/*" multiple class="hidden" />
+          <div class="hint error hidden" id="fichaInstrAttachHint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panelRebRef" class="hidden">
+    <div class="panel corner-accent">
+      <h3>Rebajes vigentes</h3>
+      <div class="panel-sub">Consulta de solo lectura — no puedes crear ni eliminar.</div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nº</th><th>Alumno</th><th>Pelotón</th><th>Desde</th><th>Hasta</th><th>Tipo</th></tr></thead>
+            <tbody id="rebRefInstrRebajesBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="rebRefInstrRebajesEmpty">Sin rebajes registrados.</div>
+      </div>
+    </div>
+    <div class="panel corner-accent" style="margin-top:16px;">
+      <h3>Refuerzos vigentes</h3>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nº</th><th>Alumno</th><th>Pelotón</th><th>Desde</th><th>Hasta</th><th>Tipo</th></tr></thead>
+            <tbody id="rebRefInstrRefuerzosBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="rebRefInstrRefuerzosEmpty">Sin refuerzos registrados.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="firmaModal">
+    <div class="modal-card" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>Firma del alumno</h3>
+        <button type="button" class="modal-close" id="firmaCloseBtn">✕</button>
+      </div>
+      <div class="panel-sub" id="firmaModalAlumno" style="margin-bottom:10px;"></div>
+      <select id="firmaAlumnoSelect" class="hidden" style="margin-bottom:12px;width:100%;"></select>
+      <div class="firma-pad-wrap"><canvas id="firmaCanvas"></canvas></div>
+      <div class="hint" style="margin:10px 0;">Pásale el móvil o la tablet al alumno para que firme aquí con el dedo.</div>
+      <div class="form-actions">
+        <button class="btn primary" id="firmaGenerarBtn" type="button">Firmar y generar PDF</button>
+        <button class="btn ghost" id="firmaLimpiarBtn" type="button">Limpiar firma</button>
+        <span class="form-msg" id="firmaModalMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="firmaPrevioModal">
+    <div class="modal-card" style="max-width:420px;">
+      <div class="modal-header">
+        <h3>Firma del alumno</h3>
+        <button type="button" class="modal-close" id="firmaPrevioCloseBtn">✕</button>
+      </div>
+      <div class="panel-sub" id="firmaPrevioProgreso" style="margin-bottom:10px;"></div>
+      <div class="firma-pad-wrap"><canvas id="firmaPrevioCanvas"></canvas></div>
+      <div class="hint" style="margin:10px 0;">Pásale el móvil o la tablet al alumno para que firme aquí con el dedo antes de guardar el parte.</div>
+      <div class="form-actions">
+        <button class="btn primary" id="firmaPrevioSiguienteBtn" type="button">Firmar y continuar</button>
+        <button class="btn ghost" id="firmaPrevioLimpiarBtn" type="button">Limpiar firma</button>
+        <span class="form-msg" id="firmaPrevioMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="info">Acceso restringido — este usuario solo puede dar de alta sanciones, no puede consultar otros datos de la sección.</footer>
+</div>
+
+<script src="/shared/catalog.js"></script>
+<script src="/shared/pdf-lib.min.js"></script>
+<script src="/shared/amonestacion.js"></script>
+<script>
+(function(){
+  "use strict";
+  var CATALOG = window.CEFOT2_CATALOG;
+
+  // ---------------- sesión ----------------
+  var miPermisos = { fotos: false, verFicha: false, adjuntos: false, verRebajesRefuerzos: false };
+  fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
+    if (!me){ location.href = "/login.html"; return; }
+    if (!me.tenant){ location.href = "/login.html"; return; }
+    if (me.tenant.role === "admin"){ location.href = "/admin.html"; return; }
+    document.getElementById("userNombre").textContent = me.nombre + " (" + me.dni + ")";
+    miPermisos = (me.tenant && me.tenant.permisos) || miPermisos;
+    var ciaLabel = me.tenant.compania + "ª";
+    var brandMarkEl = document.getElementById("brandMark");
+    var brandTitleEl = document.getElementById("brandTitleInstr");
+    if (brandMarkEl) brandMarkEl.textContent = "S·" + me.tenant.seccion;
+    if (brandTitleEl) brandTitleEl.textContent = "CEFOT-2 · BAL/" + ciaLabel + " CÍA · SECCIÓN " + me.tenant.seccion;
+    document.title = "Instructor · " + ciaLabel + " CÍA · SECCIÓN " + me.tenant.seccion;
+    configurarPestañas();
+  }).catch(function(){ location.href = "/login.html"; });
+
+  // ---------------- pestañas (solo aparecen si hay algún permiso extra) ----------------
+  var instrTabbar = document.getElementById("instrTabbar");
+  var tabBtnSancion = document.getElementById("tabBtnSancion");
+  var tabBtnFicha = document.getElementById("tabBtnFicha");
+  var tabBtnRebRef = document.getElementById("tabBtnRebRef");
+  var panelSancion = document.getElementById("panelSancion");
+  var panelFicha = document.getElementById("panelFicha");
+  var panelRebRef = document.getElementById("panelRebRef");
+
+  function configurarPestañas(){
+    var tieneFicha = miPermisos.fotos || miPermisos.verFicha || miPermisos.adjuntos;
+    var tieneRebRef = miPermisos.verRebajesRefuerzos;
+    if (!tieneFicha && !tieneRebRef) return; // solo sanciones: se queda como antes, sin pestañas
+    instrTabbar.classList.remove("hidden");
+    tabBtnFicha.classList.toggle("hidden", !tieneFicha);
+    tabBtnRebRef.classList.toggle("hidden", !tieneRebRef);
+  }
+
+  function cambiarPestañaInstr(tab){
+    tabBtnSancion.classList.toggle("active", tab === "sancion");
+    tabBtnFicha.classList.toggle("active", tab === "ficha");
+    tabBtnRebRef.classList.toggle("active", tab === "rebref");
+    panelSancion.classList.toggle("hidden", tab !== "sancion");
+    panelFicha.classList.toggle("hidden", tab !== "ficha");
+    panelRebRef.classList.toggle("hidden", tab !== "rebref");
+  }
+  tabBtnSancion.addEventListener("click", function(){ cambiarPestañaInstr("sancion"); });
+  tabBtnFicha.addEventListener("click", function(){ cambiarPestañaInstr("ficha"); });
+  tabBtnRebRef.addEventListener("click", function(){ cambiarPestañaInstr("rebref"); fetchRebRefInstr(); });
+
+  document.getElementById("logoutBtn").addEventListener("click", function(){
+    fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
+  });
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  // ---------------- medida correctora ----------------
+  var sanMedidaInput = document.getElementById("sanMedidaInput");
+  sanMedidaInput.innerHTML = '<option value="">Seleccionar…</option>' +
+    CATALOG.MEDIDA_OPTIONS.map(function(m){ return '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>'; }).join("");
+
+  var arrestoFields = document.getElementById("arrestoFields");
+  var arrestoFechaIni = document.getElementById("arrestoFechaIni");
+  var arrestoFechaFin = document.getElementById("arrestoFechaFin");
+  var arrestoDias = document.getElementById("arrestoDias");
+  var arrestoHint = document.getElementById("arrestoHint");
+
+  function actualizarDiasArresto(){
+    var ini = arrestoFechaIni.value, fin = arrestoFechaFin.value;
+    if (!ini || !fin){ arrestoDias.value = ""; return; }
+    var dIni = new Date(ini + "T00:00:00"), dFin = new Date(fin + "T00:00:00");
+    var dias = Math.round((dFin - dIni) / 86400000) + 1;
+    arrestoDias.value = dias > 0 ? dias : "";
+  }
+  arrestoFechaIni.addEventListener("change", actualizarDiasArresto);
+  arrestoFechaFin.addEventListener("change", actualizarDiasArresto);
+
+  sanMedidaInput.addEventListener("change", function(){
+    arrestoFields.classList.toggle("hidden", sanMedidaInput.value !== "Arresto");
+    if (sanMedidaInput.value !== "Arresto") arrestoHint.classList.add("hidden");
+  });
+
+  // ---------------- tipo de falta / fundamento ----------------
+  var sanTipoFalta = document.getElementById("sanTipoFalta");
+  var sanFundamento = document.getElementById("sanFundamento");
+  sanTipoFalta.addEventListener("change", function(){
+    var tipo = sanTipoFalta.value;
+    var lista = CATALOG.FALTA_CATALOG[tipo] || [];
+    if (!lista.length){
+      sanFundamento.disabled = true;
+      sanFundamento.innerHTML = '<option value="">Elige primero el tipo de falta…</option>';
+      return;
+    }
+    sanFundamento.disabled = false;
+    sanFundamento.innerHTML = '<option value="">Seleccionar…</option>' +
+      lista.map(function(texto, i){
+        return '<option value="' + escapeHtml(texto) + '">' + CATALOG.apartadoLetra(i) + ") " + escapeHtml(texto) + '</option>';
+      }).join("");
+  });
+
+  // ---------------- modo individual / múltiple ----------------
+  var mode = "individual";
+  var modeIndividualBtn = document.getElementById("modeIndividualBtn");
+  var modeMultipleBtn = document.getElementById("modeMultipleBtn");
+  var individualWrap = document.getElementById("individualWrap");
+  var multipleWrap = document.getElementById("multipleWrap");
+
+  function setMode(m){
+    mode = m;
+    modeIndividualBtn.classList.toggle("active", m === "individual");
+    modeMultipleBtn.classList.toggle("active", m === "multiple");
+    individualWrap.classList.toggle("hidden", m !== "individual");
+    multipleWrap.classList.toggle("hidden", m !== "multiple");
+  }
+  modeIndividualBtn.addEventListener("click", function(){ setMode("individual"); });
+  modeMultipleBtn.addEventListener("click", function(){ setMode("multiple"); });
+
+  // ---------------- búsqueda de alumnos (API) ----------------
+  function buscarAlumnos(q, cb){
+    if (!q || q.trim().length < 1){ cb([]); return; }
+    fetch("/api/roster/buscar?q=" + encodeURIComponent(q.trim()))
+      .then(function(r){ return r.json(); })
+      .then(function(data){ cb(data.resultados || []); })
+      .catch(function(){ cb([]); });
+  }
+  function debounce(fn, ms){
+    var t;
+    return function(){
+      var args = arguments;
+      clearTimeout(t);
+      t = setTimeout(function(){ fn.apply(null, args); }, ms);
+    };
+  }
+
+  // -- individual --
+  var cadeteInput = document.getElementById("cadeteInput");
+  var cadeteResults = document.getElementById("cadeteResults");
+  var cadetePreview = document.getElementById("cadetePreview");
+  var cadeteHint = document.getElementById("cadeteHint");
+  var selectedCadete = null;
+
+  var onCadeteInput = debounce(function(){
+    selectedCadete = null;
+    cadetePreview.classList.remove("show");
+    cadetePreview.innerHTML = "";
+    cadeteHint.classList.add("hidden");
+    var q = cadeteInput.value;
+    buscarAlumnos(q, function(resultados){
+      if (!q.trim() || !resultados.length){
+        cadeteResults.classList.add("hidden");
+        cadeteResults.innerHTML = "";
+        return;
+      }
+      cadeteResults.classList.remove("hidden");
+      cadeteResults.innerHTML = resultados.map(function(al){
+        return '<div class="search-result-item" data-numero="' + escapeHtml(al.numero) + '">' +
+          '<span>' + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + '</span>' +
+          '<span class="pelo-badge">' + escapeHtml(al.peloton || "—") + '</span>' +
+          '</div>';
+      }).join("");
+      cadeteResults.querySelectorAll("[data-numero]").forEach(function(el){
+        el.addEventListener("click", function(){
+          var numero = el.getAttribute("data-numero");
+          var al = resultados.filter(function(a){ return String(a.numero) === numero; })[0];
+          if (!al) return;
+          selectedCadete = al;
+          cadeteInput.value = "";
+          cadeteResults.classList.add("hidden");
+          cadeteResults.innerHTML = "";
+          cadetePreview.classList.add("show");
+          cadetePreview.innerHTML = '<span class="num">Nº ' + escapeHtml(al.numero) + '</span><span>' +
+            escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + '</span>' +
+            '<button type="button" class="btn small ghost" id="cadeteClearBtn" style="margin-left:auto;">Cambiar</button>';
+          document.getElementById("cadeteClearBtn").addEventListener("click", function(){
+            selectedCadete = null;
+            cadetePreview.classList.remove("show");
+            cadetePreview.innerHTML = "";
+          });
+        });
+      });
+    });
+  }, 200);
+  cadeteInput.addEventListener("input", onCadeteInput);
+
+  // -- múltiple --
+  var multiSearch = document.getElementById("multiSearch");
+  var multiResults = document.getElementById("multiResults");
+  var multiChips = document.getElementById("multiChips");
+  var multiHint = document.getElementById("multiHint");
+  var multiSelected = []; // array de {numero, ape1, ape2, nombre, peloton}
+
+  function renderMultiChips(){
+    if (!multiSelected.length){ multiChips.innerHTML = ""; return; }
+    multiChips.innerHTML = multiSelected.map(function(al){
+      return '<span class="chip" data-numero="' + escapeHtml(al.numero) + '">' +
+        escapeHtml(al.numero) + " · " + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) +
+        '<span class="x" data-removenumero="' + escapeHtml(al.numero) + '">✕</span></span>';
+    }).join("");
+    multiChips.querySelectorAll("[data-removenumero]").forEach(function(x){
+      x.addEventListener("click", function(){
+        var numero = x.getAttribute("data-removenumero");
+        multiSelected = multiSelected.filter(function(a){ return String(a.numero) !== numero; });
+        renderMultiChips();
+      });
+    });
+  }
+
+  var onMultiSearch = debounce(function(){
+    var q = multiSearch.value;
+    buscarAlumnos(q, function(resultados){
+      if (!q.trim()){
+        multiResults.innerHTML = '<div class="multi-list-empty">Escribe para buscar…</div>';
+        return;
+      }
+      if (!resultados.length){
+        multiResults.innerHTML = '<div class="multi-list-empty">Sin resultados.</div>';
+        return;
+      }
+      multiResults.innerHTML = resultados.map(function(al){
+        var checked = multiSelected.some(function(a){ return String(a.numero) === String(al.numero); });
+        return '<div class="multi-list-item"><label style="display:flex;align-items:center;gap:8px;width:100%;cursor:pointer;">' +
+          '<input type="checkbox" data-numero="' + escapeHtml(al.numero) + '"' + (checked ? " checked" : "") + '>' +
+          '<span>' + escapeHtml(al.numero) + " · " + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + '</span>' +
+          '</label></div>';
+      }).join("");
+      multiResults.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+        cb.addEventListener("change", function(){
+          var numero = cb.getAttribute("data-numero");
+          var al = resultados.filter(function(a){ return String(a.numero) === numero; })[0];
+          if (!al) return;
+          if (cb.checked){
+            if (!multiSelected.some(function(a){ return String(a.numero) === numero; })) multiSelected.push(al);
+          } else {
+            multiSelected = multiSelected.filter(function(a){ return String(a.numero) !== numero; });
+          }
+          renderMultiChips();
+        });
+      });
+    });
+  }, 200);
+  multiSearch.addEventListener("input", onMultiSearch);
+
+  // ---------------- validación y envío ----------------
+  var sanFecha = document.getElementById("sanFecha");
+  var sanLugar = document.getElementById("sanLugar");
+  var sanHora = document.getElementById("sanHora");
+  var sanEmpleo = document.getElementById("sanEmpleo");
+  var sanProfNombreInput = document.getElementById("sanProfNombreInput");
+  var sanProfApellidosInput = document.getElementById("sanProfApellidosInput");
+  var sanProfDniInput = document.getElementById("sanProfDniInput");
+  var sanMotivoInput = document.getElementById("sanMotivoInput");
+  var sanObservaciones = document.getElementById("sanObservaciones");
+  var sanFormHint = document.getElementById("sanFormHint");
+  var sanFormMsg = document.getElementById("sanFormMsg");
+  var sanSaveBtn = document.getElementById("sanSaveBtn");
+  var sanClearBtn = document.getElementById("sanClearBtn");
+
+  // ---------------- firma obligatoria de cada alumno antes de guardar el parte ----------------
+  // Se pide, uno a uno, a todos los alumnos del parte que se está a punto de
+  // guardar (sea cual sea la medida correctora). Al terminar el último, se
+  // llama al callback con las firmas recogidas para incluirlas en el propio
+  // guardado del parte.
+  var firmaPrevioModal = document.getElementById("firmaPrevioModal");
+  var firmaPrevioCanvas = document.getElementById("firmaPrevioCanvas");
+  var firmaPrevioProgreso = document.getElementById("firmaPrevioProgreso");
+  var firmaPrevioSiguienteBtn = document.getElementById("firmaPrevioSiguienteBtn");
+  var firmaPrevioMsg = document.getElementById("firmaPrevioMsg");
+  var firmaPrevioPad = null;
+  var firmaPrevioAlumnos = [];
+  var firmaPrevioIndex = 0;
+  var firmaPrevioResultado = {};
+  var firmaPrevioCallback = null;
+
+  function describeAlumnoFirmaPrevio(a){
+    return [a.ape1, a.ape2].filter(Boolean).join(" ") + ", " + a.nombre + " (nº " + a.numero + ")";
+  }
+
+  function mostrarAlumnoFirmaPrevio(){
+    var a = firmaPrevioAlumnos[firmaPrevioIndex];
+    firmaPrevioProgreso.textContent = "Firma " + (firmaPrevioIndex + 1) + " de " + firmaPrevioAlumnos.length + " — " + describeAlumnoFirmaPrevio(a);
+    firmaPrevioSiguienteBtn.textContent = (firmaPrevioIndex === firmaPrevioAlumnos.length - 1) ? "Firmar y guardar" : "Firmar y siguiente";
+    firmaPrevioMsg.textContent = "";
+    firmaPrevioMsg.className = "form-msg";
+    if (firmaPrevioPad) firmaPrevioPad.clear();
+  }
+
+  // alumnos: lista ya validada (individual o múltiple) del parte a guardar.
+  // callback(firmasObj) se llama solo si TODOS firman; si se cancela, no se
+  // llama a nada y el parte no se guarda.
+  function pedirFirmasPrevias(alumnos, callback){
+    firmaPrevioAlumnos = alumnos;
+    firmaPrevioIndex = 0;
+    firmaPrevioResultado = {};
+    firmaPrevioCallback = callback;
+    firmaPrevioModal.classList.remove("hidden");
+    mostrarAlumnoFirmaPrevio();
+    setTimeout(function(){
+      firmaPrevioPad = CEFOT2_AMONESTACION.attachFirmaPad(firmaPrevioCanvas);
+      firmaPrevioPad.resize();
+    }, 30);
+  }
+
+  function cerrarFirmaPrevioModal(){
+    firmaPrevioModal.classList.add("hidden");
+    firmaPrevioPad = null;
+    firmaPrevioCallback = null;
+  }
+  document.getElementById("firmaPrevioCloseBtn").addEventListener("click", cerrarFirmaPrevioModal);
+  document.getElementById("firmaPrevioLimpiarBtn").addEventListener("click", function(){
+    if (firmaPrevioPad) firmaPrevioPad.clear();
+  });
+
+  firmaPrevioSiguienteBtn.addEventListener("click", function(){
+    if (!firmaPrevioPad || firmaPrevioPad.isEmpty()){
+      firmaPrevioMsg.textContent = "Pide al alumno que firme antes de continuar.";
+      firmaPrevioMsg.className = "form-msg error";
+      return;
+    }
+    var alumno = firmaPrevioAlumnos[firmaPrevioIndex];
+    firmaPrevioResultado[alumno.numero] = firmaPrevioPad.toPngDataUrl();
+
+    if (firmaPrevioIndex < firmaPrevioAlumnos.length - 1){
+      firmaPrevioIndex++;
+      mostrarAlumnoFirmaPrevio();
+      setTimeout(function(){ if (firmaPrevioPad) firmaPrevioPad.resize(); }, 30);
+    } else {
+      var callback = firmaPrevioCallback;
+      var firmas = firmaPrevioResultado;
+      cerrarFirmaPrevioModal();
+      if (callback) callback(firmas);
+    }
+  });
+
+  function clearForm(){
+    setMode("individual");
+    cadeteInput.value = ""; selectedCadete = null;
+    cadetePreview.classList.remove("show"); cadetePreview.innerHTML = "";
+    cadeteHint.classList.add("hidden");
+    cadeteResults.classList.add("hidden"); cadeteResults.innerHTML = "";
+    multiSearch.value = ""; multiSelected = [];
+    multiResults.innerHTML = ""; renderMultiChips();
+    multiHint.classList.add("hidden");
+    sanFecha.value = ""; sanLugar.value = "ACTO"; sanHora.value = "08:00";
+    sanTipoFalta.value = ""; sanFundamento.disabled = true;
+    sanFundamento.innerHTML = '<option value="">Elige primero el tipo de falta…</option>';
+    sanEmpleo.value = ""; sanProfNombreInput.value = ""; sanProfApellidosInput.value = "";
+    sanProfDniInput.value = ""; sanMotivoInput.value = ""; sanMedidaInput.value = "";
+    arrestoFields.classList.add("hidden");
+    arrestoFechaIni.value = ""; arrestoFechaFin.value = ""; arrestoDias.value = "";
+    arrestoHint.classList.add("hidden");
+    sanObservaciones.value = "";
+    sanFormHint.classList.add("hidden");
+    sanFormMsg.textContent = ""; sanFormMsg.className = "form-msg";
+  }
+  sanClearBtn.addEventListener("click", clearForm);
+
+  sanSaveBtn.addEventListener("click", function(){
+    var ok = true;
+    var alumnos;
+    if (mode === "multiple"){
+      alumnos = multiSelected;
+      cadeteHint.classList.add("hidden");
+      if (!alumnos.length){ multiHint.classList.remove("hidden"); ok = false; }
+      else multiHint.classList.add("hidden");
+    } else {
+      alumnos = selectedCadete ? [selectedCadete] : [];
+      multiHint.classList.add("hidden");
+      if (!alumnos.length){ cadeteHint.classList.remove("hidden"); ok = false; }
+      else cadeteHint.classList.add("hidden");
+    }
+    if (!sanFecha.value) ok = false;
+    if (!sanTipoFalta.value) ok = false;
+    if (!sanFundamento.value) ok = false;
+    if (!sanMotivoInput.value.trim()) ok = false;
+
+    if (sanMedidaInput.value === "Arresto"){
+      var arrestoOk = !!(arrestoFechaIni.value && arrestoFechaFin.value && arrestoFechaFin.value >= arrestoFechaIni.value);
+      arrestoHint.classList.toggle("hidden", arrestoOk);
+      if (!arrestoOk) ok = false;
+    } else {
+      arrestoHint.classList.add("hidden");
+    }
+
+    sanFormHint.classList.toggle("hidden", ok);
+    if (!ok){
+      sanFormMsg.textContent = "Revisa los campos marcados.";
+      sanFormMsg.className = "form-msg error";
+      return;
+    }
+
+    pedirFirmasPrevias(alumnos, function(firmas){
+      var payload = {
+        alumnos: alumnos.map(function(a){ return a.numero; }),
+        fecha: sanFecha.value,
+        lugar: sanLugar.value.trim(),
+        hora: sanHora.value,
+        tipoFalta: sanTipoFalta.value,
+        fundamento: sanFundamento.value,
+        profEmpleo: sanEmpleo.value,
+        profNombre: sanProfNombreInput.value.trim(),
+        profApellidos: sanProfApellidosInput.value.trim(),
+        profDni: sanProfDniInput.value.trim(),
+        motivo: sanMotivoInput.value.trim(),
+        medidaCorrectora: sanMedidaInput.value,
+        arrestoFechaIni: sanMedidaInput.value === "Arresto" ? arrestoFechaIni.value : "",
+        arrestoFechaFin: sanMedidaInput.value === "Arresto" ? arrestoFechaFin.value : "",
+        observaciones: sanObservaciones.value.trim(),
+        firmas: firmas
+      };
+
+      sanSaveBtn.disabled = true;
+      fetch("/api/sanciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+        .then(function(res){
+          sanSaveBtn.disabled = false;
+          if (!res.ok){
+            sanFormMsg.textContent = res.data.error || "No se ha podido guardar.";
+            sanFormMsg.className = "form-msg error";
+            return;
+          }
+          showConfirmation(res.data.sancion);
+          clearForm();
+        })
+        .catch(function(){
+          sanSaveBtn.disabled = false;
+          sanFormMsg.textContent = "Error de conexión con el servidor.";
+          sanFormMsg.className = "form-msg error";
+        });
+    });
+  });
+
+  // ---------------- confirmación ----------------
+  var formWrap = document.getElementById("formWrap");
+  var confirmWrap = document.getElementById("confirmWrap");
+  var confirmDetail = document.getElementById("confirmDetail");
+
+  function formatDateDisplay(iso){
+    if (!iso) return "—";
+    var parts = iso.split("-");
+    if (parts.length !== 3) return iso;
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  }
+
+  function showConfirmation(sancion){
+    var alumnosTxt = sancion.alumnos.map(function(a){
+      return "Nº " + escapeHtml(a.numero) + " (" + escapeHtml([a.ape1, a.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(a.nombre) + ")";
+    }).join("<br>");
+    confirmDetail.innerHTML =
+      "<dl>" +
+      "<dt>Expediente</dt><dd>Nº " + escapeHtml(String(sancion.expediente)) + "</dd>" +
+      "<dt>Alumno(s)</dt><dd>" + alumnosTxt + "</dd>" +
+      "<dt>Fecha</dt><dd>" + formatDateDisplay(sancion.fecha) + "</dd>" +
+      "<dt>Tipo</dt><dd>" + (sancion.tipoFalta === "LEVE" ? "Leve" : "Grave") + "</dd>" +
+      "<dt>Motivo</dt><dd>" + escapeHtml(sancion.motivo) + "</dd>" +
+      (sancion.medidaCorrectora ? "<dt>Medida</dt><dd>" + escapeHtml(sancion.medidaCorrectora) + "</dd>" : "") +
+      "</dl>";
+    confirmFirmarBtn.classList.toggle("hidden", sancion.medidaCorrectora !== "Amonestación verbal");
+    confirmFirmarBtn.onclick = function(){ abrirFirmaModal(sancion); };
+    formWrap.classList.add("hidden");
+    confirmWrap.classList.remove("hidden");
+    window.scrollTo(0, 0);
+  }
+  document.getElementById("confirmNewBtn").addEventListener("click", function(){
+    confirmWrap.classList.add("hidden");
+    formWrap.classList.remove("hidden");
+  });
+
+  // ---------------- firma táctil + documento "Amonestaciones Verbales" ----------------
+  var confirmFirmarBtn = document.getElementById("confirmFirmarBtn");
+  var firmaModal = document.getElementById("firmaModal");
+  var firmaCanvas = document.getElementById("firmaCanvas");
+  var firmaAlumnoSelect = document.getElementById("firmaAlumnoSelect");
+  var firmaModalAlumno = document.getElementById("firmaModalAlumno");
+  var firmaModalMsg = document.getElementById("firmaModalMsg");
+  var firmaGenerarBtn = document.getElementById("firmaGenerarBtn");
+  var firmaPad = null;
+  var sancionParaFirma = null;
+
+  function describeAlumno(a){
+    return "Nº " + a.numero + " — " + [a.ape1, a.ape2].filter(Boolean).join(" ") + ", " + a.nombre;
+  }
+
+  function abrirFirmaModal(sancion){
+    sancionParaFirma = sancion;
+    firmaModalMsg.textContent = "";
+    firmaModalMsg.className = "form-msg";
+    if (sancion.alumnos.length > 1){
+      firmaAlumnoSelect.classList.remove("hidden");
+      firmaAlumnoSelect.innerHTML = sancion.alumnos.map(function(a){
+        return '<option value="' + escapeHtml(a.numero) + '">' + escapeHtml(describeAlumno(a)) + '</option>';
+      }).join("");
+      firmaModalAlumno.textContent = "Elige qué alumno va a firmar (el documento se genera de uno en uno):";
+    } else {
+      firmaAlumnoSelect.classList.add("hidden");
+      firmaAlumnoSelect.innerHTML = "";
+      firmaModalAlumno.textContent = sancion.alumnos[0] ? describeAlumno(sancion.alumnos[0]) : "";
+    }
+    firmaModal.classList.remove("hidden");
+    // El pad necesita que el canvas ya sea visible para medir su tamaño real.
+    setTimeout(function(){
+      firmaPad = CEFOT2_AMONESTACION.attachFirmaPad(firmaCanvas);
+      firmaPad.resize();
+    }, 30);
+  }
+
+  function cerrarFirmaModal(){
+    firmaModal.classList.add("hidden");
+    firmaPad = null;
+  }
+  document.getElementById("firmaCloseBtn").addEventListener("click", cerrarFirmaModal);
+  document.getElementById("firmaLimpiarBtn").addEventListener("click", function(){
+    if (firmaPad) firmaPad.clear();
+  });
+
+  firmaGenerarBtn.addEventListener("click", function(){
+    if (!firmaPad || firmaPad.isEmpty()){
+      firmaModalMsg.textContent = "Pide al alumno que firme antes de continuar.";
+      firmaModalMsg.className = "form-msg error";
+      return;
+    }
+    var sancion = sancionParaFirma;
+    var numero = sancion.alumnos.length > 1 ? firmaAlumnoSelect.value : sancion.alumnos[0].numero;
+    var alumno = sancion.alumnos.filter(function(a){ return String(a.numero) === String(numero); })[0];
+    if (!alumno) return;
+    var firmaPngDataUrl = firmaPad.toPngDataUrl();
+
+    firmaGenerarBtn.disabled = true;
+    firmaModalMsg.textContent = "Generando documento…";
+    firmaModalMsg.className = "form-msg";
+
+    fetch("/api/sanciones/" + encodeURIComponent(sancion.id) + "/firma", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero: numero, firmaPng: firmaPngDataUrl })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok){
+          firmaModalMsg.textContent = res.data.error || "No se ha podido guardar la firma.";
+          firmaModalMsg.className = "form-msg error";
+          firmaGenerarBtn.disabled = false;
+          return;
+        }
+        return CEFOT2_AMONESTACION.generarAmonestacionPDF(sancion, alumno, firmaPngDataUrl).then(function(bytes){
+          CEFOT2_AMONESTACION.descargarBytes(bytes, CEFOT2_AMONESTACION.nombreArchivoAmonestacion(sancion, alumno));
+          firmaGenerarBtn.disabled = false;
+          firmaModalMsg.textContent = "Documento descargado.";
+          firmaModalMsg.className = "form-msg ok";
+        });
+      })
+      .catch(function(){
+        firmaGenerarBtn.disabled = false;
+        firmaModalMsg.textContent = "Error de conexión con el servidor.";
+        firmaModalMsg.className = "form-msg error";
+      });
+  });
+
+  // ---------------- pestaña "Ficha del alumno" (foto / datos / adjuntos) ----------------
+  var fichaInstrInput = document.getElementById("fichaInstrInput");
+  var fichaInstrResults = document.getElementById("fichaInstrResults");
+  var fichaInstrDetalle = document.getElementById("fichaInstrDetalle");
+  var fichaInstrFieldsGrid = document.getElementById("fichaInstrFieldsGrid");
+  var fichaInstrFotoCol = document.getElementById("fichaInstrFotoCol");
+  var fichaInstrFotoImg = document.getElementById("fichaInstrFotoImg");
+  var fichaInstrFotoPlaceholder = document.getElementById("fichaInstrFotoPlaceholder");
+  var fichaInstrTakePhotoBtn = document.getElementById("fichaInstrTakePhotoBtn");
+  var fichaInstrUploadPhotoBtn = document.getElementById("fichaInstrUploadPhotoBtn");
+  var fichaInstrUploadPhotoInput = document.getElementById("fichaInstrUploadPhotoInput");
+  var fichaInstrRemovePhotoBtn = document.getElementById("fichaInstrRemovePhotoBtn");
+  var fichaInstrCameraWrap = document.getElementById("fichaInstrCameraWrap");
+  var fichaInstrCameraVideo = document.getElementById("fichaInstrCameraVideo");
+  var fichaInstrCaptureBtn = document.getElementById("fichaInstrCaptureBtn");
+  var fichaInstrCameraCancelBtn = document.getElementById("fichaInstrCameraCancelBtn");
+  var fichaInstrCameraCanvas = document.getElementById("fichaInstrCameraCanvas");
+  var fichaInstrFotoMsg = document.getElementById("fichaInstrFotoMsg");
+  var fichaInstrAttachBlock = document.getElementById("fichaInstrAttachBlock");
+  var fichaInstrAttachList = document.getElementById("fichaInstrAttachList");
+  var fichaInstrAttachAddBtn = document.getElementById("fichaInstrAttachAddBtn");
+  var fichaInstrAttachInput = document.getElementById("fichaInstrAttachInput");
+  var fichaInstrAttachHint = document.getElementById("fichaInstrAttachHint");
+
+  var fichaInstrNumeroActual = null;
+  var fichaInstrCameraStream = null;
+  var FICHA_INSTR_ATTACH_MAX_BYTES = 4 * 1024 * 1024;
+
+  var onFichaInstrInput = debounce(function(){
+    var q = fichaInstrInput.value;
+    buscarAlumnos(q, function(resultados){
+      if (!q.trim() || !resultados.length){
+        fichaInstrResults.classList.add("hidden");
+        fichaInstrResults.innerHTML = "";
+        return;
+      }
+      fichaInstrResults.classList.remove("hidden");
+      fichaInstrResults.innerHTML = resultados.map(function(al){
+        return '<div class="search-result-item" data-numero="' + escapeHtml(al.numero) + '">' +
+          '<span>' + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + '</span>' +
+          '<span class="pelo-badge">' + escapeHtml(al.peloton || "—") + '</span>' +
+          '</div>';
+      }).join("");
+      fichaInstrResults.querySelectorAll("[data-numero]").forEach(function(el){
+        el.addEventListener("click", function(){
+          var numero = el.getAttribute("data-numero");
+          fichaInstrInput.value = "";
+          fichaInstrResults.classList.add("hidden");
+          fichaInstrResults.innerHTML = "";
+          abrirFichaInstr(numero);
+        });
+      });
+    });
+  }, 200);
+  fichaInstrInput.addEventListener("input", onFichaInstrInput);
+
+  function formatFileSize(bytes){
+    bytes = Number(bytes) || 0;
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function stopFichaInstrCamera(){
+    if (fichaInstrCameraStream){
+      fichaInstrCameraStream.getTracks().forEach(function(t){ t.stop(); });
+      fichaInstrCameraStream = null;
+    }
+    fichaInstrCameraVideo.srcObject = null;
+    fichaInstrCameraWrap.classList.add("hidden");
+  }
+
+  function updateFichaInstrFotoPreview(dataUrlOrNull){
+    if (dataUrlOrNull){
+      fichaInstrFotoImg.src = dataUrlOrNull;
+      fichaInstrFotoImg.classList.remove("hidden");
+      fichaInstrFotoPlaceholder.classList.add("hidden");
+      fichaInstrRemovePhotoBtn.classList.toggle("hidden", !miPermisos.fotos);
+    } else {
+      fichaInstrFotoImg.classList.add("hidden");
+      fichaInstrFotoImg.src = "";
+      fichaInstrFotoPlaceholder.classList.remove("hidden");
+      fichaInstrRemovePhotoBtn.classList.add("hidden");
+    }
+  }
+
+  function compressImageToSquareDataUrl(srcDataUrl, cb){
+    var img = new Image();
+    img.onload = function(){
+      var size = 320;
+      var side = Math.min(img.width, img.height);
+      var canvas = document.createElement("canvas");
+      canvas.width = size; canvas.height = size;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      cb(canvas.toDataURL("image/jpeg", 0.78));
+    };
+    img.onerror = function(){ alert("No se pudo procesar la imagen seleccionada."); };
+    img.src = srcDataUrl;
+  }
+
+  function guardarFotoInstr(dataUrlOrNull){
+    if (!fichaInstrNumeroActual) return;
+    fichaInstrFotoMsg.textContent = "Guardando…";
+    fichaInstrFotoMsg.className = "form-msg";
+    fetch("/api/roster/" + encodeURIComponent(fichaInstrNumeroActual) + "/foto", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ foto: dataUrlOrNull })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok){
+          fichaInstrFotoMsg.textContent = res.data.error || "No se ha podido guardar la foto.";
+          fichaInstrFotoMsg.className = "form-msg error";
+          return;
+        }
+        updateFichaInstrFotoPreview(dataUrlOrNull);
+        fichaInstrFotoMsg.textContent = "Foto guardada. Ya es visible para el administrador.";
+        fichaInstrFotoMsg.className = "form-msg ok";
+      }).catch(function(){
+        fichaInstrFotoMsg.textContent = "Error de conexión con el servidor.";
+        fichaInstrFotoMsg.className = "form-msg error";
+      });
+  }
+
+  fichaInstrRemovePhotoBtn.addEventListener("click", function(){
+    if (confirm("¿Quitar la foto de este alumno?")) guardarFotoInstr(null);
+  });
+  fichaInstrUploadPhotoBtn.addEventListener("click", function(){
+    fichaInstrUploadPhotoInput.value = "";
+    fichaInstrUploadPhotoInput.click();
+  });
+  fichaInstrUploadPhotoInput.addEventListener("change", function(){
+    var file = fichaInstrUploadPhotoInput.files && fichaInstrUploadPhotoInput.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      compressImageToSquareDataUrl(String(reader.result), function(compressed){ guardarFotoInstr(compressed); });
+    };
+    reader.onerror = function(){ alert("No se pudo leer el archivo de imagen."); };
+    reader.readAsDataURL(file);
+  });
+  fichaInstrTakePhotoBtn.addEventListener("click", function(){
+    if (window.isSecureContext === false){
+      alert("Para hacer fotos con la cámara, esta página tiene que abrirse con HTTPS (candado en la barra de direcciones), no con HTTP normal.\nPide el enlace https:// de este sitio, o usa 'Subir foto' en su lugar.");
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert("Este navegador no permite acceder a la cámara desde aquí. Usa 'Subir foto' en su lugar.");
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }).then(function(stream){
+      fichaInstrCameraStream = stream;
+      fichaInstrCameraVideo.srcObject = stream;
+      fichaInstrCameraWrap.classList.remove("hidden");
+    }).catch(function(err){
+      var msg = "No se pudo acceder a la cámara: " + (err && err.message ? err.message : err);
+      if (err && err.name === "NotAllowedError"){
+        msg = "Se ha denegado el permiso de la cámara para este sitio. Revisa los permisos (icono de candado/cámara en la barra de direcciones) y vuelve a intentarlo.";
+      }
+      alert(msg + "\nPuedes usar 'Subir foto' en su lugar.");
+    });
+  });
+  fichaInstrCaptureBtn.addEventListener("click", function(){
+    var video = fichaInstrCameraVideo;
+    var vw = video.videoWidth || 320, vh = video.videoHeight || 320;
+    var side = Math.min(vw, vh);
+    var size = 320;
+    fichaInstrCameraCanvas.width = size; fichaInstrCameraCanvas.height = size;
+    var ctx = fichaInstrCameraCanvas.getContext("2d");
+    ctx.drawImage(video, (vw - side) / 2, (vh - side) / 2, side, side, 0, 0, size, size);
+    var dataUrl = fichaInstrCameraCanvas.toDataURL("image/jpeg", 0.78);
+    stopFichaInstrCamera();
+    guardarFotoInstr(dataUrl);
+  });
+  fichaInstrCameraCancelBtn.addEventListener("click", stopFichaInstrCamera);
+
+  function renderFichaInstrAttachments(adjuntos){
+    var items = adjuntos || [];
+    if (!items.length){
+      fichaInstrAttachList.innerHTML = '<div class="ficha-attach-empty">Sin archivos adjuntos.</div>';
+      return;
+    }
+    fichaInstrAttachList.innerHTML = items.map(function(a){
+      return '<div class="ficha-attach-item">' +
+        '<span class="name" title="' + escapeHtml(a.nombre) + '">' + escapeHtml(a.nombre) + '</span>' +
+        '<span class="meta">' + escapeHtml(formatFileSize(a.tamano)) + '</span>' +
+        '<span class="acts">' +
+          '<button type="button" class="btn small ghost" data-idl="' + escapeHtml(a.id) + '">Descargar</button>' +
+          (a.subidoPorMi ? '<button type="button" class="btn small danger-ghost" data-idel="' + escapeHtml(a.id) + '">Eliminar</button>' : "") +
+        '</span>' +
+        '</div>';
+    }).join("");
+    fichaInstrAttachList.querySelectorAll("[data-idl]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-idl");
+        fetch("/api/roster/" + encodeURIComponent(fichaInstrNumeroActual) + "/adjuntos/" + encodeURIComponent(id))
+          .then(function(r){ return r.json(); })
+          .then(function(data){
+            if (!data.adjunto) return;
+            var a = document.createElement("a");
+            a.href = data.adjunto.dataUrl;
+            a.download = data.adjunto.nombre;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          }).catch(function(){ alert("No se pudo descargar el archivo."); });
+      });
+    });
+    fichaInstrAttachList.querySelectorAll("[data-idel]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-idel");
+        if (!confirm("¿Eliminar este archivo adjunto? Esta acción no se puede deshacer.")) return;
+        fetch("/api/roster/" + encodeURIComponent(fichaInstrNumeroActual) + "/adjuntos/" + encodeURIComponent(id), { method: "DELETE" })
+          .then(function(r){ if (!r.ok) throw new Error("delete failed"); })
+          .then(function(){ abrirFichaInstr(fichaInstrNumeroActual); })
+          .catch(function(){ alert("No se ha podido eliminar el archivo."); });
+      });
+    });
+  }
+
+  fichaInstrAttachAddBtn.addEventListener("click", function(){
+    fichaInstrAttachInput.value = "";
+    fichaInstrAttachInput.click();
+  });
+  fichaInstrAttachInput.addEventListener("change", function(){
+    var files = Array.prototype.slice.call(fichaInstrAttachInput.files || []);
+    if (!files.length || !fichaInstrNumeroActual) return;
+    fichaInstrAttachHint.classList.add("hidden");
+    var errores = [];
+    function siguiente(i){
+      if (i >= files.length){
+        if (errores.length){
+          fichaInstrAttachHint.textContent = errores.join(" ");
+          fichaInstrAttachHint.classList.remove("hidden");
+        }
+        abrirFichaInstr(fichaInstrNumeroActual);
+        return;
+      }
+      var file = files[i];
+      var esValido = file.type === "application/pdf" || file.type.indexOf("image/") === 0;
+      if (!esValido){ errores.push('"' + file.name + '" no es un PDF ni una imagen: se ha omitido.'); siguiente(i + 1); return; }
+      if (file.size > FICHA_INSTR_ATTACH_MAX_BYTES){
+        errores.push('"' + file.name + '" pesa ' + formatFileSize(file.size) + ' (máximo ' + formatFileSize(FICHA_INSTR_ATTACH_MAX_BYTES) + '): se ha omitido.');
+        siguiente(i + 1); return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(){
+        fetch("/api/roster/" + encodeURIComponent(fichaInstrNumeroActual) + "/adjuntos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre: file.name, tipo: file.type, tamano: file.size, dataUrl: String(reader.result) })
+        }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+          .then(function(res){
+            if (!res.ok) errores.push('"' + file.name + '": ' + (res.data.error || "no se pudo guardar."));
+            siguiente(i + 1);
+          }).catch(function(){
+            errores.push('"' + file.name + '": error de conexión.');
+            siguiente(i + 1);
+          });
+      };
+      reader.onerror = function(){ errores.push('No se pudo leer "' + file.name + '".'); siguiente(i + 1); };
+      reader.readAsDataURL(file);
+    }
+    siguiente(0);
+  });
+
+  function abrirFichaInstr(numero){
+    fichaInstrNumeroActual = numero;
+    stopFichaInstrCamera();
+    fichaInstrFotoMsg.textContent = "";
+    fichaInstrFotoMsg.className = "form-msg";
+    fetch("/api/roster/" + encodeURIComponent(numero) + "/ficha")
+      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok || !res.data.ficha){
+          fichaInstrDetalle.classList.add("hidden");
+          return;
+        }
+        var f = res.data.ficha;
+        fichaInstrDetalle.classList.remove("hidden");
+
+        // Foto
+        var mostrarFoto = f.foto !== undefined; // el servidor solo la incluye si hay permiso
+        fichaInstrFotoCol.classList.toggle("hidden", !mostrarFoto);
+        if (mostrarFoto){
+          updateFichaInstrFotoPreview(f.foto || null);
+          fichaInstrTakePhotoBtn.classList.toggle("hidden", !miPermisos.fotos);
+          fichaInstrUploadPhotoBtn.classList.toggle("hidden", !miPermisos.fotos);
+          if (!miPermisos.fotos) fichaInstrRemovePhotoBtn.classList.add("hidden");
+        }
+
+        // Campos (solo si el servidor los envió: implica permiso verFicha)
+        var campos = [
+          ["Número", f.numero], ["Apellidos", [f.ape1, f.ape2].filter(Boolean).join(" ")], ["Nombre", f.nombre],
+          ["Pelotón", f.peloton]
+        ];
+        if (f.sexo !== undefined) campos.push(["Sexo", f.sexo], ["DNI", f.dni], ["Teléfono", f.telefono]);
+        fichaInstrFieldsGrid.innerHTML = campos.map(function(c){
+          return '<div class="field"><label>' + escapeHtml(c[0]) + '</label><input type="text" value="' + escapeHtml(c[1] || "") + '" disabled></div>';
+        }).join("");
+
+        // Adjuntos
+        var mostrarAdjuntos = Array.isArray(f.adjuntos);
+        fichaInstrAttachBlock.classList.toggle("hidden", !mostrarAdjuntos);
+        if (mostrarAdjuntos) renderFichaInstrAttachments(f.adjuntos);
+      })
+      .catch(function(){ fichaInstrDetalle.classList.add("hidden"); });
+  }
+
+  // ---------------- pestaña "Rebajes / Refuerzos" (solo lectura) ----------------
+  var rebRefInstrRebajesBody = document.getElementById("rebRefInstrRebajesBody");
+  var rebRefInstrRebajesEmpty = document.getElementById("rebRefInstrRebajesEmpty");
+  var rebRefInstrRefuerzosBody = document.getElementById("rebRefInstrRefuerzosBody");
+  var rebRefInstrRefuerzosEmpty = document.getElementById("rebRefInstrRefuerzosEmpty");
+  var rebRefInstrCargado = false;
+
+  function fetchRebRefInstr(){
+    if (rebRefInstrCargado) return;
+    rebRefInstrCargado = true;
+    Promise.all([
+      fetch("/api/rebajes").then(function(r){ return r.ok ? r.json() : { rebajes: [] }; }),
+      fetch("/api/refuerzos").then(function(r){ return r.ok ? r.json() : { refuerzos: [] }; })
+    ]).then(function(results){
+      var rebajes = results[0].rebajes || [];
+      var refuerzos = results[1].refuerzos || [];
+
+      if (!rebajes.length){
+        rebRefInstrRebajesBody.innerHTML = "";
+        rebRefInstrRebajesEmpty.classList.remove("hidden");
+      } else {
+        rebRefInstrRebajesEmpty.classList.add("hidden");
+        rebRefInstrRebajesBody.innerHTML = rebajes.map(function(r){
+          return "<tr><td>" + escapeHtml(r.numero) + "</td><td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre) + "</td><td>" +
+            escapeHtml(r.peloton || "—") + "</td><td>" + formatDateDisplay(r.fechaInicio) + "</td><td>" + formatDateDisplay(r.fechaFin) + "</td><td>" +
+            (r.total ? "Total/clase" : "Parcial") + "</td></tr>";
+        }).join("");
+      }
+
+      if (!refuerzos.length){
+        rebRefInstrRefuerzosBody.innerHTML = "";
+        rebRefInstrRefuerzosEmpty.classList.remove("hidden");
+      } else {
+        rebRefInstrRefuerzosEmpty.classList.add("hidden");
+        rebRefInstrRefuerzosBody.innerHTML = refuerzos.map(function(r){
+          var alumno = (r.alumnos && r.alumnos[0]) || {};
+          var multi = r.alumnos && r.alumnos.length > 1 ? (" (+" + (r.alumnos.length - 1) + ")") : "";
+          return "<tr><td>" + escapeHtml(alumno.numero || "") + "</td><td>" + escapeHtml([alumno.ape1, alumno.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(alumno.nombre || "") + multi + "</td><td>" +
+            escapeHtml(alumno.peloton || "—") + "</td><td>" + formatDateDisplay(r.fechaInicio) + "</td><td>" + formatDateDisplay(r.fechaFin) + "</td><td>" +
+            escapeHtml(r.tipo || "") + "</td></tr>";
+        }).join("");
+      }
+    }).catch(function(){
+      rebRefInstrCargado = false;
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
