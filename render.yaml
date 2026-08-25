@@ -5,7 +5,7 @@
 # (Neon, Supabase...), como se explica en el README.
 services:
   - type: web
-    name: cefot
+    name: cefot-vxs6
     runtime: node
     plan: free
     buildCommand: npm install
