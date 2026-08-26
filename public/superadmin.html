@@ -67,6 +67,25 @@
   </header>
 
   <div class="panel corner-accent" style="margin-bottom:22px;">
+    <h3>Mi contraseña</h3>
+    <div class="panel-sub">Cambia la contraseña de tu propia cuenta de Súper Administrador. No hace falta escribir la contraseña actual.</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="miPasswordInput">Nueva contraseña</label>
+        <input type="text" id="miPasswordInput" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="field">
+        <label for="miPasswordConfirmInput">Repite la nueva contraseña</label>
+        <input type="text" id="miPasswordConfirmInput" placeholder="Repite la contraseña">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn primary" id="miPasswordSaveBtn" type="button">Guardar contraseña</button>
+      <span class="form-msg" id="miPasswordMsg"></span>
+    </div>
+  </div>
+
+  <div class="panel corner-accent" style="margin-bottom:22px;">
     <h3>Dar de alta una sección nueva</h3>
     <div class="panel-sub">Elige compañía y sección, y crea a su jefe de sección. A partir de ese momento, ese jefe de sección entra con su propia URL y solo puede cargar los datos de SU sección.</div>
     <div class="field-grid">
@@ -396,6 +415,48 @@
         secDeleteConfirmBtn.disabled = false;
         secDeleteMsg.textContent = "Error de conexión con el servidor.";
         secDeleteMsg.className = "form-msg error";
+      });
+  });
+
+  var miPasswordInput = document.getElementById("miPasswordInput");
+  var miPasswordConfirmInput = document.getElementById("miPasswordConfirmInput");
+  var miPasswordSaveBtn = document.getElementById("miPasswordSaveBtn");
+  var miPasswordMsg = document.getElementById("miPasswordMsg");
+
+  miPasswordSaveBtn.addEventListener("click", function(){
+    var password = miPasswordInput.value;
+    var confirm = miPasswordConfirmInput.value;
+    if (password.length < 6){
+      miPasswordMsg.textContent = "La contraseña debe tener al menos 6 caracteres.";
+      miPasswordMsg.className = "form-msg error";
+      return;
+    }
+    if (password !== confirm){
+      miPasswordMsg.textContent = "Las dos contraseñas no coinciden.";
+      miPasswordMsg.className = "form-msg error";
+      return;
+    }
+    miPasswordSaveBtn.disabled = true;
+    fetch("/api/superadmin/mi-password", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: password })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        miPasswordSaveBtn.disabled = false;
+        if (!res.ok){
+          miPasswordMsg.textContent = res.data.error || "No se ha podido cambiar la contraseña.";
+          miPasswordMsg.className = "form-msg error";
+          return;
+        }
+        miPasswordMsg.textContent = "Contraseña actualizada correctamente.";
+        miPasswordMsg.className = "form-msg ok";
+        miPasswordInput.value = "";
+        miPasswordConfirmInput.value = "";
+      }).catch(function(){
+        miPasswordSaveBtn.disabled = false;
+        miPasswordMsg.textContent = "Error de conexión con el servidor.";
+        miPasswordMsg.className = "form-msg error";
       });
   });
 
