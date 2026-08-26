@@ -1229,11 +1229,26 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
         <div class="field-grid">
           <div class="field" style="grid-column:1/-1;">
-            <label for="refCadeteInput">Alumno</label>
-            <input type="text" id="refCadeteInput" list="refCadeteList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
-            <datalist id="refCadeteList"></datalist>
-            <div class="cadet-preview" id="refCadetePreview"></div>
-            <div class="hint error hidden" id="refCadeteHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+            <label>Alumno(s)</label>
+            <div class="mode-toggle" id="refModeToggle">
+              <button type="button" class="mode-btn active" id="refModeIndividualBtn" data-mode="individual">Individual</button>
+              <button type="button" class="mode-btn" id="refModeMultipleBtn" data-mode="multiple">Múltiple</button>
+            </div>
+
+            <div id="refIndividualWrap">
+              <input type="text" id="refCadeteInput" list="refCadeteList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+              <datalist id="refCadeteList"></datalist>
+              <div class="cadet-preview" id="refCadetePreview"></div>
+              <div class="hint error hidden" id="refCadeteHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+            </div>
+
+            <div id="refMultipleWrap" class="hidden">
+              <input type="search" id="refMultiSearch" placeholder="Buscar alumnos para añadir al refuerzo...">
+              <div class="multi-list" id="refMultiList"></div>
+              <div class="chip-row" id="refMultiChipsManual"></div>
+              <div class="hint error hidden" id="refMultiHint">Selecciona al menos un alumno.</div>
+            </div>
+
             <div class="chip-row hidden" id="refMultiChips"></div>
           </div>
 
@@ -1269,7 +1284,70 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           </div>
         </div>
 
-        <div id="refSancionFields" class="hidden">
+        <div id="refInfraccionFields">
+          <div class="panel-sub" style="margin-top:4px;">Estos datos son necesarios para poder generar el documento (ANEXO). Si el refuerzo viene de una sanción, se rellenan automáticamente desde ahí.</div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="refFecha">Día</label>
+              <input type="date" id="refFecha">
+            </div>
+            <div class="field">
+              <label for="refLugar">Lugar</label>
+              <input type="text" id="refLugar" value="ACTO">
+            </div>
+            <div class="field">
+              <label for="refHora">Hora</label>
+              <input type="time" id="refHora" value="08:00">
+            </div>
+            <div class="field">
+              <label for="refTipoFalta">Tipo de falta</label>
+              <select id="refTipoFalta">
+                <option value="">Seleccionar…</option>
+                <option value="LEVE">Leve</option>
+                <option value="GRAVE">Grave</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row" style="grid-column:1/-1;">
+            <div class="field narrow">
+              <label for="refEmpleo">Empleo</label>
+              <select id="refEmpleo">
+                <option value="">—</option>
+                <option value="CAP">CAP</option>
+                <option value="BG">BG</option>
+                <option value="SGT1">SGT1</option>
+                <option value="SGTO">SGTO</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="refProfNombreInput">Nombre (profesor)</label>
+              <input type="text" id="refProfNombreInput" list="refProfNombreList" autocomplete="off">
+              <datalist id="refProfNombreList"></datalist>
+            </div>
+            <div class="field">
+              <label for="refProfApellidosInput">Apellidos (profesor)</label>
+              <input type="text" id="refProfApellidosInput" list="refProfApellidosList" autocomplete="off">
+              <datalist id="refProfApellidosList"></datalist>
+            </div>
+            <div class="field narrow">
+              <label for="refProfDniInput">DNI</label>
+              <input type="text" id="refProfDniInput">
+            </div>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label for="refFundamento">Fundamento legal (según tipo de falta)</label>
+            <select id="refFundamento" disabled>
+              <option value="">Elige primero el tipo de falta…</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label for="refMotivoInput">Motivo del refuerzo / descripción de los hechos</label>
+            <input type="text" id="refMotivoInput" list="refMotivoList" placeholder="Ej. Necesita repaso de la materia" autocomplete="off">
+            <datalist id="refMotivoList"></datalist>
+          </div>
+        </div>
+
+        <div id="refSancionFields">
           <div class="field-grid">
             <div class="field">
               <label for="refAudDia">Trámite de audiencia — día</label>
@@ -4665,11 +4743,34 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var refDraftBanner = document.getElementById("refDraftBanner");
   var refDraftExpediente = document.getElementById("refDraftExpediente");
   var refDraftCancelBtn = document.getElementById("refDraftCancelBtn");
+  var refModeToggle = document.getElementById("refModeToggle");
+  var refModeIndividualBtn = document.getElementById("refModeIndividualBtn");
+  var refModeMultipleBtn = document.getElementById("refModeMultipleBtn");
+  var refIndividualWrap = document.getElementById("refIndividualWrap");
+  var refMultipleWrap = document.getElementById("refMultipleWrap");
   var refCadeteInput = document.getElementById("refCadeteInput");
   var refCadeteList = document.getElementById("refCadeteList");
   var refCadetePreview = document.getElementById("refCadetePreview");
   var refCadeteHint = document.getElementById("refCadeteHint");
+  var refMultiSearch = document.getElementById("refMultiSearch");
+  var refMultiList = document.getElementById("refMultiList");
+  var refMultiChipsManual = document.getElementById("refMultiChipsManual");
+  var refMultiHint = document.getElementById("refMultiHint");
   var refMultiChips = document.getElementById("refMultiChips");
+  var refInfraccionFields = document.getElementById("refInfraccionFields");
+  var refFecha = document.getElementById("refFecha");
+  var refLugar = document.getElementById("refLugar");
+  var refHora = document.getElementById("refHora");
+  var refTipoFalta = document.getElementById("refTipoFalta");
+  var refEmpleo = document.getElementById("refEmpleo");
+  var refProfNombreInput = document.getElementById("refProfNombreInput");
+  var refProfNombreList = document.getElementById("refProfNombreList");
+  var refProfApellidosInput = document.getElementById("refProfApellidosInput");
+  var refProfApellidosList = document.getElementById("refProfApellidosList");
+  var refProfDniInput = document.getElementById("refProfDniInput");
+  var refFundamento = document.getElementById("refFundamento");
+  var refMotivoInput = document.getElementById("refMotivoInput");
+  var refMotivoList = document.getElementById("refMotivoList");
   var refFechaInicio = document.getElementById("refFechaInicio");
   var refFechaFin = document.getElementById("refFechaFin");
   var refFechaHint = document.getElementById("refFechaHint");
@@ -4696,6 +4797,89 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var refuerzosEmptyState = document.getElementById("refuerzosEmptyState");
 
   var refSelectedCadete = null;
+  var refMode = "individual"; // "individual" | "multiple" — solo aplica al refuerzo manual
+  var refMultiSelected = []; // alumnos seleccionados en modo múltiple (refuerzo manual)
+
+  // ---------- modo individual / múltiple (refuerzo manual) ----------
+  function setRefMode(mode){
+    if (refuerzoDraft) return; // en modo borrador el alumno/los alumnos vienen fijados desde la sanción
+    refMode = mode;
+    refModeIndividualBtn.classList.toggle("active", mode === "individual");
+    refModeMultipleBtn.classList.toggle("active", mode === "multiple");
+    refIndividualWrap.classList.toggle("hidden", mode !== "individual");
+    refMultipleWrap.classList.toggle("hidden", mode !== "multiple");
+    if (mode === "multiple") renderRefMultiList();
+  }
+  refModeIndividualBtn.addEventListener("click", function(){ setRefMode("individual"); });
+  refModeMultipleBtn.addEventListener("click", function(){ setRefMode("multiple"); });
+
+  function renderRefMultiList(){
+    var q = stripAccents(refMultiSearch.value || "");
+    var k = state.keys;
+    var rows = state.rows.filter(function(row){
+      if (!q) return true;
+      var hay = [getVal(row,k.numero), getVal(row,k.ape1), getVal(row,k.ape2), getVal(row,k.nombre)].join(" ");
+      return stripAccents(hay).indexOf(q) !== -1;
+    });
+    if (!rows.length){
+      refMultiList.innerHTML = '<div class="multi-list-empty">Sin resultados.</div>';
+      return;
+    }
+    refMultiList.innerHTML = rows.map(function(row){
+      var numero = getVal(row,k.numero);
+      var ape1 = getVal(row,k.ape1), ape2 = getVal(row,k.ape2), nombre = getVal(row,k.nombre), pel = getVal(row,k.peloton);
+      var checked = refMultiSelected.indexOf(numero) !== -1;
+      return '<label class="multi-list-item"><input type="checkbox" data-numero="' + escapeHtml(numero) + '" ' + (checked ? 'checked' : '') + '><span>Nº ' + escapeHtml(numero) + ' — ' + escapeHtml([ape1,ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(nombre) + (pel ? ' (Pelotón ' + escapeHtml(pel) + ')' : '') + '</span></label>';
+    }).join("");
+    refMultiList.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var numero = cb.getAttribute("data-numero");
+        if (cb.checked){
+          if (refMultiSelected.indexOf(numero) === -1) refMultiSelected.push(numero);
+        } else {
+          refMultiSelected = refMultiSelected.filter(function(n){ return n !== numero; });
+        }
+        renderRefMultiChips();
+      });
+    });
+  }
+
+  function renderRefMultiChips(){
+    var k = state.keys;
+    if (!refMultiSelected.length){
+      refMultiChipsManual.innerHTML = "";
+      return;
+    }
+    refMultiChipsManual.innerHTML = refMultiSelected.map(function(numero){
+      var row = findCadetByNumero(numero);
+      var label = row ? ([getVal(row,k.ape1), getVal(row,k.ape2)].filter(Boolean).join(" ") + ", Nº " + numero) : ("Nº " + numero);
+      return '<span class="chip">' + escapeHtml(label) + '<span class="x" data-removenumero="' + escapeHtml(numero) + '">×</span></span>';
+    }).join("");
+    refMultiChipsManual.querySelectorAll("[data-removenumero]").forEach(function(x){
+      x.addEventListener("click", function(){
+        var numero = x.getAttribute("data-removenumero");
+        refMultiSelected = refMultiSelected.filter(function(n){ return n !== numero; });
+        renderRefMultiList();
+        renderRefMultiChips();
+      });
+    });
+  }
+  refMultiSearch.addEventListener("input", renderRefMultiList);
+
+  refTipoFalta.addEventListener("change", function(){
+    var tipo = refTipoFalta.value;
+    var list = FALTA_CATALOG[tipo];
+    if (!list){
+      refFundamento.disabled = true;
+      refFundamento.innerHTML = '<option value="">Elige primero el tipo de falta…</option>';
+      return;
+    }
+    refFundamento.disabled = false;
+    refFundamento.innerHTML = '<option value="">Seleccionar…</option>' +
+      list.map(function(text){
+        return '<option value="' + escapeHtml(text) + '">' + escapeHtml(truncate(text, 100)) + '</option>';
+      }).join("");
+  });
 
   function buildRefCadetOptions(){
     var k = state.keys;
@@ -4744,7 +4928,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if (!refuerzoDraft) return;
     refDraftBanner.classList.remove("hidden");
     refDraftExpediente.textContent = "Nº " + refuerzoDraft.expediente;
-    refSancionFields.classList.remove("hidden");
+    refInfraccionFields.classList.add("hidden");
+    refModeToggle.classList.add("hidden");
 
     if (refuerzoDraft.alumnos.length > 1){
       refCadeteInput.disabled = true;
@@ -4786,15 +4971,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function clearRefForm(){
     refuerzoDraft = null;
     refDraftBanner.classList.add("hidden");
-    refSancionFields.classList.add("hidden");
+    refInfraccionFields.classList.remove("hidden");
+    refModeToggle.classList.remove("hidden");
     refMultiChips.classList.add("hidden");
     refMultiChips.innerHTML = "";
 
+    setRefMode("individual");
     refCadeteInput.disabled = false;
     refCadeteInput.value = "";
     refSelectedCadete = null;
     refCadetePreview.classList.remove("show");
     refCadeteHint.classList.add("hidden");
+
+    refMultiSearch.value = "";
+    refMultiSelected = [];
+    renderRefMultiList();
+    renderRefMultiChips();
+    refMultiHint.classList.add("hidden");
 
     refFechaInicio.value = "";
     refFechaFin.value = "";
@@ -4803,6 +4996,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refHoraInicio.value = "09:00";
     refDuracion.value = "1";
     refObservaciones.value = "";
+    refFecha.value = "";
+    refLugar.value = "ACTO";
+    refHora.value = "08:00";
+    refTipoFalta.value = "";
+    refFundamento.disabled = true;
+    refFundamento.innerHTML = '<option value="">Elige primero el tipo de falta…</option>';
+    refEmpleo.value = "";
+    refProfNombreInput.value = "";
+    refProfApellidosInput.value = "";
+    refProfDniInput.value = "";
+    refMotivoInput.value = "";
     refAudDia.value = "";
     refAudHora.value = "";
     refJefeCia.value = "";
@@ -4820,6 +5024,29 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var alumnos = [];
     if (refuerzoDraft){
       alumnos = refuerzoDraft.alumnos;
+    } else if (refMode === "multiple"){
+      var km = state.keys;
+      alumnos = refMultiSelected.map(function(numero){ return findCadetByNumero(numero); }).filter(Boolean).map(function(row){
+        return {
+          numero: getVal(row, km.numero),
+          ape1: getVal(row, km.ape1),
+          ape2: getVal(row, km.ape2),
+          nombre: getVal(row, km.nombre),
+          peloton: getVal(row, km.peloton)
+        };
+      });
+      refCadeteHint.classList.add("hidden");
+      if (!alumnos.length){
+        refMultiHint.textContent = "Selecciona al menos un alumno.";
+        refMultiHint.classList.remove("hidden");
+        ok = false;
+      } else if (alumnos.length > MAX_ANEXO_ALUMNOS){
+        refMultiHint.textContent = "Máximo " + MAX_ANEXO_ALUMNOS + " alumnos por refuerzo múltiple (la plantilla PDF del ANEXO I no admite más). Has seleccionado " + alumnos.length + ".";
+        refMultiHint.classList.remove("hidden");
+        ok = false;
+      } else {
+        refMultiHint.classList.add("hidden");
+      }
     } else if (refSelectedCadete){
       var k = state.keys;
       alumnos = [{
@@ -4829,6 +5056,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         nombre: getVal(refSelectedCadete, k.nombre),
         peloton: getVal(refSelectedCadete, k.peloton)
       }];
+      refMultiHint.classList.add("hidden");
     } else {
       refCadeteHint.classList.remove("hidden");
       ok = false;
@@ -4839,11 +5067,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if (!refTipo.value) ok = false;
     if (!refHoraInicio.value) ok = false;
     if (!refDuracion.value || isNaN(parseFloat(refDuracion.value))) ok = false;
-    if (refuerzoDraft){
-      if (!refAudDia.value) ok = false;
-      if (!refAudHora.value) ok = false;
-      if (!refJefeCia.value.trim()) ok = false;
-      if (!refLugarFecha.value.trim()) ok = false;
+    // Estos campos hacen falta siempre para poder generar el documento
+    // (ANEXO) del refuerzo, tanto si viene de una sanción como si es manual.
+    if (!refAudDia.value) ok = false;
+    if (!refAudHora.value) ok = false;
+    if (!refJefeCia.value.trim()) ok = false;
+    if (!refLugarFecha.value.trim()) ok = false;
+    if (!refuerzoDraft){
+      if (!refFecha.value) ok = false;
+      if (!refTipoFalta.value) ok = false;
+      if (!refFundamento.value) ok = false;
+      if (!refMotivoInput.value.trim()) ok = false;
     }
 
     refFormHint.classList.toggle("hidden", ok && alumnos.length > 0);
@@ -4852,6 +5086,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       refFormMsg.className = "form-msg error";
       return;
     }
+
+    var manualTipoFalta = refTipoFalta.value;
+    var manualList = FALTA_CATALOG[manualTipoFalta] || [];
+    var manualIdx = manualList.indexOf(refFundamento.value);
+    var manualFundamentoLetra = manualIdx >= 0 ? apartadoLetra(manualIdx) : "";
 
     var payload = {
       origen: refuerzoDraft ? "sancion" : "manual",
@@ -4864,21 +5103,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       horaInicio: refHoraInicio.value,
       duracion: refDuracion.value.trim(),
       observaciones: refObservaciones.value.trim(),
-      fecha: refuerzoDraft ? refuerzoDraft.fecha : "",
-      lugar: refuerzoDraft ? refuerzoDraft.lugar : "",
-      hora: refuerzoDraft ? refuerzoDraft.hora : "",
-      profEmpleo: refuerzoDraft ? refuerzoDraft.profEmpleo : "",
-      profNombre: refuerzoDraft ? refuerzoDraft.profNombre : "",
-      profApellidos: refuerzoDraft ? refuerzoDraft.profApellidos : "",
-      profDni: refuerzoDraft ? refuerzoDraft.profDni : "",
-      tipoFalta: refuerzoDraft ? refuerzoDraft.tipoFalta : "",
-      fundamento: refuerzoDraft ? refuerzoDraft.fundamento : "",
-      fundamentoLetra: refuerzoDraft ? refuerzoDraft.fundamentoLetra : "",
-      motivo: refuerzoDraft ? refuerzoDraft.motivo : "",
-      audDia: refuerzoDraft ? refAudDia.value : "",
-      audHora: refuerzoDraft ? refAudHora.value : "",
-      jefeCia: refuerzoDraft ? refJefeCia.value.trim() : "",
-      lugarFecha: refuerzoDraft ? refLugarFecha.value.trim() : ""
+      fecha: refuerzoDraft ? refuerzoDraft.fecha : refFecha.value,
+      lugar: refuerzoDraft ? refuerzoDraft.lugar : refLugar.value.trim(),
+      hora: refuerzoDraft ? refuerzoDraft.hora : refHora.value,
+      profEmpleo: refuerzoDraft ? refuerzoDraft.profEmpleo : refEmpleo.value,
+      profNombre: refuerzoDraft ? refuerzoDraft.profNombre : refProfNombreInput.value.trim(),
+      profApellidos: refuerzoDraft ? refuerzoDraft.profApellidos : refProfApellidosInput.value.trim(),
+      profDni: refuerzoDraft ? refuerzoDraft.profDni : refProfDniInput.value.trim(),
+      tipoFalta: refuerzoDraft ? refuerzoDraft.tipoFalta : manualTipoFalta,
+      fundamento: refuerzoDraft ? refuerzoDraft.fundamento : refFundamento.value,
+      fundamentoLetra: refuerzoDraft ? refuerzoDraft.fundamentoLetra : manualFundamentoLetra,
+      motivo: refuerzoDraft ? refuerzoDraft.motivo : refMotivoInput.value.trim(),
+      audDia: refAudDia.value,
+      audHora: refAudHora.value,
+      jefeCia: refJefeCia.value.trim(),
+      lugarFecha: refLugarFecha.value.trim()
     };
 
     refSaveBtn.disabled = true;
@@ -4918,10 +5157,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     });
   }
 
-  function renderRefuerzosTab(){
-    buildRefCadetOptions();
+  function refreshRefuerzodatalists(){
     var jefes = uniqueSorted(refuerzos.map(function(r){ return r.jefeCia; }));
     refJefeCiaList.innerHTML = jefes.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
+
+    var nombres = uniqueSorted(refuerzos.map(function(r){ return r.profNombre; }).concat(sanciones.map(function(r){ return r.profNombre; })));
+    refProfNombreList.innerHTML = nombres.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
+
+    var apellidos = uniqueSorted(refuerzos.map(function(r){ return r.profApellidos; }).concat(sanciones.map(function(r){ return r.profApellidos; })));
+    refProfApellidosList.innerHTML = apellidos.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
+
+    var motivos = uniqueSorted(refuerzos.map(function(r){ return r.motivo; }));
+    refMotivoList.innerHTML = motivos.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
+  }
+
+  function renderRefuerzosTab(){
+    buildRefCadetOptions();
+    refreshRefuerzodatalists();
 
     var k = state.keys;
     var pelotones = k.peloton ? uniqueSorted(state.rows.map(function(r){ return getVal(r, k.peloton); })) : [];
