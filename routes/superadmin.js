@@ -198,4 +198,25 @@ router.delete("/secciones/:id", auth.requireAuth, auth.requireSuperAdmin, async 
   res.json({ ok: true });
 });
 
+// Cambia la contraseña de quien está haciendo la petición (el propio Súper
+// Administrador logueado), sin depender de conocer la anterior. Funciona
+// tanto si es un Súper Administrador sin sección propia (vive en
+// data.superAdmins) como si es, a la vez, jefe de sección de la suya (vive
+// como usuario de un tenant con superAdmin:true) — findUserGlobal() da
+// igual una referencia directa al objeto real en cualquiera de los dos
+// casos, así que basta con mutarla y guardar.
+router.patch("/mi-password", auth.requireAuth, auth.requireSuperAdmin, function (req, res){
+  const password = String((req.body && req.body.password) || "");
+  if (password.length < 6){
+    return res.status(400).json({ error: "La nueva contraseña debe tener al menos 6 caracteres." });
+  }
+  const found = db.findUserGlobal(req.user.dni);
+  if (!found){
+    return res.status(404).json({ error: "No se ha encontrado tu usuario." });
+  }
+  found.user.passwordHash = auth.hashPassword(password);
+  db.save();
+  res.json({ ok: true });
+});
+
 module.exports = router;
