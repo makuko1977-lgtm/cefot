@@ -2187,7 +2187,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       nombre: findKey(headers, ["NOMBRE"]),
       peloton: findKey(headers, ["PELOTON","PELOTÓN"]),
       sexo: findKey(headers, ["SEXO"]),
-      unidad: findKey(headers, ["DESTINO"]),
+      unidad: findKey(headers, ["DESTINO", "UNIDAD"]),
       dni: findKey(headers, ["DNI","DNI_"]),
       telefono: findKey(headers, ["TELEFONO","TELÉFONO"])
     };
@@ -2231,7 +2231,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return r.json();
     }).then(function(data){
       applyRosterRows(data.roster || []);
-      state.meta = { count: state.rows.length, loadedAt: data.rosterUpdatedAt };
+      state.meta = { count: state.rows.length, loadedAt: data.rosterUpdatedAt, updatedBy: data.rosterUpdatedBy };
       return state.rows.length > 0;
     });
   }
@@ -2449,15 +2449,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     unidadFilter.innerHTML = '<option value="">Unidad: todas</option>' +
       unidades.map(function(u){ return '<option value="'+escapeHtml(u)+'">'+escapeHtml(u)+'</option>'; }).join("");
 
-    if (state.meta){
+    if (state.meta && state.meta.loadedAt){
       var d = new Date(state.meta.loadedAt);
-      metaNote.textContent = "Origen: " + state.meta.fileName + " (hoja \"" + state.meta.sheetName + "\") · cargado el " + d.toLocaleDateString("es-ES") + " · " + state.meta.count + " registros";
+      var fecha = d.toLocaleDateString("es-ES") + " " + d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+      if (state.meta.fileName){
+        metaNote.textContent = "Origen: " + state.meta.fileName + " (hoja \"" + state.meta.sheetName + "\") · cargado el " + fecha + " · " + state.meta.count + " registros";
+      } else {
+        metaNote.textContent = "Roster guardado en el servidor · actualizado el " + fecha +
+          (state.meta.updatedBy ? " por " + state.meta.updatedBy : "") + " · " + state.meta.count + " registros";
+      }
     } else {
       metaNote.textContent = "";
     }
 
     tableHead.innerHTML = "<th></th>" + state.columns.map(function(c){
-      return "<th>" + escapeHtml(c.key) + "</th>";
+      return "<th>" + escapeHtml(c.label || c.key) + "</th>";
     }).join("") + "<th></th>";
 
     applySeccionBranding(computeSeccionInfo());
