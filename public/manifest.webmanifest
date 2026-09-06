@@ -1,0 +1,26 @@
+{
+  "name": "CEFOT-2 · BAL/3ª CÍA",
+  "short_name": "CEFOT",
+  "description": "Gestión de personal, sanciones, rebajes y refuerzos — CEFOT-2",
+  "start_url": "/login.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f2e6",
+  "theme_color": "#1f7a3d",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/shared/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/shared/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

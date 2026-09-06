@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2ea85a"/>
+      <stop offset="55%" stop-color="#1f7a3d"/>
+      <stop offset="100%" stop-color="#345c34"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <rect x="36" y="36" width="440" height="440" rx="72" fill="none" stroke="#af7f2c" stroke-width="10" opacity="0.75"/>
+  <text x="256" y="292" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="168" font-weight="700" fill="#0e150f">S·3</text>
+</svg>
