@@ -38,6 +38,7 @@ app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/superadmin", require("./routes/superadmin"));
+app.use("/api/capitan", require("./routes/capitan"));
 
 // ---------------- frontend estático ----------------
 app.use(express.static(path.join(__dirname, "public")));

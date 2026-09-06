@@ -58,9 +58,9 @@ router.post("/login", function (req, res){
   }
 
   intentosFallidos.delete(key);
-  const token = auth.issueToken(found.user, found.role, found.tenantId, found.superAdmin);
+  const token = auth.issueToken(found.user, found.role, found.tenantId, found.superAdmin, found.capitanCompania);
   auth.setAuthCookie(res, token);
-  res.json({ dni: found.user.dni, nombre: found.user.nombre, role: found.role, tenantId: found.tenantId, superAdmin: !!found.superAdmin });
+  res.json({ dni: found.user.dni, nombre: found.user.nombre, role: found.role, tenantId: found.tenantId, superAdmin: !!found.superAdmin, capitanCompania: found.capitanCompania || null });
 });
 
 router.post("/logout", function (req, res){
@@ -78,6 +78,7 @@ router.get("/me", auth.requireAuth, function (req, res){
     dni: req.user.dni,
     nombre: req.user.nombre,
     superAdmin: !!req.user.superAdmin,
+    capitanCompania: req.user.capitanCompania || null,
     tenant: null
   };
   if (req.db){
