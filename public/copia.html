@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copia de seguridad · CEFOT-2</title>
+<title>Copia y sync · CEFOT-2</title>
 <link rel="icon" href="/shared/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/shared/app.css">
 <style>
@@ -16,19 +16,19 @@
 </head>
 <body>
   <p><a href="/admin.html">← Volver al panel</a></p>
-  <h1>Copia de seguridad</h1>
-  <p class="sub">Sirve tanto la copia del HTML local (<code>seccion3_backup</code>) como la del servidor. Al importar se sustituyen roster, sanciones, rebajes, refuerzos y actividades de <strong>esta sección</strong>. No se tocan usuarios.</p>
+  <h1>Copia y sincronización</h1>
+  <p class="sub">El HTML local y el servidor siguen siendo independientes. Aquí copias datos de uno a otro a petición (sustituye lo de destino). Desde <a href="/seccion3.html">seccion3.html</a> también tienes <strong>Traer del servidor</strong> y <strong>Publicar en servidor</strong>.</p>
 
   <div class="panel">
-    <h2 style="margin:0 0 10px;font-size:16px;">Exportar</h2>
-    <p class="hint">Descarga un JSON que luego puedes abrir en el HTML local o volver a cargar aquí.</p>
+    <h2 style="margin:0 0 10px;font-size:16px;">Exportar del servidor</h2>
+    <p class="hint">JSON que puedes importar en el HTML local (botón Copia de seguridad) o volver a cargar aquí.</p>
     <button class="btn primary" id="exportBtn" type="button">Descargar copia</button>
     <div class="msg" id="exportMsg"></div>
   </div>
 
   <div class="panel">
-    <h2 style="margin:0 0 10px;font-size:16px;">Importar</h2>
-    <p class="hint">Elige el JSON exportado desde el HTML o desde este servidor. Escribe <strong>RESTAURAR</strong> para confirmar.</p>
+    <h2 style="margin:0 0 10px;font-size:16px;">Importar al servidor</h2>
+    <p class="hint">JSON del HTML local o de una exportación anterior. Escribe <strong>RESTAURAR</strong>.</p>
     <div class="field" style="margin:10px 0;">
       <input type="file" id="fileInput" accept=".json,application/json">
     </div>
@@ -65,7 +65,7 @@ document.getElementById("exportBtn").addEventListener("click", function(){
     a.href = URL.createObjectURL(blob);
     a.download = "cefot2_copia_seguridad.json";
     a.click();
-    setMsg(msg, "Copia descargada. También vale para el HTML local.", true);
+    setMsg(msg, "Copia descargada. Válida también en el HTML local.", true);
   }).catch(function(){ setMsg(msg, "Error al exportar.", false); });
 });
 
