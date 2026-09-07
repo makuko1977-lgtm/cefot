@@ -1,19 +1,20 @@
-# Blueprint de Render (https://render.com/docs/blueprint-spec).
-# Al conectar este repositorio en Render y elegir "New > Blueprint", detecta
-# este archivo y deja el servicio casi configurado solo — solo falta rellenar
-# DATABASE_URL a mano con la cadena de conexión de tu base de datos gratuita
-# (Neon, Supabase...), como se explica en el README.
+# Blueprint Render: New → Blueprint → este repo.
+# Servicio ya existente: https://cefot-vxs6.onrender.com
 services:
   - type: web
     name: cefot-vxs6
     runtime: node
     plan: free
-    buildCommand: npm install
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    buildCommand: npm install --omit=dev
     startCommand: npm start
+    healthCheckPath: /login.html
     envVars:
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
         value: "1"
       - key: DATABASE_URL
-        sync: false # se rellena a mano en el panel de Render (dato sensible)
+        sync: false
