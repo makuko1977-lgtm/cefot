@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Modo servidor · CEFOT-2</title>
-<meta name="theme-color" content="#1f7a3d">
-<link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/shared/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/shared/app.css">
 <style>
@@ -17,9 +15,8 @@
   .login-card .field{margin-bottom:16px;}
   .login-card .btn.primary{width:100%;padding:11px;font-size:14px;margin-top:6px;}
   .login-msg{min-height:18px;font-size:13px;margin-top:12px;text-align:center;}
-  .install-hint{margin-top:18px;font-size:12px;color:var(--text-dim);text-align:center;line-height:1.45;}
-  .mode-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#e1f3df;color:#1f7a3d;padding:3px 8px;border-radius:999px;margin:0 auto 10px;}
   .mode-row{text-align:center;}
+  .mode-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#e1f3df;color:#1f7a3d;padding:3px 8px;border-radius:999px;margin:0 auto 10px;}
 </style>
 </head>
 <body>
@@ -28,7 +25,7 @@
     <div class="mark">S·3</div>
     <div class="mode-row"><span class="mode-tag">Modo servidor</span></div>
     <h1>CEFOT-2 · BAL/3ª CÍA</h1>
-    <div class="sub">Acceso con usuario y contraseña — datos compartidos</div>
+    <div class="sub">Acceso con usuario y contraseña</div>
     <form id="loginForm">
       <div class="field">
         <label for="loginDni">Usuario</label>
@@ -41,13 +38,12 @@
       <button type="submit" class="btn primary">Entrar</button>
       <div class="login-msg form-msg" id="loginMsg"></div>
     </form>
-    <div class="install-hint"><a href="/seccion3.html">Abrir modo local</a></div>
   </div>
 </div>
 <script>
 function destinoTrasLogin(me){
-  if (me.tenant && me.tenant.role === "admin") return "/admin.html";
-  if (me.role === "admin") return "/admin.html";
+  if (me.tenant && me.tenant.role === "admin") return "/seccion3_completo.html";
+  if (me.role === "admin") return "/seccion3_completo.html";
   if (me.superAdmin) return "/superadmin.html";
   if (me.jefeEstudios) return "/estudios.html";
   if (me.capitanCompania) return "/capitan.html";
@@ -67,7 +63,7 @@ document.getElementById("loginForm").addEventListener("submit", function(e){
       dni: document.getElementById("loginDni").value,
       password: document.getElementById("loginPassword").value
     })
-  }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+  }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
     .then(function(res){
       if (!res.ok){
         msg.textContent = res.data.error || "No se ha podido iniciar sesión.";
