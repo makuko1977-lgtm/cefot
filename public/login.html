@@ -15,15 +15,12 @@
   .login-card .field{margin-bottom:16px;}
   .login-card .btn.primary{width:100%;padding:11px;font-size:14px;margin-top:6px;}
   .login-msg{min-height:18px;font-size:13px;margin-top:12px;text-align:center;}
-  .mode-row{text-align:center;}
-  .mode-tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#e1f3df;color:#1f7a3d;padding:3px 8px;border-radius:999px;margin:0 auto 10px;}
 </style>
 </head>
 <body>
 <div class="login-wrap">
   <div class="login-card corner-accent">
     <div class="mark">S·3</div>
-    <div class="mode-row"><span class="mode-tag">Modo servidor</span></div>
     <h1>CEFOT-2 · BAL/3ª CÍA</h1>
     <div class="sub">Acceso con usuario y contraseña</div>
     <form id="loginForm">
@@ -42,8 +39,8 @@
 </div>
 <script>
 function destinoTrasLogin(me){
-  if (me.tenant && me.tenant.role === "admin") return "/seccion3_completo.html";
-  if (me.role === "admin") return "/seccion3_completo.html";
+  if (me.tenant && me.tenant.role === "admin") return "/seccion3.html";
+  if (me.role === "admin") return "/seccion3.html";
   if (me.superAdmin) return "/superadmin.html";
   if (me.jefeEstudios) return "/estudios.html";
   if (me.capitanCompania) return "/capitan.html";
@@ -55,7 +52,6 @@ fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(f
 document.getElementById("loginForm").addEventListener("submit", function(e){
   e.preventDefault();
   var msg = document.getElementById("loginMsg");
-  msg.textContent = "";
   fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
