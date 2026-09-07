@@ -7,19 +7,24 @@
 <link rel="icon" href="/shared/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/shared/app.css">
 <style>
-  body{max-width:980px;margin:0 auto;padding:24px 16px 60px;}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0;}
-  .stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;}
-  .stat .n{font-size:26px;font-weight:700;}
-  .stat .l{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;}
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .app{max-width:1040px;margin:0 auto;padding:20px 16px 72px;}
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0;}
+  @media (max-width:720px){ .stats{grid-template-columns:repeat(2,minmax(0,1fr));} }
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+  .stat .n{font-size:28px;font-weight:700;line-height:1.1;}
+  .stat .l{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;margin-top:4px;}
+  .filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:8px 0 4px;}
+  .table-box{overflow-x:auto;max-width:100%;}
+  .table-box table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;}
+  .table-box th,.table-box td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top;word-wrap:break-word;overflow-wrap:anywhere;}
+  .table-box th.num,.table-box td.num{width:56px;text-align:right;white-space:nowrap;overflow-wrap:normal;}
+  .table-box th.tipo,.table-box td.tipo{width:92px;white-space:nowrap;}
   .var{color:var(--text-dim);font-size:12px;}
-  .filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:12px 0;}
 </style>
 </head>
 <body>
-  <header class="top" style="margin-bottom:18px;">
+<div class="app">
+  <header class="top">
     <div class="brand">
       <div class="mark">JE</div>
       <div>
@@ -27,7 +32,7 @@
         <div class="sub">Estadísticas agregadas — sin datos personales</div>
       </div>
     </div>
-    <div><button class="btn small ghost" id="logoutBtn" type="button">Cerrar sesión</button></div>
+    <button class="btn small ghost" id="logoutBtn" type="button">Cerrar sesión</button>
   </header>
 
   <div class="filtros">
@@ -52,28 +57,30 @@
 
   <div class="stats" id="totales"></div>
 
-  <div class="panel" style="margin-top:16px;">
+  <div class="panel" style="margin-top:8px;">
     <h3>Sanciones por tipo y medida</h3>
-    <div id="tipos"></div>
+    <div id="tipos" class="table-box"></div>
   </div>
   <div class="panel" style="margin-top:16px;">
     <h3>Fundamentos legales</h3>
-    <div id="fundamentos"></div>
+    <div id="fundamentos" class="table-box"></div>
   </div>
   <div class="panel" style="margin-top:16px;">
     <h3>Motivos agrupados</h3>
     <p class="hint">Se juntan textos que dicen lo mismo con otras palabras («dormido en clase» / «quedarse dormido en clase»; «no se ha afeitado» / «falta de policía»).</p>
-    <div id="motivos"></div>
+    <div id="motivos" class="table-box"></div>
   </div>
   <div class="panel" style="margin-top:16px;">
     <h3>Por sección</h3>
-    <div id="secciones"></div>
+    <div id="secciones" class="table-box"></div>
   </div>
-
+</div>
 <script>
-function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
-
-fetch("/api/auth/me").then(function(r){ return r.ok?r.json():null; }).then(function(me){
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"\u0026amp;").replace(/</g,"\u0026lt;").replace(/>/g,"\u0026gt;");
+}
+fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
   if (!me || !(me.jefeEstudios || me.superAdmin)) location.href = "/login.html";
 }).catch(function(){ location.href = "/login.html"; });
 
@@ -95,36 +102,38 @@ function cargar(){
 function pintar(d){
   var t = d.totales || {};
   document.getElementById("totales").innerHTML =
-    caja(t.refuerzos, "Refuerzos") +
-    caja(t.rebajes, "Rebajes") +
-    caja(t.arrestos, "Arrestos") +
-    caja(t.sanciones, "Sanciones");
+    caja(t.refuerzos, "Refuerzos") + caja(t.rebajes, "Rebajes") +
+    caja(t.arrestos, "Arrestos") + caja(t.sanciones, "Sanciones");
 
   var med = d.sancionesPorMedida || {};
   var tipo = d.sancionesPorTipo || {};
   document.getElementById("tipos").innerHTML =
     "<p><strong>Leves:</strong> " + (tipo.LEVE||0) + " · <strong>Graves:</strong> " + (tipo.GRAVE||0) + "</p>" +
-    "<table><thead><tr><th>Medida</th><th>Nº</th></tr></thead><tbody>" +
-    Object.keys(med).sort().map(function(k){ return "<tr><td>"+esc(k)+"</td><td>"+med[k]+"</td></tr>"; }).join("") +
-    "</tbody></table>";
+    "<table><thead><tr><th>Medida</th><th class='num'>Nº</th></tr></thead><tbody>" +
+    Object.keys(med).sort().map(function(k){
+      return "<tr><td>"+esc(k)+"</td><td class='num'>"+med[k]+"</td></tr>";
+    }).join("") + "</tbody></table>";
 
   document.getElementById("fundamentos").innerHTML =
-    "<table><thead><tr><th>Tipo</th><th>Fundamento</th><th>Nº</th></tr></thead><tbody>" +
+    "<table><thead><tr><th class='tipo'>Tipo</th><th>Fundamento</th><th class='num'>Nº</th></tr></thead><tbody>" +
     (d.fundamentos||[]).map(function(f){
-      return "<tr><td>"+esc(f.tipo)+(f.letra?" ("+esc(f.letra)+")":"")+"</td><td>"+esc(f.fundamento)+"</td><td>"+f.count+"</td></tr>";
+      return "<tr><td class='tipo'>"+esc(f.tipo)+(f.letra?" ("+esc(f.letra)+")":"")+
+        "</td><td>"+esc(f.fundamento)+"</td><td class='num'>"+f.count+"</td></tr>";
     }).join("") + "</tbody></table>";
 
   document.getElementById("motivos").innerHTML =
-    "<table><thead><tr><th>Grupo</th><th>Nº</th><th>Cómo se escribió</th></tr></thead><tbody>" +
+    "<table><thead><tr><th>Grupo</th><th class='num'>Nº</th><th>Cómo se escribió</th></tr></thead><tbody>" +
     (d.motivos||[]).map(function(m){
       var vars = (m.variantes||[]).map(function(v){ return esc(v.texto)+" (×"+v.count+")"; }).join("; ");
-      return "<tr><td>"+esc(m.etiqueta)+"</td><td>"+m.count+"</td><td class='var'>"+vars+"</td></tr>";
+      return "<tr><td>"+esc(m.etiqueta)+"</td><td class='num'>"+m.count+"</td><td class='var'>"+vars+"</td></tr>";
     }).join("") + "</tbody></table>";
 
   document.getElementById("secciones").innerHTML =
-    "<table><thead><tr><th>Sección</th><th>Refuerzos</th><th>Rebajes</th><th>Arrestos</th><th>Sanciones</th></tr></thead><tbody>" +
+    "<table><thead><tr><th>Sección</th><th class='num'>Ref.</th><th class='num'>Reb.</th><th class='num'>Arr.</th><th class='num'>San.</th></tr></thead><tbody>" +
     (d.porSeccion||[]).map(function(s){
-      return "<tr><td>"+esc(s.nombre||s.id)+"</td><td>"+s.refuerzos+"</td><td>"+s.rebajes+"</td><td>"+s.arrestos+"</td><td>"+s.sanciones+"</td></tr>";
+      return "<tr><td>"+esc(s.nombre||s.id)+"</td><td class='num'>"+s.refuerzos+
+        "</td><td class='num'>"+s.rebajes+"</td><td class='num'>"+s.arrestos+
+        "</td><td class='num'>"+s.sanciones+"</td></tr>";
     }).join("") + "</tbody></table>";
 }
 function caja(n,l){ return '<div class="stat"><div class="n">'+(n||0)+'</div><div class="l">'+esc(l)+'</div></div>'; }
