@@ -1,5 +1,4 @@
-# Blueprint Render: New → Blueprint → este repo.
-# Servicio ya existente: https://cefot-vxs6.onrender.com
+# Variables reales que usa el código. Render pone PORT solo.
 services:
   - type: web
     name: cefot-vxs6
@@ -18,3 +17,5 @@ services:
         value: "1"
       - key: DATABASE_URL
         sync: false
+      - key: PGSSL_NO_VERIFY
+        value: "true"
