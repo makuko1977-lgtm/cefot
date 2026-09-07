@@ -1,11 +1,9 @@
 const path = require("path");
 const fs = require("fs");
-const crypto = require("crypto");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
 const db = require("./lib/db");
-const auth = require("./lib/auth");
 const avisos = require("./lib/avisos");
 
 const app = express();
@@ -40,6 +38,7 @@ app.use("/api/sanciones", function (req, res, next){
   }
   next();
 }, require("./routes/sanciones"));
+app.use("/api/sanciones", require("./routes/sancionesMedida"));
 app.use("/api/rebajes", require("./routes/rebajes"));
 app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/actividades", require("./routes/actividades"));
