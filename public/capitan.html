@@ -71,7 +71,7 @@
 
   <div class="panel corner-accent">
     <h3>Secciones de mi compañía</h3>
-    <div class="panel-sub">Entra en una sección para consultar y crear sanciones, arrestos, rebajes, refuerzos e historial de sus alumnos — con el mismo acceso que su jefe de sección, salvo el roster y la gestión de usuarios. Podrás volver aquí en cualquier momento para cambiar de sección.</div>
+    <div class="panel-sub">Entra en una sección para consultar sanciones, arrestos, rebajes y refuerzos. No gestionas el roster ni los jefes de pelotón. Usa «Volver a compañía» para cambiar de sección sin cerrar sesión.</div>
     <div class="grid-secciones" id="seccionesGrid"></div>
   </div>
 </div>
@@ -87,7 +87,7 @@
 
   function escapeHtml(s){
     return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      return { "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c];
     });
   }
 
@@ -147,7 +147,7 @@
           alert(res.data.error || "No se ha podido entrar en esa sección.");
           return;
         }
-        location.href = "/admin.html";
+        location.href = "/seccion3.html";
       }).catch(function(){
         btn.disabled = false;
         btn.textContent = "Entrar";
@@ -210,10 +210,8 @@
   fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
     if (!me){ location.href = "/login.html"; return; }
     if (!me.capitanCompania){
-      // No es capitán (o ya ha entrado en una sección propia como jefe real):
-      // manda a cada cual a su pantalla habitual.
       if (me.superAdmin) location.href = "/superadmin.html";
-      else if (me.tenant && me.tenant.role === "admin") location.href = "/admin.html";
+      else if (me.tenant && me.tenant.role === "admin") location.href = "/seccion3.html";
       else location.href = "/instructor.html";
       return;
     }
