@@ -30,4 +30,7 @@
     if (push) push.onclick = function (){ window.cefotSync && window.cefotSync.publicar(); };
   };
   document.body.appendChild(s);
+  var t = document.createElement("script");
+  t.src = "/shared/instructor-trabajo.js";
+  document.body.appendChild(t);
 })();
