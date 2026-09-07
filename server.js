@@ -33,6 +33,7 @@ app.use("/api/actividades", require("./routes/actividades"));
 app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/superadmin", require("./routes/superadmin"));
+app.use("/api/superadmin", require("./routes/jefesEstudiosAdmin"));
 app.use("/api/capitan", require("./routes/capitan"));
 app.use("/api/estudios", require("./routes/estudios"));
 
@@ -75,17 +76,12 @@ async function start(){
       createdAt: new Date().toISOString()
     });
     await db.save();
-    console.log("========================================================");
-    console.log(" Instalación nueva: se ha creado un Súper Administrador.");
-    console.log(" DNI:        " + dni);
-    console.log(" Contraseña: " + password);
-    console.log(" Entra en /login.html, crea tu primera sección y cámbiala.");
-    console.log("========================================================");
+    console.log(" Instalación nueva SUPERADMIN / " + password);
   }
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, function (){
-    console.log("Servidor CEFOT-2 escuchando en el puerto " + PORT + " (almacén: " + (db.usingDatabase ? "base de datos Postgres" : "fichero local") + ")");
+    console.log("Servidor CEFOT-2 puerto " + PORT + " (" + (db.usingDatabase ? "Postgres" : "fichero") + ")");
   });
 }
 
