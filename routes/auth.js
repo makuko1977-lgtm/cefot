@@ -11,14 +11,12 @@ const intentosFallidos = new Map();
 function limiterKey(req, dni){
   return (req.ip || "sin-ip") + "|" + dni;
 }
-
 function limpiarSiExpirado(entry){
   if (entry && entry.first && Date.now() - entry.first > VENTANA_MS && (!entry.blockedUntil || Date.now() > entry.blockedUntil)){
     return null;
   }
   return entry;
 }
-
 const limpiezaTimer = setInterval(function (){
   const ahora = Date.now();
   intentosFallidos.forEach(function (entry, key){
@@ -53,9 +51,17 @@ router.post("/login", function (req, res){
   }
 
   intentosFallidos.delete(key);
-  const token = auth.issueToken(found.user, found.role, found.tenantId, found.superAdmin, found.capitanCompania);
+  const token = auth.issueToken(found.user, found.role, found.tenantId, found.superAdmin, found.capitanCompania, found.jefeEstudios);
   auth.setAuthCookie(res, token);
-  res.json({ dni: found.user.dni, nombre: found.user.nombre, role: found.role, tenantId: found.tenantId, superAdmin: !!found.superAdmin, capitanCompania: found.capitanCompania || null });
+  res.json({
+    dni: found.user.dni,
+    nombre: found.user.nombre,
+    role: found.role,
+    tenantId: found.tenantId,
+    superAdmin: !!found.superAdmin,
+    capitanCompania: found.capitanCompania || null,
+    jefeEstudios: !!found.jefeEstudios
+  });
 });
 
 router.post("/logout", function (req, res){
@@ -69,6 +75,7 @@ router.get("/me", auth.requireAuth, function (req, res){
     nombre: req.user.nombre,
     superAdmin: !!req.user.superAdmin,
     capitanCompania: req.user.capitanCompania || null,
+    jefeEstudios: !!req.user.jefeEstudios,
     tenant: null
   };
   if (req.db){
