@@ -40,7 +40,7 @@ struct LoginView: View {
                         .multilineTextAlignment(.center)
 
                     VStack(alignment: .leading, spacing: 12) {
-                        field("DNI", text: $dni, secret: false)
+                        field("Usuario", text: $dni, secret: false)
                             .textInputAutocapitalization(.characters)
                         field("Contraseña", text: $password, secret: true)
                     }
