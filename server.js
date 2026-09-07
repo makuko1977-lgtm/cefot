@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const crypto = require("crypto");
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -7,13 +8,8 @@ const db = require("./lib/db");
 const auth = require("./lib/auth");
 
 const app = express();
+const PUBLIC = path.join(__dirname, "public");
 
-// Si se despliega detrás de un proxy inverso (Nginx, un PaaS, etc.), hay que
-// decírselo explícitamente a Express para que req.ip y las cookies "secure"
-// se calculen a partir de la cabecera X-Forwarded-* del proxy y no del socket
-// TCP directo. Se activa solo con la variable de entorno TRUST_PROXY (por
-// ejemplo TRUST_PROXY=1) para no fiarse de esa cabecera si no hay proxy
-// delante (si no hay proxy, cualquiera podría falsear su IP con ella).
 if (process.env.TRUST_PROXY){
   app.set("trust proxy", process.env.TRUST_PROXY === "true" ? 1 : process.env.TRUST_PROXY);
 }
@@ -21,7 +17,6 @@ if (process.env.TRUST_PROXY){
 app.use(express.json({ limit: "20mb" }));
 app.use(cookieParser());
 
-// ---------------- cabeceras de seguridad básicas ----------------
 app.use(function (req, res, next){
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
@@ -29,7 +24,6 @@ app.use(function (req, res, next){
   next();
 });
 
-// ---------------- API ----------------
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/roster", require("./routes/roster"));
 app.use("/api/sanciones", require("./routes/sanciones"));
@@ -41,28 +35,36 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/superadmin", require("./routes/superadmin"));
 app.use("/api/capitan", require("./routes/capitan"));
 
-// ---------------- frontend estático ----------------
-app.use(express.static(path.join(__dirname, "public")));
+function serveHtmlWithExtras(fileName){
+  return function (req, res, next){
+    const file = path.join(PUBLIC, fileName);
+    fs.readFile(file, "utf8", function (err, html){
+      if (err) return next();
+      if (html.indexOf("/shared/admin-extras.js") !== -1){
+        return res.type("html").send(html);
+      }
+      res.type("html").send(
+        html.replace(/<\/body>/i, "<script src=\"/shared/admin-extras.js\"></script></body>")
+      );
+    });
+  };
+}
+
+app.get("/admin.html", serveHtmlWithExtras("admin.html"));
+app.get("/seccion3.html", serveHtmlWithExtras("seccion3.html"));
+
+app.use(express.static(PUBLIC));
 
 app.use(function (req, res){
   res.status(404).json({ error: "No encontrado." });
 });
 
 async function start(){
-  // Carga el estado guardado (de Postgres si hay DATABASE_URL, o del
-  // fichero local si no) antes de aceptar ninguna petición. Si los datos
-  // todavía estaban en el formato antiguo (una sola sección, sin
-  // compañías), db.init() ya los migra automáticamente al formato nuevo.
   await db.init();
 
-  // ---------------- crea un Súper Administrador por defecto si no hay nada ----------------
-  // Solo ocurre en una instalación totalmente nueva (sin secciones ni
-  // súper administradores todavía) — no en una que se acaba de migrar desde
-  // el formato antiguo, porque esa ya trae su propio Súper Administrador
-  // (el que antes era el único admin).
   if (!db.data.superAdmins.length && !Object.keys(db.data.tenants).length){
     const dni = "SUPERADMIN";
-    const password = crypto.randomBytes(4).toString("hex"); // 8 caracteres al azar
+    const password = crypto.randomBytes(4).toString("hex");
     db.data.superAdmins.push({
       dni: dni,
       nombre: "Súper Administrador",
