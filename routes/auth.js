@@ -4,10 +4,9 @@ const auth = require("../lib/auth");
 
 const router = express.Router();
 
-// ---------------- protección contra fuerza bruta en el login ----------------
 const MAX_INTENTOS = 5;
-const VENTANA_MS = 10 * 60 * 1000; // 10 minutos
-const intentosFallidos = new Map(); // clave -> { count, first, blockedUntil }
+const VENTANA_MS = 10 * 60 * 1000;
+const intentosFallidos = new Map();
 
 function limiterKey(req, dni){
   return (req.ip || "sin-ip") + "|" + dni;
@@ -30,10 +29,6 @@ const limpiezaTimer = setInterval(function (){
 }, VENTANA_MS);
 if (limpiezaTimer.unref) limpiezaTimer.unref();
 
-// El login ya no busca en un único listado de usuarios: busca en todo el
-// sistema (súper administradores + las secciones de todas las compañías),
-// porque todavía no se sabe a qué sección pertenece quien intenta entrar
-// hasta que se identifica el DNI.
 router.post("/login", function (req, res){
   const dni = auth.normalizeDni(req.body.dni);
   const password = String(req.body.password || "");
@@ -54,7 +49,7 @@ router.post("/login", function (req, res){
       entry.blockedUntil = Date.now() + 30000 * (entry.count - MAX_INTENTOS + 1);
     }
     intentosFallidos.set(key, entry);
-    return res.status(401).json({ error: "DNI o contraseña incorrectos." });
+    return res.status(401).json({ error: "Usuario o contraseña incorrectos." });
   }
 
   intentosFallidos.delete(key);
@@ -68,11 +63,6 @@ router.post("/logout", function (req, res){
   res.json({ ok: true });
 });
 
-// Igual para todo el mundo: siempre incluye `superAdmin`, y además `tenant`
-// (con `role`/`permisos` dentro) cuando quien pregunta tiene sección propia.
-// Así una misma cuenta con doble función (jefe de sección + Súper
-// Administrador) recibe de golpe todo lo que necesita para decidir qué
-// pantalla mostrar, sin dos peticiones distintas.
 router.get("/me", auth.requireAuth, function (req, res){
   const out = {
     dni: req.user.dni,
