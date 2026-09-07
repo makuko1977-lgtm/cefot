@@ -12,24 +12,17 @@ function stripAccents(s){
 }
 
 const ROSTER_FIELDS = ["numero", "ape1", "ape2", "nombre", "peloton", "sexo", "unidad", "dni", "telefono"];
-const FOTO_MAX_BYTES = 400 * 1024; // dataURL incluido; una foto comprimida 320x320 ronda 20-40 KB
-// El límite en el cliente es 4 MB de archivo original; en base64 (dataURL)
-// eso pesa ~1.37×, así que el límite aquí tiene que ser mayor que 4 MB.
+const FOTO_MAX_BYTES = 400 * 1024;
 const ADJUNTO_MAX_BYTES = 6 * 1024 * 1024;
 const ADJUNTOS_MAX_POR_ALUMNO = 20;
 
-// Los campos "_foto", "_adjuntos", "_cuestionario" y "_cuestionarioFecha" NO
-// se tocan nunca desde el reemplazo masivo del roster (subida de Excel /
-// edición de campos de texto en la ficha): siempre se preservan tal cual
-// estaban guardados en el servidor, y solo cambian a través de sus propias
-// rutas (más abajo). Así, una foto o un adjunto que suba un instructor no
-// puede perderse si el jefe de sección guarda el roster con una copia
-// desactualizada en su navegador.
 function sanitizeRosterRow(row, prev){
   const out = {};
   ROSTER_FIELDS.forEach(function (k){
     out[k] = row[k] == null ? "" : String(row[k]);
   });
+  // Si el cliente solo tenía el DNI enmascarado, no pisar el valor real.
+  if (auth.looksMaskedDni(out.dni) && prev && prev.dni) out.dni = prev.dni;
   if (prev){
     if (prev._foto) out._foto = prev._foto;
     if (prev._adjuntos && prev._adjuntos.length) out._adjuntos = prev._adjuntos;
@@ -43,11 +36,6 @@ function findRow(req, numero){
   return req.db.roster.find(function (r){ return String(r.numero) === String(numero); });
 }
 
-// Convención CEFOT-2: en el número de protocolo del alumno, el 1er dígito
-// indica la compañía (1-4) y el 2º dígito la sección (1-5). Se usa como
-// aviso de seguridad al cargar un roster nuevo: si buena parte de los
-// números no encajan con la sección de quien lo está cargando, es probable
-// que se haya subido la hoja de otra sección por error.
 function contarNumerosFueraDeSeccion(rows, compania, seccion){
   const prefijo = String(compania) + String(seccion);
   let total = 0, fuera = 0;
@@ -61,18 +49,22 @@ function contarNumerosFueraDeSeccion(rows, compania, seccion){
   return { total: total, fuera: fuera };
 }
 
-// Roster completo: solo el jefe de sección (contiene DNI, teléfono, etc.)
+function rosterParaCliente(req, rows){
+  return (rows || []).map(function (r){
+    const row = Object.assign({}, r);
+    row.dni = auth.publicDni(req, r.dni);
+    return row;
+  });
+}
+
 router.get("/", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   res.json({
-    roster: req.db.roster,
+    roster: rosterParaCliente(req, req.db.roster),
     rosterUpdatedAt: req.db.rosterUpdatedAt,
     rosterUpdatedBy: req.db.rosterUpdatedBy
   });
 });
 
-// Reemplaza el roster completo (tras cargar un Excel nuevo, o al guardar
-// los campos de texto de una ficha). Solo el jefe de sección, y siempre
-// dentro de su propia sección.
 router.post("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
   const rows = Array.isArray(req.body.roster) ? req.body.roster : null;
   if (!rows){
@@ -100,9 +92,6 @@ router.post("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan,
   res.json(respuesta);
 });
 
-// Buscador limitado: para jefes de pelotón y jefe de sección. Solo devuelve
-// lo justo para identificar al alumno en un parte — nunca DNI, teléfono, ni
-// el resto de su ficha, historial o expedientes.
 router.get("/buscar", auth.requireAuth, function (req, res){
   const q = stripAccents(req.query.q || "");
   let rows = req.db.roster;
@@ -118,11 +107,6 @@ router.get("/buscar", auth.requireAuth, function (req, res){
   res.json({ resultados: limited });
 });
 
-// Ficha básica de un alumno concreto: para el jefe de sección, o para un
-// jefe de pelotón con permiso de "ver ficha", "hacer fotos" o "adjuntos"
-// (necesita ver al menos lo justo para saber a quién le está haciendo la
-// foto o adjuntando algo). El nivel de detalle depende de qué permisos
-// tenga exactamente.
 router.get("/:numero/ficha", auth.requireAuth, function (req, res){
   const row = findRow(req, req.params.numero);
   if (!row) return res.status(404).json({ error: "Alumno no encontrado." });
@@ -143,7 +127,7 @@ router.get("/:numero/ficha", auth.requireAuth, function (req, res){
   }
   if (isAdmin || permisos.verFicha){
     ficha.sexo = row.sexo || "";
-    ficha.dni = row.dni || "";
+    ficha.dni = auth.publicDni(req, row.dni);
     ficha.telefono = row.telefono || "";
     ficha.unidad = row.unidad || "";
   }
@@ -152,16 +136,12 @@ router.get("/:numero/ficha", auth.requireAuth, function (req, res){
       return {
         id: a.id, nombre: a.nombre, tipo: a.tipo, tamano: a.tamano, fecha: a.fecha,
         subidoPorMi: !!(a.subidoPor && a.subidoPor.dni === req.user.dni)
-        // Nota: no se envía dataUrl aquí para no inflar la respuesta; se
-        // descarga bajo demanda con GET /:numero/adjuntos/:id.
       };
     });
   }
   res.json({ ficha: ficha });
 });
 
-// Guarda (o borra, si foto === null) la foto de un alumno. Jefe de sección,
-// o jefe de pelotón con el permiso "fotos".
 router.patch("/:numero/foto", auth.requireAuth, auth.requirePermiso("fotos"), function (req, res){
   const row = findRow(req, req.params.numero);
   if (!row) return res.status(404).json({ error: "Alumno no encontrado." });
@@ -183,8 +163,6 @@ router.patch("/:numero/foto", auth.requireAuth, auth.requirePermiso("fotos"), fu
   res.json({ ok: true, foto: row._foto });
 });
 
-// Añade un archivo adjunto a la ficha de un alumno. Jefe de sección, o jefe
-// de pelotón con el permiso "adjuntos".
 router.post("/:numero/adjuntos", auth.requireAuth, auth.requirePermiso("adjuntos"), function (req, res){
   const row = findRow(req, req.params.numero);
   if (!row) return res.status(404).json({ error: "Alumno no encontrado." });
@@ -220,8 +198,6 @@ router.post("/:numero/adjuntos", auth.requireAuth, auth.requirePermiso("adjuntos
   res.status(201).json({ ok: true, adjunto: { id: entry.id, nombre: entry.nombre, tipo: entry.tipo, tamano: entry.tamano, fecha: entry.fecha } });
 });
 
-// Descarga un adjunto concreto (incluye el contenido en base64). Mismas
-// reglas de acceso que la ficha básica.
 router.get("/:numero/adjuntos/:id", auth.requireAuth, function (req, res){
   const row = findRow(req, req.params.numero);
   if (!row) return res.status(404).json({ error: "Alumno no encontrado." });
@@ -237,8 +213,6 @@ router.get("/:numero/adjuntos/:id", auth.requireAuth, function (req, res){
   res.json({ adjunto: entry });
 });
 
-// Elimina un adjunto. Jefe de sección siempre; un jefe de pelotón con
-// permiso "adjuntos" solo puede eliminar los que él mismo subió.
 router.delete("/:numero/adjuntos/:id", auth.requireAuth, auth.requirePermiso("adjuntos"), function (req, res){
   const row = findRow(req, req.params.numero);
   if (!row) return res.status(404).json({ error: "Alumno no encontrado." });
