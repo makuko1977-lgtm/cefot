@@ -3,209 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capitán de Compañía · CEFOT-2</title>
+<title>Capitan de Compania · CEFOT-2</title>
 <link rel="stylesheet" href="/shared/app.css">
 <style>
-  .grid-secciones{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));
-    gap:12px;
-    margin-top:6px;
-  }
-  .seccion-card{
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:14px;
-  }
+  .grid-secciones{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:6px;}
+  .seccion-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;}
   .seccion-card.vacia{opacity:.55;}
-  .seccion-card .cia{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.5px;
-    color:var(--text-dim); text-transform:uppercase; margin-bottom:4px;
-  }
-  .seccion-card h4{margin:0 0 6px; font-family:var(--font-display); font-size:16px;}
-  .seccion-card .jefe{font-size:12.5px; color:var(--text-dim);}
-  .seccion-card .jefe.sin-crear{font-style:italic;}
-  .seccion-card .mini-stats{
-    display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;
-  }
-  .seccion-card .mini-stat{
-    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
-    background:var(--panel-2); border-radius:6px; padding:2px 6px;
-  }
+  .seccion-card .cia{font-family:var(--font-mono);font-size:11px;letter-spacing:.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;}
+  .seccion-card h4{margin:0 0 6px;font-family:var(--font-display);font-size:16px;}
+  .seccion-card .jefe{font-size:12.5px;color:var(--text-dim);}
+  .seccion-card .mini-stats{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .seccion-card .mini-stat{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);background:var(--panel-2);border-radius:6px;padding:2px 6px;}
   .seccion-card .form-actions{margin-top:12px;}
 </style>
 </head>
 <body>
-
 <div class="app">
   <header class="top">
     <div class="brand">
       <div class="mark">CC</div>
       <div>
-        <h1>CEFOT-2 · Capitán de Compañía</h1>
-        <div class="sub" id="companiaSub">Elige la sección en la que quieres actuar</div>
+        <h1>CEFOT-2 · Capitan de Compania</h1>
+        <div class="sub" id="companiaSub">Elige la seccion en la que quieres actuar</div>
       </div>
     </div>
-    <div id="topActions" style="display:flex; gap:8px; align-items:center;"></div>
+    <div id="topActions" style="display:flex;gap:8px;align-items:center;"></div>
   </header>
-
   <div class="panel corner-accent" style="margin-bottom:22px;">
-    <h3>Mi contraseña</h3>
-    <div class="panel-sub">Cambia la contraseña de tu propia cuenta de capitán. No hace falta escribir la contraseña actual.</div>
+    <h3>Mi contrasena</h3>
+    <div class="panel-sub">Cambia la contrasena de tu cuenta de capitan.</div>
     <div class="field-grid">
-      <div class="field">
-        <label for="miPasswordInput">Nueva contraseña</label>
-        <input type="text" id="miPasswordInput" placeholder="Mínimo 6 caracteres">
-      </div>
-      <div class="field">
-        <label for="miPasswordConfirmInput">Repite la nueva contraseña</label>
-        <input type="text" id="miPasswordConfirmInput" placeholder="Repite la contraseña">
-      </div>
+      <div class="field"><label for="miPasswordInput">Nueva contrasena</label><input type="text" id="miPasswordInput" placeholder="Minimo 6 caracteres"></div>
+      <div class="field"><label for="miPasswordConfirmInput">Repite la nueva contrasena</label><input type="text" id="miPasswordConfirmInput" placeholder="Repite la contrasena"></div>
     </div>
     <div class="form-actions">
-      <button class="btn primary" id="miPasswordSaveBtn" type="button">Guardar contraseña</button>
+      <button class="btn primary" id="miPasswordSaveBtn" type="button">Guardar contrasena</button>
       <span class="form-msg" id="miPasswordMsg"></span>
     </div>
   </div>
-
   <div class="panel corner-accent">
-    <h3>Secciones de mi compañía</h3>
-    <div class="panel-sub">Entra en una sección para consultar sanciones, arrestos, rebajes y refuerzos. No gestionas el roster ni los jefes de pelotón. Usa «Volver a compañía» para cambiar de sección sin cerrar sesión.</div>
+    <h3>Secciones de mi compania</h3>
+    <div class="panel-sub">Entra en una seccion. Para volver aqui sin cerrar sesion usa Volver a compania.</div>
     <div class="grid-secciones" id="seccionesGrid"></div>
   </div>
 </div>
-
 <script>
 (function(){
-  "use strict";
-
-  var seccionesGrid = document.getElementById("seccionesGrid");
+  var grid = document.getElementById("seccionesGrid");
   var topActions = document.getElementById("topActions");
-  var companiaSub = document.getElementById("companiaSub");
-  var currentUser = null;
+  var sub = document.getElementById("companiaSub");
 
-  function escapeHtml(s){
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
-      return { "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c];
-    });
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "\u0026amp;")
+      .replace(/</g, "\u0026lt;")
+      .replace(/>/g, "\u0026gt;")
+      .replace(/"/g, "\u0026quot;");
   }
 
-  function renderTopActions(){
-    var quien = currentUser ? (currentUser.nombre + " (" + currentUser.dni + ")") : "";
-    topActions.innerHTML =
-      (quien ? '<span class="meta-note">' + escapeHtml(quien) + '</span>' : "") +
-      '<button class="btn small ghost" id="logoutBtn">Cerrar sesión</button>';
-    document.getElementById("logoutBtn").addEventListener("click", function(){
-      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
-    });
-  }
-
-  function renderGrid(secciones){
+  function pintar(secciones){
     var html = "";
-    secciones.forEach(function(s){
+    (secciones || []).forEach(function(s){
       if (s.existe){
-        html +=
-          '<div class="seccion-card" data-id="' + s.id + '">' +
-            '<div class="cia">Sección ' + s.seccion + '</div>' +
-            '<h4>' + escapeHtml(s.nombre) + '</h4>' +
-            '<div class="jefe">Jefe de sección: ' + escapeHtml(s.jefeSeccion ? s.jefeSeccion.nombre : "—") + '</div>' +
-            '<div class="mini-stats">' +
-              '<span class="mini-stat">' + s.totales.alumnos + ' alumnos</span>' +
-              '<span class="mini-stat">' + s.totales.sanciones + ' sanciones</span>' +
-            '</div>' +
-            '<div class="form-actions">' +
-              '<button class="btn primary small entrar-btn" type="button" data-id="' + s.id + '">Entrar</button>' +
-            '</div>' +
-          '</div>';
+        html += '<div class="seccion-card"><div class="cia">Seccion ' + s.seccion + '</div><h4>'
+          + esc(s.nombre) + '</h4><div class="jefe">Jefe de seccion: '
+          + esc(s.jefeSeccion ? s.jefeSeccion.nombre : "-") + '</div><div class="mini-stats"><span class="mini-stat">'
+          + s.totales.alumnos + ' alumnos</span><span class="mini-stat">'
+          + s.totales.sanciones + ' sanciones</span></div><div class="form-actions">'
+          + '<button class="btn primary small entrar-btn" type="button" data-id="' + s.id + '">Entrar</button></div></div>';
       } else {
-        html +=
-          '<div class="seccion-card vacia">' +
-            '<div class="cia">Sección ' + s.seccion + '</div>' +
-            '<h4>Sin crear</h4>' +
-            '<div class="jefe sin-crear">Todavía no tiene jefe de sección</div>' +
-          '</div>';
+        html += '<div class="seccion-card vacia"><div class="cia">Seccion ' + s.seccion
+          + '</div><h4>Sin crear</h4><div class="jefe">Todavia no tiene jefe de seccion</div></div>';
       }
     });
-    seccionesGrid.innerHTML = html;
-    seccionesGrid.querySelectorAll(".entrar-btn").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        entrarEnSeccion(btn.getAttribute("data-id"), btn);
-      });
+    grid.innerHTML = html || '<div class="empty-state">No hay secciones.</div>';
+    grid.querySelectorAll(".entrar-btn").forEach(function(btn){
+      btn.onclick = function(){
+        btn.disabled = true;
+        fetch("/api/capitan/secciones/" + encodeURIComponent(btn.getAttribute("data-id")) + "/entrar", { method: "POST" })
+          .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+          .then(function(res){
+            if (!res.ok){ btn.disabled = false; alert(res.d.error || "No se pudo entrar"); return; }
+            location.href = "/seccion3.html";
+          }).catch(function(){ btn.disabled = false; alert("Error de conexion"); });
+      };
     });
   }
 
-  function entrarEnSeccion(id, btn){
-    btn.disabled = true;
-    btn.textContent = "Entrando…";
-    fetch("/api/capitan/secciones/" + encodeURIComponent(id) + "/entrar", { method: "POST" })
-      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
-      .then(function(res){
-        if (!res.ok){
-          btn.disabled = false;
-          btn.textContent = "Entrar";
-          alert(res.data.error || "No se ha podido entrar en esa sección.");
-          return;
-        }
-        location.href = "/seccion3.html";
-      }).catch(function(){
-        btn.disabled = false;
-        btn.textContent = "Entrar";
-        alert("Error de conexión con el servidor.");
-      });
-  }
-
-  function cargarSecciones(){
-    return fetch("/api/capitan/secciones").then(function(r){
-      if (!r.ok) throw new Error("No se han podido cargar las secciones.");
-      return r.json();
-    }).then(function(data){
-      companiaSub.textContent = "Capitán de la " + data.compania + "ª Compañía — elige la sección en la que quieres actuar";
-      renderGrid(data.secciones || []);
-    });
-  }
-
-  var miPasswordInput = document.getElementById("miPasswordInput");
-  var miPasswordConfirmInput = document.getElementById("miPasswordConfirmInput");
-  var miPasswordSaveBtn = document.getElementById("miPasswordSaveBtn");
-  var miPasswordMsg = document.getElementById("miPasswordMsg");
-
-  miPasswordSaveBtn.addEventListener("click", function(){
-    var password = miPasswordInput.value;
-    var confirm = miPasswordConfirmInput.value;
-    if (password.length < 6){
-      miPasswordMsg.textContent = "La contraseña debe tener al menos 6 caracteres.";
-      miPasswordMsg.className = "form-msg error";
-      return;
-    }
-    if (password !== confirm){
-      miPasswordMsg.textContent = "Las dos contraseñas no coinciden.";
-      miPasswordMsg.className = "form-msg error";
-      return;
-    }
-    miPasswordSaveBtn.disabled = true;
-    fetch("/api/capitan/mi-password", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: password })
-    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
-      .then(function(res){
-        miPasswordSaveBtn.disabled = false;
-        if (!res.ok){
-          miPasswordMsg.textContent = res.data.error || "No se ha podido cambiar la contraseña.";
-          miPasswordMsg.className = "form-msg error";
-          return;
-        }
-        miPasswordMsg.textContent = "Contraseña actualizada correctamente.";
-        miPasswordMsg.className = "form-msg ok";
-        miPasswordInput.value = "";
-        miPasswordConfirmInput.value = "";
-      }).catch(function(){
-        miPasswordSaveBtn.disabled = false;
-        miPasswordMsg.textContent = "Error de conexión con el servidor.";
-        miPasswordMsg.className = "form-msg error";
-      });
-  });
+  document.getElementById("miPasswordSaveBtn").onclick = function(){
+    var p = document.getElementById("miPasswordInput").value;
+    var c = document.getElementById("miPasswordConfirmInput").value;
+    var msg = document.getElementById("miPasswordMsg");
+    if (p.length < 6 || p !== c){ msg.textContent = "Revisa la contrasena (minimo 6 y que coincidan)."; msg.className = "form-msg error"; return; }
+    fetch("/api/capitan/mi-password", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: p }) })
+      .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
+      .then(function(res){ msg.textContent = res.ok ? "Guardada." : (res.d.error || "Error"); msg.className = "form-msg " + (res.ok ? "ok" : "error"); });
+  };
 
   fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
     if (!me){ location.href = "/login.html"; return; }
@@ -215,15 +108,22 @@
       else location.href = "/instructor.html";
       return;
     }
-    currentUser = me;
-    renderTopActions();
-    cargarSecciones().catch(function(){
-      seccionesGrid.innerHTML = '<div class="empty-state">No se han podido cargar las secciones. Recarga la página.</div>';
+    topActions.innerHTML = '<span class="meta-note">' + esc(me.nombre) + ' (' + esc(me.dni) + ')</span>'
+      + '<button class="btn small ghost" id="logoutBtn">Cerrar sesion</button>';
+    document.getElementById("logoutBtn").onclick = function(){
+      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
+    };
+    fetch("/api/capitan/secciones").then(function(r){
+      if (!r.ok) throw new Error("fail");
+      return r.json();
+    }).then(function(data){
+      sub.textContent = "Capitan de la " + data.compania + "a Compania — elige seccion";
+      pintar(data.secciones || []);
+    }).catch(function(){
+      grid.innerHTML = '<div class="empty-state">No se han podido cargar las secciones. Recarga.</div>';
     });
   }).catch(function(){ location.href = "/login.html"; });
-
 })();
 </script>
-
 </body>
 </html>
