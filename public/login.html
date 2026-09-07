@@ -61,6 +61,7 @@
 
   function destinoTrasLogin(me){
     if (me.superAdmin) return "/superadmin.html";
+    if (me.jefeEstudios) return "/estudios.html";
     if (me.capitanCompania && !(me.tenant && me.tenant.role === "admin")) return "/capitan.html";
     if (me.tenant && me.tenant.role === "admin") return "/admin.html";
     return "/instructor.html";
@@ -88,9 +89,7 @@
           msg.className = "login-msg form-msg error";
           return;
         }
-        if (res.data.superAdmin) location.href = "/superadmin.html";
-        else if (res.data.capitanCompania && !res.data.tenantId) location.href = "/capitan.html";
-        else location.href = res.data.role === "admin" ? "/admin.html" : "/instructor.html";
+        location.href = destinoTrasLogin(res.data);
       })
       .catch(function(){
         msg.textContent = "Error de conexión con el servidor.";
