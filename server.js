@@ -32,6 +32,7 @@ app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/actividades", require("./routes/actividades"));
 app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin", require("./routes/avisos"));
 app.use("/api/superadmin", require("./routes/superadmin"));
 app.use("/api/superadmin", require("./routes/jefesEstudiosAdmin"));
 app.use("/api/capitan", require("./routes/capitan"));
@@ -59,33 +60,17 @@ app.get("/superadmin.html", serveHtmlWithExtras("superadmin.html", "/shared/supe
 app.get("/instructor.html", serveHtmlWithExtras("instructor.html", "/shared/instructor-trabajo.js"));
 
 app.use(express.static(PUBLIC));
-
 app.use(function (req, res){
   res.status(404).json({ error: "No encontrado." });
 });
 
 async function start(){
   await db.init();
-
-  if (!db.data.superAdmins.length && !Object.keys(db.data.tenants).length){
-    const dni = "SUPERADMIN";
-    const password = crypto.randomBytes(4).toString("hex");
-    db.data.superAdmins.push({
-      dni: dni,
-      nombre: "Súper Administrador",
-      passwordHash: auth.hashPassword(password),
-      createdAt: new Date().toISOString()
-    });
-    await db.save();
-    console.log(" Instalación nueva SUPERADMIN / " + password);
-  }
-
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, function (){
-    console.log("Servidor CEFOT-2 puerto " + PORT + " (" + (db.usingDatabase ? "Postgres" : "fichero") + ")");
+    console.log("Servidor CEFOT-2 puerto " + PORT);
   });
 }
-
 start().catch(function (err){
   console.error("No se pudo arrancar el servidor:", err);
   process.exit(1);
