@@ -599,6 +599,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .status-pill.grave{background:var(--danger-soft);color:var(--danger);}
   .status-pill.alerta{background:var(--danger-soft);color:var(--danger);}
   .status-pill.noalerta{background:#e7e9dc;color:var(--text-dim);}
+  .alert-badges{display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
 
   .cat-chip{
     display:inline-block;
@@ -870,6 +871,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
     body.print-consulta thead th{background:#eee !important; color:#000 !important; position:static !important;}
     body.print-consulta tbody td, body.print-consulta thead th{white-space:normal !important;}
+    body.print-consulta .no-print{display:none !important;}
+    body.print-consulta.print-filtro-expediente .consulta-section[data-exp-idx]:not(.print-selected){display:none !important;}
   }
 
   .firma-pad-wrap{border:1.5px dashed var(--border); border-radius:10px; background:#fff; overflow:hidden;}
@@ -880,6 +883,33 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .permisos-grid label{display:flex; align-items:center; gap:6px; font-size:12.5px; cursor:pointer;}
   .permisos-chip{display:inline-block; font-size:10.5px; padding:2px 7px; border-radius:20px; background:var(--panel-2); border:1px solid var(--border-light); color:var(--text-dim); margin:1px 3px 1px 0; white-space:nowrap;}
   .permisos-chip.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-bright);}
+
+  .arresto-pendiente-form{display:flex;gap:5px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+  .arresto-pendiente-form input[type=date]{font-size:11.5px;padding:3px 5px;border-radius:6px;border:1px solid var(--border-light);background:var(--panel-2);color:var(--text);}
+
+  .fill-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.3px;
+    background:var(--accent-soft);
+    color:var(--accent-bright);
+    white-space:nowrap;
+    border:none;
+    cursor:pointer;
+  }
+  .fill-badge:hover{filter:brightness(0.95);}
+
+  .exp-print-check{
+    display:inline-flex; align-items:center; gap:5px; font-weight:600; text-transform:none;
+    letter-spacing:normal; color:var(--text); background:var(--panel-2); border:1px solid var(--border-light);
+    border-radius:7px; padding:3px 8px 3px 6px; cursor:pointer; font-size:11.5px;
+  }
 </style>
 </head>
 <body>
@@ -952,6 +982,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <button type="button" id="tabBtnRebajes">Rebajes</button>
       <button type="button" id="tabBtnSanciones">Sanciones</button>
       <button type="button" id="tabBtnRefuerzos">Refuerzos</button>
+      <button type="button" id="tabBtnActividades">Actividades</button>
       <button type="button" id="tabBtnConsultas">Consultas</button>
       <button type="button" id="tabBtnUsuarios">Usuarios</button>
     </div>
@@ -1089,6 +1120,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             </div>
           </div>
 
+          <div class="field" style="grid-column:1/-1;">
+            <label class="multi-list-item" style="font-weight:650;">
+              <input type="checkbox" id="sanVincularExpedienteCheck">
+              <span>Vincular esta sanción a un expediente ya cursado (en vez de abrir uno nuevo)</span>
+            </label>
+            <div class="hidden" id="sanVincularExpedienteWrap" style="margin-top:8px;">
+              <label for="sanExpedienteInput">Expediente existente</label>
+              <input type="text" id="sanExpedienteInput" list="sanExpedienteList" placeholder="Escribe el número de expediente, o el nombre/número de un alumno del expediente..." autocomplete="off">
+              <datalist id="sanExpedienteList"></datalist>
+              <div class="cadet-preview" id="sanExpedientePreview"></div>
+              <div class="hint error hidden" id="sanExpedienteHint">No se reconoce ningún expediente con ese texto. Selecciónalo de la lista.</div>
+              <div class="hint" style="margin-top:4px;">Esta sanción se guardará con el mismo número de expediente; el resto de datos (fecha, tipo, motivo, medida) se rellenan como una sanción normal.</div>
+            </div>
+          </div>
+
           <div class="field">
             <label for="sanFecha">Día</label>
             <input type="date" id="sanFecha">
@@ -1108,6 +1154,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               <option value="">Seleccionar…</option>
               <option value="LEVE">Leve</option>
               <option value="GRAVE">Grave</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="sanFaseInput">Fase (opcional)</label>
+            <select id="sanFaseInput">
+              <option value="">—</option>
+              <option value="FFMG">FFMG</option>
+              <option value="FFE">FFE</option>
             </select>
           </div>
 
@@ -1156,21 +1211,41 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <select id="sanMedidaInput"><option value="">Seleccionar…</option></select>
           </div>
 
-          <div class="field-row hidden" id="sanArrestoFields" style="grid-column:1/-1;">
-            <div class="field">
-              <label for="sanArrestoFechaIni">Fecha inicio arresto</label>
-              <input type="date" id="sanArrestoFechaIni">
+          <div class="hidden" id="sanArrestoWrap" style="grid-column:1/-1;">
+            <div class="mode-toggle" id="sanArrestoModoToggle">
+              <button type="button" class="mode-btn active" id="sanArrestoModoFechaBtn" data-modo="fecha">Fecha conocida</button>
+              <button type="button" class="mode-btn" id="sanArrestoModoPendienteBtn" data-modo="pendiente">Pendiente</button>
             </div>
-            <div class="field">
-              <label for="sanArrestoFechaFin">Fecha fin arresto</label>
-              <input type="date" id="sanArrestoFechaFin">
+
+            <div class="field-row" id="sanArrestoFields" style="margin-top:10px;">
+              <div class="field">
+                <label for="sanArrestoFechaIni">Fecha inicio arresto</label>
+                <input type="date" id="sanArrestoFechaIni">
+              </div>
+              <div class="field">
+                <label for="sanArrestoFechaFin">Fecha fin arresto</label>
+                <input type="date" id="sanArrestoFechaFin">
+              </div>
+              <div class="field narrow">
+                <label for="sanArrestoDias">Días de arresto</label>
+                <input type="number" id="sanArrestoDias" min="1" step="1" readonly>
+              </div>
             </div>
-            <div class="field narrow">
-              <label for="sanArrestoDias">Días de arresto</label>
-              <input type="number" id="sanArrestoDias" min="1" step="1" readonly>
-            </div>
+            <div class="hint error hidden" id="sanArrestoHint">Indica la fecha de inicio y fin del arresto (la fecha de fin debe ser igual o posterior a la de inicio).</div>
+
+            <div class="hint hidden" id="sanArrestoPendienteNote" style="margin-top:6px;">La fecha del arresto queda pendiente. Podrás indicarla más adelante desde la propia lista de Sanciones, en cuanto se sepa.</div>
           </div>
-          <div class="hint error hidden" id="sanArrestoHint" style="grid-column:1/-1;">Indica la fecha de inicio y fin del arresto (la fecha de fin debe ser igual o posterior a la de inicio).</div>
+
+          <div class="hidden" id="sanTrabajoWrap" style="grid-column:1/-1;">
+            <div class="field-row" style="margin-top:4px;">
+              <div class="field">
+                <label for="sanTrabajoFechaFin">Fecha límite para realizar el trabajo</label>
+                <input type="date" id="sanTrabajoFechaFin">
+              </div>
+            </div>
+            <div class="hint error hidden" id="sanTrabajoHint">Indica la fecha límite para realizar el trabajo.</div>
+            <div class="hint" style="margin-top:6px;">Una vez cumplida esa fecha, si el trabajo no se ha marcado como hecho desde el listado de Sanciones o desde Consultas, aparecerá un aviso de trabajo vencido.</div>
+          </div>
 
           <div class="field" style="grid-column:1/-1;">
             <label for="sanObservaciones">Observaciones (opcional)</label>
@@ -1198,9 +1273,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <option value="LEVE">Leves</option>
           <option value="GRAVE">Graves</option>
         </select>
-        <select id="sanAlertaFilter">
-          <option value="">Alerta: todas</option>
-          <option value="si">Solo con alerta</option>
+        <select id="sanAlertaTotalFilter">
+          <option value="">5+ en total: todos</option>
+          <option value="si">Solo con 5+ en total</option>
+          <option value="no">Solo sin 5+ en total</option>
+        </select>
+        <select id="sanAlertaFundamentoFilter">
+          <option value="">3+ mismo fundamento: todos</option>
+          <option value="si">Solo con 3+ mismo fundamento</option>
+          <option value="no">Solo sin 3+ mismo fundamento</option>
         </select>
       </div>
 
@@ -1210,7 +1291,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <thead>
               <tr>
                 <th>Exp.</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha</th><th>Tipo</th>
-                <th>Motivo</th><th>Medida correctora</th><th>Alerta</th><th></th>
+                <th>Motivo</th><th>Medida correctora</th><th>Alertas</th><th></th>
               </tr>
             </thead>
             <tbody id="sancionesTableBody"></tbody>
@@ -1226,6 +1307,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="banner-draft hidden" id="refDraftBanner">
         <span>Completando el refuerzo del expediente <strong id="refDraftExpediente"></strong> (traído desde Sanciones).</span>
         <button class="btn small ghost" id="refDraftCancelBtn" type="button">Cancelar / empezar en blanco</button>
+      </div>
+
+      <div class="banner-draft hidden" id="refEditBanner">
+        <span>Editando el refuerzo <strong id="refEditExpediente"></strong>. Al guardar se regenerará y descargará el documento actualizado.</span>
+        <button class="btn small ghost" id="refEditCancelBtn" type="button">Cancelar edición</button>
       </div>
 
       <div class="panel corner-accent">
@@ -1281,6 +1367,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           <div class="field">
             <label for="refDuracion">Duración (horas)</label>
             <input type="text" id="refDuracion" value="1" inputmode="decimal">
+          </div>
+
+          <div class="field hidden" id="refFindeWrap" style="grid-column:1/-1;">
+            <div class="hint" style="margin-bottom:6px;">El periodo incluye sábado y/o domingo: indica el horario específico para esos días (distinto del de entre semana).</div>
+            <div class="field-row">
+              <div class="field narrow">
+                <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
+                <input type="time" id="refHoraInicioFinde" value="10:00">
+              </div>
+              <div class="field narrow">
+                <label for="refDuracionFinde">Duración fin de semana (horas)</label>
+                <input type="text" id="refDuracionFinde" value="1" inputmode="decimal">
+              </div>
+            </div>
           </div>
 
           <div class="field" style="grid-column:1/-1;">
@@ -1416,6 +1516,72 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
     </div>
 
+    <!-- ---------- ACTIVIDADES PANEL ---------- -->
+    <div id="actividadesPanel" class="hidden">
+
+      <div class="panel corner-accent">
+        <h3>Actividades</h3>
+        <div class="panel-sub">Quién ha participado en cada ejercicio, marcha, tiro o examen del ciclo. Las actividades son propias de cada fase (FFMG / FFE).</div>
+
+        <div class="mode-toggle" id="actFaseToggle">
+          <button type="button" class="mode-btn" id="actFaseFFMGBtn" data-fase="FFMG">FFMG</button>
+          <button type="button" class="mode-btn active" id="actFaseFFEBtn" data-fase="FFE">FFE</button>
+        </div>
+
+        <div class="field-row" style="margin-top:14px;align-items:flex-end;">
+          <div class="field">
+            <label for="actNombreInput">Nueva actividad</label>
+            <input type="text" id="actNombreInput" placeholder="Ej. MARCHA 15KM" autocomplete="off">
+          </div>
+          <div class="field narrow">
+            <label for="actFechaInput">Fecha (opcional)</label>
+            <input type="date" id="actFechaInput">
+          </div>
+          <div class="field narrow" style="flex:0 0 auto;">
+            <button class="btn primary" id="actAddBtn" type="button">Añadir actividad</button>
+          </div>
+        </div>
+        <div class="hint error hidden" id="actFormHint">Escribe un nombre para la actividad.</div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="actividadesTable">
+            <thead>
+              <tr>
+                <th>#</th><th>Actividad</th><th>Fecha</th><th>Participantes</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="actividadesTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="actividadesEmptyState">Todavía no hay actividades en esta fase.</div>
+      </div>
+    </div>
+
+    <!-- ---------- PARTICIPANTES DE UNA ACTIVIDAD (modal) ---------- -->
+    <div id="actParticipantesModal" class="modal-overlay hidden">
+      <div class="modal-card" style="max-width:640px;">
+        <div class="modal-header">
+          <h3 id="actParticipantesTitle">Participantes</h3>
+          <button type="button" class="modal-close" id="actParticipantesCloseBtn">&times;</button>
+        </div>
+        <div>
+          <input type="search" id="actParticipantesSearch" placeholder="Buscar alumno por número, apellidos o nombre...">
+          <label class="multi-list-item" style="margin-top:10px;font-weight:650;">
+            <input type="checkbox" id="actSeleccionarTodos">
+            <span>Seleccionar todos</span>
+          </label>
+          <div class="multi-list" id="actParticipantesList" style="margin-top:6px;"></div>
+          <div class="form-actions" style="margin-top:14px;">
+            <span id="actParticipantesCount" class="form-msg"></span>
+            <button class="btn primary" id="actParticipantesGuardarBtn" type="button" style="margin-left:auto;">Guardar</button>
+            <button class="btn ghost" id="actParticipantesCancelarBtn" type="button">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ---------- CONSULTAS PANEL ---------- -->
     <div id="consultasPanel" class="hidden">
 
@@ -1429,7 +1595,53 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <select id="consTipoSelect">
               <option value="">Seleccionar…</option>
               <option value="estado_periodo">Personal rebajado, en refuerzo o en arresto en un periodo</option>
+              <option value="actividades">Personal que ha participado en una actividad</option>
+              <option value="arresto_pendiente">Sanciones de arresto con fecha pendiente</option>
+              <option value="trabajos">Sanciones de trabajo: hechos, pendientes y vencidos</option>
             </select>
+          </div>
+        </div>
+
+        <div class="hidden" id="consActividadFaseWrap" style="margin-top:4px;">
+          <div class="mode-toggle" id="consActModoToggle">
+            <button type="button" class="mode-btn active" id="consActModoActividadBtn" data-modo="actividad">Por actividad</button>
+            <button type="button" class="mode-btn" id="consActModoAlumnoBtn" data-modo="alumno">Por alumno</button>
+          </div>
+
+          <div class="field-row" style="margin-top:10px;">
+            <div class="field">
+              <label for="consActFaseSelect">Fase</label>
+              <select id="consActFaseSelect">
+                <option value="">Seleccionar…</option>
+                <option value="FFMG">FFMG</option>
+                <option value="FFE">FFE</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="consActPorActividadWrap">
+            <div class="field-row">
+              <div class="field">
+                <label for="consActActividadSelect">Actividad</label>
+                <select id="consActActividadSelect" disabled>
+                  <option value="">Elige primero la fase…</option>
+                </select>
+              </div>
+            </div>
+            <label class="multi-list-item" style="margin-top:4px;">
+              <input type="checkbox" id="consActNoParticiparonCheck">
+              <span>Mostrar quienes NO han participado (suele ser una lista más corta)</span>
+            </label>
+          </div>
+
+          <div class="hidden" id="consActPorAlumnoWrap">
+            <div class="field" style="grid-column:1/-1;">
+              <label for="consActAlumnoInput">Alumno</label>
+              <input type="text" id="consActAlumnoInput" list="consActAlumnoList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+              <datalist id="consActAlumnoList"></datalist>
+              <div class="cadet-preview" id="consActAlumnoPreview"></div>
+              <div class="hint error hidden" id="consActAlumnoHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+            </div>
           </div>
         </div>
 
@@ -1444,6 +1656,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           </div>
         </div>
         <div class="hint error hidden" id="consFechaHint">Indica la fecha de inicio y fin de la consulta (la fecha de fin debe ser igual o posterior a la de inicio).</div>
+
+        <div class="hidden" id="consArrestoPendienteWrap" style="margin-top:4px;">
+          <label class="multi-list-item">
+            <input type="checkbox" id="consArrestoAgruparCheck">
+            <span>Agrupar por expediente</span>
+          </label>
+        </div>
+
+        <div class="hidden" id="consTrabajosWrap" style="margin-top:4px;">
+          <label class="multi-list-item">
+            <input type="checkbox" id="consTrabajosSoloVencidosCheck">
+            <span>Mostrar solo los vencidos (fecha límite cumplida y todavía sin marcar como hechos)</span>
+          </label>
+        </div>
 
         <div class="form-actions hidden" id="consActions">
           <button class="btn primary" id="consBuscarBtn" type="button">Consultar</button>
@@ -1881,7 +2107,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var MEDIDA_OPTIONS = ["Amonestación verbal", "Trabajo no superior a 5 horas", "Refuerzo", "Arresto", "Sin medida"];
 
   // Umbrales de alerta por reincidencia (hoja DINAMICA_SANCION original).
-  var ALERT_SAME_MOTIVO_THRESHOLD = 3;
+  var ALERT_SAME_FUNDAMENTO_THRESHOLD = 3;
   var ALERT_TOTAL_THRESHOLD = 5;
 
   var EXPEDIENTE_COUNTER_KEY = "seccion3_expediente_counter_v1";
@@ -1953,11 +2179,119 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function formatMedidaCorrectora(r){
     var base = r.medidaCorrectora || "—";
-    if (r.medidaCorrectora === "Arresto" && r.arrestoFechaIni && r.arrestoFechaFin){
-      base += " (" + formatDateDisplay(r.arrestoFechaIni) + " a " + formatDateDisplay(r.arrestoFechaFin) +
-        (r.arrestoDias ? ", " + r.arrestoDias + (r.arrestoDias === 1 ? " día" : " días") : "") + ")";
+    if (r.medidaCorrectora === "Arresto"){
+      if (r.arrestoFechaIni && r.arrestoFechaFin){
+        base += " (" + formatDateDisplay(r.arrestoFechaIni) + " a " + formatDateDisplay(r.arrestoFechaFin) +
+          (r.arrestoDias ? ", " + r.arrestoDias + (r.arrestoDias === 1 ? " día" : " días") : "") + ")";
+      } else if (r.arrestoPendiente){
+        base += " (fecha pendiente)";
+      }
+    }
+    if (r.medidaCorrectora === "Trabajo no superior a 5 horas" && r.trabajoFechaFin){
+      base += " (hasta " + formatDateDisplay(r.trabajoFechaFin) + ")";
     }
     return base;
+  }
+
+  // ---------------- trabajos (medida correctora "Trabajo no superior a 5 horas") ----------------
+  // Un trabajo asignado como medida correctora lleva una fecha límite de
+  // realización y un estado "hecho" que se marca a mano (con un clic), tanto
+  // desde el propio listado de Sanciones como desde el informe de Consultas.
+  // Si se cumple la fecha límite y sigue sin marcarse como hecho, se
+  // considera "vencido" y se avisa de ello.
+  function todayIso(){
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function esTrabajo(r){
+    return r.medidaCorrectora === "Trabajo no superior a 5 horas" && !!r.trabajoFechaFin;
+  }
+  function trabajoVencido(r){
+    return esTrabajo(r) && !r.trabajoHecho && r.trabajoFechaFin < todayIso();
+  }
+  // Marca/desmarca un trabajo como hecho en el servidor. Se usa tanto desde
+  // el listado de Sanciones como desde Consultas, por eso devuelve la
+  // promesa: cada llamador refresca la vista en la que está.
+  function toggleTrabajoHecho(sancionId, hecho){
+    return fetch("/api/sanciones/" + encodeURIComponent(sancionId) + "/trabajo-hecho", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hecho: hecho })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (res.ok && res.data.sancion){
+          var r = sanciones.filter(function(x){ return x.id === sancionId; })[0];
+          if (r){
+            r.trabajoHecho = res.data.sancion.trabajoHecho;
+            r.trabajoHechoFecha = res.data.sancion.trabajoHechoFecha;
+          }
+        } else {
+          alert((res.data && res.data.error) || "No se ha podido actualizar el trabajo.");
+        }
+      }).catch(function(){
+        alert("Error de conexión con el servidor.");
+      });
+  }
+
+  // ---------------- aviso de fechas coincidentes (arresto / refuerzo) ----------------
+  // Antes de guardar un arresto con fecha ya conocida o un refuerzo,
+  // comprueba si ese mismo alumno ya tiene otro arresto/refuerzo que se
+  // solape en fechas, y si es así pide confirmación explícita.
+  function rangosFechaSeSolapan(iniA, finA, iniB, finB){
+    if (!iniA || !finA || !iniB || !finB) return false;
+    return iniA <= finB && iniB <= finA;
+  }
+
+  function buscarFechasCoincidentes(numeros, ini, fin, opts){
+    opts = opts || {};
+    var out = [];
+    if (!ini || !fin || !numeros || !numeros.length) return out;
+
+    refuerzos.forEach(function(r){
+      if (opts.excludeRefuerzoId && r.id === opts.excludeRefuerzoId) return;
+      if (!rangosFechaSeSolapan(ini, fin, r.fechaInicio, r.fechaFin)) return;
+      (r.alumnos || []).forEach(function(al){
+        if (numeros.indexOf(al.numero) === -1) return;
+        out.push({
+          tipo: "refuerzo",
+          nombre: [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + al.nombre + " (Nº " + al.numero + ")",
+          ini: r.fechaInicio,
+          fin: r.fechaFin,
+          ref: r.expediente
+        });
+      });
+    });
+
+    sanciones.forEach(function(r){
+      if (opts.excludeSancionId && r.id === opts.excludeSancionId) return;
+      if (r.medidaCorrectora !== "Arresto" || r.arrestoPendiente) return;
+      if (!rangosFechaSeSolapan(ini, fin, r.arrestoFechaIni, r.arrestoFechaFin)) return;
+      (r.alumnos || []).forEach(function(al){
+        if (numeros.indexOf(al.numero) === -1) return;
+        out.push({
+          tipo: "arresto",
+          nombre: [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + al.nombre + " (Nº " + al.numero + ")",
+          ini: r.arrestoFechaIni,
+          fin: r.arrestoFechaFin,
+          ref: r.expediente
+        });
+      });
+    });
+
+    return out;
+  }
+
+  function confirmarFechaSinCoincidencia(numeros, ini, fin, opts){
+    var coincidencias = buscarFechasCoincidentes(numeros, ini, fin, opts);
+    if (!coincidencias.length) return true;
+    var detalle = coincidencias.map(function(c){
+      var tipoTxt = c.tipo === "refuerzo" ? "un refuerzo (Nº " + c.ref + ")" : "un arresto (expediente Nº " + c.ref + ")";
+      return "· " + c.nombre + " ya tiene " + tipoTxt + " del " + formatDateDisplay(c.ini) + " al " + formatDateDisplay(c.fin);
+    }).join("\n");
+    return confirm(
+      "Las fechas indicadas coinciden con las de un registro ya existente:\n\n" + detalle +
+      "\n\nPulsa \"Aceptar\" para mantener igualmente estas fechas, o \"Cancelar\" para volver a elegir otra fecha."
+    );
   }
 
   // ---------------- state ----------------
@@ -1972,8 +2306,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var rebajes = [];  // array of saved rebaje records
   var sanciones = []; // array of saved sanción records
   var refuerzos = []; // array of saved refuerzo records
+  var actividades = []; // array of saved actividad records (Actividades: FFMG/FFE)
   var sanMultiSelected = []; // alumnos seleccionados en modo múltiple (sanciones)
   var refuerzoDraft = null; // borrador de refuerzo generado desde una sanción, pendiente de guardar
+  var editingRefuerzoId = null; // id del refuerzo que se está corrigiendo (null = alta nueva)
 
   // Compañía/Sección detectadas a partir de los números de protocolo de la tabla
   // cargada (1º dígito = compañía, 2º dígito = sección). Si no hay datos válidos,
@@ -2019,12 +2355,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var tabBtnRebajes = document.getElementById("tabBtnRebajes");
   var tabBtnSanciones = document.getElementById("tabBtnSanciones");
   var tabBtnRefuerzos = document.getElementById("tabBtnRefuerzos");
+  var tabBtnActividades = document.getElementById("tabBtnActividades");
   var tabBtnConsultas = document.getElementById("tabBtnConsultas");
   var tabBtnUsuarios = document.getElementById("tabBtnUsuarios");
   var rosterPanel = document.getElementById("rosterPanel");
   var rebajesPanel = document.getElementById("rebajesPanel");
   var sancionesPanel = document.getElementById("sancionesPanel");
   var refuerzosPanel = document.getElementById("refuerzosPanel");
+  var actividadesPanel = document.getElementById("actividadesPanel");
   var consultasPanel = document.getElementById("consultasPanel");
   var usuariosPanel = document.getElementById("usuariosPanel");
 
@@ -2297,6 +2635,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     });
   }
 
+  function fetchActividades(){
+    return fetch("/api/actividades").then(function(r){ return r.json(); }).then(function(data){
+      actividades = data.actividades || [];
+    });
+  }
+
   // Nota: la foto y los adjuntos de la ficha (uno a uno) SÍ se guardan ya en
   // el servidor (ver fichaSaveBtn y fichaAttachInput más abajo, que llaman a
   // sus propias rutas). Lo que sigue deshabilitado (botón oculto) es la
@@ -2363,12 +2707,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     tabBtnRebajes.classList.toggle("active", tab === "rebajes");
     tabBtnSanciones.classList.toggle("active", tab === "sanciones");
     tabBtnRefuerzos.classList.toggle("active", tab === "refuerzos");
+    tabBtnActividades.classList.toggle("active", tab === "actividades");
     tabBtnConsultas.classList.toggle("active", tab === "consultas");
     tabBtnUsuarios.classList.toggle("active", tab === "usuarios");
     rosterPanel.classList.toggle("hidden", tab !== "roster");
     rebajesPanel.classList.toggle("hidden", tab !== "rebajes");
     sancionesPanel.classList.toggle("hidden", tab !== "sanciones");
     refuerzosPanel.classList.toggle("hidden", tab !== "refuerzos");
+    actividadesPanel.classList.toggle("hidden", tab !== "actividades");
     consultasPanel.classList.toggle("hidden", tab !== "consultas");
     usuariosPanel.classList.toggle("hidden", tab !== "usuarios");
   }
@@ -2380,6 +2726,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   tabBtnRebajes.addEventListener("click", function(){ switchTab("rebajes"); fetchRebajes().then(renderRebajesList); });
   tabBtnSanciones.addEventListener("click", function(){ switchTab("sanciones"); fetchSanciones().then(renderSancionesList); });
   tabBtnRefuerzos.addEventListener("click", function(){ switchTab("refuerzos"); fetchRefuerzosServer().then(renderRefuerzosList); });
+  tabBtnActividades.addEventListener("click", function(){ switchTab("actividades"); fetchActividades().then(renderActividadesTab); });
   tabBtnConsultas.addEventListener("click", function(){ switchTab("consultas"); });
   tabBtnUsuarios.addEventListener("click", function(){ switchTab("usuarios"); renderUsuarios(); });
 
@@ -3624,7 +3971,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     html += '</div>';
 
     if (info && info.hasAlert){
-      html += '<div class="historial-section"><span class="status-pill alerta">Alerta por reincidencia (3 o más sanciones por el mismo motivo)</span></div>';
+      var histReasons = [];
+      if (info.totalAlert) histReasons.push(info.total + " sanciones en total");
+      if (info.fundamentoAlert) histReasons.push(info.maxFundamento + " con el mismo fundamento legal");
+      html += '<div class="historial-section"><span class="status-pill alerta">Alerta por reincidencia (' + escapeHtml(histReasons.join(" · ")) + ')</span></div>';
     }
 
     historialBody.innerHTML = html;
@@ -3971,12 +4321,26 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var sanFundamento = document.getElementById("sanFundamento");
   var sanMotivoInput = document.getElementById("sanMotivoInput");
   var sanMotivoList = document.getElementById("sanMotivoList");
+  var sanFaseInput = document.getElementById("sanFaseInput");
+  var sanVincularExpedienteCheck = document.getElementById("sanVincularExpedienteCheck");
+  var sanVincularExpedienteWrap = document.getElementById("sanVincularExpedienteWrap");
+  var sanExpedienteInput = document.getElementById("sanExpedienteInput");
+  var sanExpedienteList = document.getElementById("sanExpedienteList");
+  var sanExpedientePreview = document.getElementById("sanExpedientePreview");
+  var sanExpedienteHint = document.getElementById("sanExpedienteHint");
   var sanMedidaInput = document.getElementById("sanMedidaInput");
+  var sanArrestoWrap = document.getElementById("sanArrestoWrap");
+  var sanArrestoModoFechaBtn = document.getElementById("sanArrestoModoFechaBtn");
+  var sanArrestoModoPendienteBtn = document.getElementById("sanArrestoModoPendienteBtn");
   var sanArrestoFields = document.getElementById("sanArrestoFields");
   var sanArrestoFechaIni = document.getElementById("sanArrestoFechaIni");
   var sanArrestoFechaFin = document.getElementById("sanArrestoFechaFin");
   var sanArrestoDias = document.getElementById("sanArrestoDias");
   var sanArrestoHint = document.getElementById("sanArrestoHint");
+  var sanArrestoPendienteNote = document.getElementById("sanArrestoPendienteNote");
+  var sanTrabajoWrap = document.getElementById("sanTrabajoWrap");
+  var sanTrabajoFechaFin = document.getElementById("sanTrabajoFechaFin");
+  var sanTrabajoHint = document.getElementById("sanTrabajoHint");
   var sanObservaciones = document.getElementById("sanObservaciones");
   var sanFormHint = document.getElementById("sanFormHint");
   var sanSaveBtn = document.getElementById("sanSaveBtn");
@@ -3987,12 +4351,91 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var sanSearchInput = document.getElementById("sanSearchInput");
   var sanPelotonFilter = document.getElementById("sanPelotonFilter");
   var sanTipoFilter = document.getElementById("sanTipoFilter");
-  var sanAlertaFilter = document.getElementById("sanAlertaFilter");
+  var sanAlertaTotalFilter = document.getElementById("sanAlertaTotalFilter");
+  var sanAlertaFundamentoFilter = document.getElementById("sanAlertaFundamentoFilter");
   var sancionesTableBody = document.getElementById("sancionesTableBody");
   var sancionesEmptyState = document.getElementById("sancionesEmptyState");
 
   var sanSelectedCadete = null;
   var sanMode = "individual"; // "individual" | "multiple"
+  var sanArrestoModo = "fecha"; // "fecha" | "pendiente"
+  var sanExpedienteSeleccionado = null;
+
+  function setSanArrestoModo(modo){
+    sanArrestoModo = modo;
+    sanArrestoModoFechaBtn.classList.toggle("active", modo === "fecha");
+    sanArrestoModoPendienteBtn.classList.toggle("active", modo === "pendiente");
+    sanArrestoFields.classList.toggle("hidden", modo !== "fecha");
+    sanArrestoPendienteNote.classList.toggle("hidden", modo !== "pendiente");
+    if (modo === "pendiente") sanArrestoHint.classList.add("hidden");
+  }
+  sanArrestoModoFechaBtn.addEventListener("click", function(){ setSanArrestoModo("fecha"); });
+  sanArrestoModoPendienteBtn.addEventListener("click", function(){ setSanArrestoModo("pendiente"); });
+
+  // Lista de expedientes ya existentes para poder vincular una sanción nueva
+  // a uno de ellos en vez de abrir uno nuevo (una falta distinta, pero bajo
+  // el mismo número de expediente). Un expediente puede tener varios
+  // alumnos, así que se resumen todos en la etiqueta.
+  function buildSanExpedienteOptions(){
+    var vistos = {};
+    var items = [];
+    sanciones.forEach(function(r){
+      if (vistos[r.expediente]) return;
+      vistos[r.expediente] = true;
+      var alumnosResumen = (r.alumnos || []).map(function(al){
+        return [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + al.nombre + " (Nº " + al.numero + ")";
+      }).join(" / ");
+      items.push({
+        expediente: r.expediente,
+        label: r.expediente + " — " + alumnosResumen + " · " + truncate(r.motivo || "", 40) + " (" + formatDateDisplay(r.fecha) + ")"
+      });
+    });
+    items.sort(function(a, b){ return (a.expediente || 0) - (b.expediente || 0); });
+    sanExpedienteList.innerHTML = items.map(function(item){ return '<option value="' + escapeHtml(item.label) + '">'; }).join("");
+  }
+
+  function findSancionByExpediente(expediente){
+    var found = sanciones.filter(function(r){ return r.expediente === expediente; });
+    return found.length ? found[0] : null;
+  }
+
+  sanVincularExpedienteCheck.addEventListener("change", function(){
+    var activo = sanVincularExpedienteCheck.checked;
+    sanVincularExpedienteWrap.classList.toggle("hidden", !activo);
+    if (activo){
+      buildSanExpedienteOptions();
+    } else {
+      sanExpedienteInput.value = "";
+      sanExpedienteSeleccionado = null;
+      sanExpedientePreview.classList.remove("show");
+      sanExpedienteHint.classList.add("hidden");
+    }
+  });
+
+  sanExpedienteInput.addEventListener("input", function(){
+    var val = sanExpedienteInput.value.trim();
+    var m = val.match(/^(\S+)\s*—/);
+    var seleccionadoDeLista = !!m; // el valor completo (con alumnos) solo aparece así cuando se elige de la lista, no al teclear un número a mano
+    var numStr = m ? m[1] : (val.match(/^(\d+)$/) ? val : null);
+    var expNum = numStr ? parseInt(numStr, 10) : NaN;
+    var record = !isNaN(expNum) ? findSancionByExpediente(expNum) : null;
+    if (record){
+      sanExpedienteSeleccionado = record.expediente;
+      var alumnosResumen = (record.alumnos || []).map(function(al){
+        return [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + al.nombre;
+      }).join(" / ");
+      sanExpedientePreview.innerHTML = '<span class="num">Nº ' + escapeHtml(String(record.expediente)) + '</span><span>' + escapeHtml(alumnosResumen) + ' · ' + escapeHtml(truncate(record.motivo || "", 60)) + '</span>';
+      sanExpedientePreview.classList.add("show");
+      sanExpedienteHint.classList.add("hidden");
+      if (seleccionadoDeLista && val !== String(record.expediente)){
+        sanExpedienteInput.value = String(record.expediente);
+      }
+    } else {
+      sanExpedienteSeleccionado = null;
+      sanExpedientePreview.classList.remove("show");
+      sanExpedienteHint.classList.toggle("hidden", val === "");
+    }
+  });
 
   function truncate(s, n){
     s = String(s || "");
@@ -4012,34 +4455,43 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }).join("");
   }
 
-  function motivoNorm(m){ return stripAccents(m); }
+  function fundamentoNorm(f){ return stripAccents(f); }
 
   // Devuelve, para cada número de alumno, el total de sanciones y el
-  // recuento por motivo — igual que la hoja DINAMICA_SANCION original.
+  // recuento por fundamento legal — igual que la hoja DINAMICA_SANCION
+  // original, pero agrupando por el fundamento del catálogo (más preciso
+  // que el texto libre del motivo, que casi nunca se repite igual).
   // Cada expediente puede afectar a varios alumnos (alumnos[]).
   function computeSanctionAlerts(){
     var byNumero = {};
     sanciones.forEach(function(r){
       (r.alumnos || []).forEach(function(al){
-        if (!byNumero[al.numero]) byNumero[al.numero] = { total: 0, motivos: {} };
+        if (!byNumero[al.numero]) byNumero[al.numero] = { total: 0, fundamentos: {} };
         byNumero[al.numero].total++;
-        var mn = motivoNorm(r.motivo);
-        byNumero[al.numero].motivos[mn] = (byNumero[al.numero].motivos[mn] || 0) + 1;
+        var fn = fundamentoNorm(r.fundamento);
+        if (!byNumero[al.numero].fundamentos[fn]) byNumero[al.numero].fundamentos[fn] = { count: 0, texto: r.fundamento || "" };
+        byNumero[al.numero].fundamentos[fn].count++;
       });
     });
     var alerts = {};
     Object.keys(byNumero).forEach(function(numero){
       var info = byNumero[numero];
-      var maxMotivo = 0;
-      Object.keys(info.motivos).forEach(function(mn){ maxMotivo = Math.max(maxMotivo, info.motivos[mn]); });
+      var maxFundamento = 0, maxFundamentoTexto = "";
+      Object.keys(info.fundamentos).forEach(function(fn){
+        if (info.fundamentos[fn].count > maxFundamento){
+          maxFundamento = info.fundamentos[fn].count;
+          maxFundamentoTexto = info.fundamentos[fn].texto;
+        }
+      });
       var totalAlert = info.total >= ALERT_TOTAL_THRESHOLD;
-      var motivoAlert = maxMotivo >= ALERT_SAME_MOTIVO_THRESHOLD;
+      var fundamentoAlert = maxFundamento >= ALERT_SAME_FUNDAMENTO_THRESHOLD;
       alerts[numero] = {
         total: info.total,
-        maxMotivo: maxMotivo,
-        hasAlert: totalAlert || motivoAlert,
+        maxFundamento: maxFundamento,
+        maxFundamentoTexto: maxFundamentoTexto,
+        hasAlert: totalAlert || fundamentoAlert,
         totalAlert: totalAlert,
-        motivoAlert: motivoAlert
+        fundamentoAlert: fundamentoAlert
       };
     });
     return alerts;
@@ -4131,7 +4583,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       if (info && info.hasAlert){
         var reasons = [];
         if (info.totalAlert) reasons.push(info.total + " sanciones en total (umbral " + ALERT_TOTAL_THRESHOLD + ")");
-        if (info.motivoAlert) reasons.push(info.maxMotivo + " veces el mismo motivo (umbral " + ALERT_SAME_MOTIVO_THRESHOLD + ")");
+        if (info.fundamentoAlert) reasons.push(info.maxFundamento + " veces el mismo fundamento legal (umbral " + ALERT_SAME_FUNDAMENTO_THRESHOLD + ")");
         sanAlertHint.textContent = "Este alumno ya tiene antecedentes: " + reasons.join(" · ") + ".";
         sanAlertHint.classList.remove("hidden");
       } else {
@@ -4188,8 +4640,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   sanMedidaInput.addEventListener("change", function(){
     sanSaveRefuerzoBtn.classList.toggle("hidden", sanMedidaInput.value !== "Refuerzo");
-    sanArrestoFields.classList.toggle("hidden", sanMedidaInput.value !== "Arresto");
+    sanArrestoWrap.classList.toggle("hidden", sanMedidaInput.value !== "Arresto");
     if (sanMedidaInput.value !== "Arresto") sanArrestoHint.classList.add("hidden");
+    sanTrabajoWrap.classList.toggle("hidden", sanMedidaInput.value !== "Trabajo no superior a 5 horas");
+    if (sanMedidaInput.value !== "Trabajo no superior a 5 horas") sanTrabajoHint.classList.add("hidden");
   });
 
   function clearSanForm(){
@@ -4213,6 +4667,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     sanTipoFalta.value = "";
     sanFundamento.disabled = true;
     sanFundamento.innerHTML = '<option value="">Elige primero el tipo de falta…</option>';
+    sanFaseInput.value = "";
+    sanVincularExpedienteCheck.checked = false;
+    sanVincularExpedienteWrap.classList.add("hidden");
+    sanExpedienteInput.value = "";
+    sanExpedienteSeleccionado = null;
+    sanExpedientePreview.classList.remove("show");
+    sanExpedienteHint.classList.add("hidden");
     sanEmpleo.value = "";
     sanProfNombreInput.value = "";
     sanProfApellidosInput.value = "";
@@ -4220,11 +4681,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     sanMotivoInput.value = "";
     sanMedidaInput.value = "";
     sanSaveRefuerzoBtn.classList.add("hidden");
-    sanArrestoFields.classList.add("hidden");
+    sanArrestoWrap.classList.add("hidden");
+    setSanArrestoModo("fecha");
     sanArrestoFechaIni.value = "";
     sanArrestoFechaFin.value = "";
     sanArrestoDias.value = "";
     sanArrestoHint.classList.add("hidden");
+    sanTrabajoWrap.classList.add("hidden");
+    sanTrabajoFechaFin.value = "";
+    sanTrabajoHint.classList.add("hidden");
     sanObservaciones.value = "";
     sanFormHint.classList.add("hidden");
   }
@@ -4269,7 +4734,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if (!sanFundamento.value) ok = false;
     if (!sanMotivoInput.value.trim()) ok = false;
 
-    if (sanMedidaInput.value === "Arresto"){
+    if (sanMedidaInput.value === "Arresto" && sanArrestoModo === "fecha"){
       var arrestoOk = !!(sanArrestoFechaIni.value && sanArrestoFechaFin.value && sanArrestoFechaFin.value >= sanArrestoFechaIni.value);
       sanArrestoHint.classList.toggle("hidden", arrestoOk);
       if (!arrestoOk) ok = false;
@@ -4277,12 +4742,41 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       sanArrestoHint.classList.add("hidden");
     }
 
+    if (sanMedidaInput.value === "Trabajo no superior a 5 horas"){
+      var trabajoOk = !!sanTrabajoFechaFin.value;
+      sanTrabajoHint.classList.toggle("hidden", trabajoOk);
+      if (!trabajoOk) ok = false;
+    } else {
+      sanTrabajoHint.classList.add("hidden");
+    }
+
+    if (sanVincularExpedienteCheck.checked){
+      var expedienteOk = sanExpedienteSeleccionado != null;
+      sanExpedienteHint.classList.toggle("hidden", expedienteOk);
+      if (!expedienteOk) ok = false;
+    } else {
+      sanExpedienteHint.classList.add("hidden");
+    }
+
     sanFormHint.classList.toggle("hidden", ok);
     return ok ? alumnos : null;
   }
 
+  // Antes de guardar un arresto con fecha ya conocida, avisa si algún alumno
+  // ya tiene otro arresto/refuerzo que se solape en fechas.
+  function sanArrestoCoincidenciaOk(alumnos){
+    if (sanMedidaInput.value === "Arresto" && sanArrestoModo === "fecha" && sanArrestoFechaIni.value && sanArrestoFechaFin.value){
+      var k = state.keys;
+      var numeros = alumnos.map(function(row){ return getVal(row, k.numero); });
+      return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, {});
+    }
+    return true;
+  }
+
   function buildSanPayload(alumnos){
     var k = state.keys;
+    var esArresto = sanMedidaInput.value === "Arresto";
+    var vincular = sanVincularExpedienteCheck.checked && sanExpedienteSeleccionado != null;
     return {
       alumnos: alumnos.map(function(row){ return getVal(row, k.numero); }),
       fecha: sanFecha.value,
@@ -4290,14 +4784,19 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       hora: sanHora.value,
       tipoFalta: sanTipoFalta.value,
       fundamento: sanFundamento.value,
+      fase: sanFaseInput.value,
       profEmpleo: sanEmpleo.value,
       profNombre: sanProfNombreInput.value.trim(),
       profApellidos: sanProfApellidosInput.value.trim(),
       profDni: sanProfDniInput.value.trim(),
       motivo: sanMotivoInput.value.trim(),
       medidaCorrectora: sanMedidaInput.value.trim(),
-      arrestoFechaIni: sanMedidaInput.value === "Arresto" ? sanArrestoFechaIni.value : "",
-      arrestoFechaFin: sanMedidaInput.value === "Arresto" ? sanArrestoFechaFin.value : "",
+      arrestoPendiente: esArresto && sanArrestoModo === "pendiente",
+      arrestoFechaIni: esArresto && sanArrestoModo === "fecha" ? sanArrestoFechaIni.value : "",
+      arrestoFechaFin: esArresto && sanArrestoModo === "fecha" ? sanArrestoFechaFin.value : "",
+      trabajoFechaFin: sanMedidaInput.value === "Trabajo no superior a 5 horas" ? sanTrabajoFechaFin.value : "",
+      vincularExpediente: vincular,
+      expediente: vincular ? sanExpedienteSeleccionado : undefined,
       observaciones: sanObservaciones.value.trim()
     };
   }
@@ -4317,6 +4816,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       sanFormMsg.className = "form-msg error";
       return;
     }
+    if (!sanArrestoCoincidenciaOk(alumnos)) return;
     pedirFirmasPrevias(alumnos, function(firmas){
     sanSaveBtn.disabled = true;
     crearSancion(alumnos, firmas).then(function(res){
@@ -4348,6 +4848,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       sanFormMsg.className = "form-msg error";
       return;
     }
+    if (!sanArrestoCoincidenciaOk(alumnos)) return;
     pedirFirmasPrevias(alumnos, function(firmas){
     sanSaveRefuerzoBtn.disabled = true;
     crearSancion(alumnos, firmas).then(function(res){
@@ -4689,7 +5190,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     var q = stripAccents(sanSearchInput.value);
     var pelotonVal = sanPelotonFilter.value;
     var tipoVal = sanTipoFilter.value;
-    var soloAlerta = sanAlertaFilter.value === "si";
+    var totalFilterVal = sanAlertaTotalFilter.value; // "" | "si" | "no"
+    var fundamentoFilterVal = sanAlertaFundamentoFilter.value; // "" | "si" | "no"
 
     var rows = [];
     sanciones.forEach(function(r){
@@ -4698,9 +5200,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
     var filtered = rows.filter(function(item){
       var r = item.record, al = item.alumno;
+      var info = alerts[al.numero];
       if (pelotonVal && al.peloton !== pelotonVal) return false;
       if (tipoVal && r.tipoFalta !== tipoVal) return false;
-      if (soloAlerta && !(alerts[al.numero] && alerts[al.numero].hasAlert)) return false;
+      if (totalFilterVal === "si" && !(info && info.totalAlert)) return false;
+      if (totalFilterVal === "no" && info && info.totalAlert) return false;
+      if (fundamentoFilterVal === "si" && !(info && info.fundamentoAlert)) return false;
+      if (fundamentoFilterVal === "no" && info && info.fundamentoAlert) return false;
       if (!q) return true;
       var hay = [al.numero, al.ape1, al.ape2, al.nombre, r.motivo, "exp " + r.expediente].join(" ");
       return stripAccents(hay).indexOf(q) !== -1;
@@ -4717,9 +5223,28 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     sancionesTableBody.innerHTML = filtered.map(function(item){
       var r = item.record, al = item.alumno;
       var info = alerts[al.numero];
-      var alertaCell = info && info.hasAlert
-        ? '<span class="status-pill alerta">Alerta</span>'
-        : '<span class="status-pill noalerta">—</span>';
+      var alertBadges = '<div class="alert-badges">' +
+        (info && info.totalAlert ? '<span class="status-pill alerta" title="' + info.total + ' sanciones en total">5+ total</span>' : "") +
+        (info && info.fundamentoAlert ? '<span class="status-pill alerta" title="' + info.maxFundamento + ' veces el mismo fundamento legal">3+ fundamento</span>' : "") +
+        ((!info || !info.hasAlert) ? '<span class="status-pill noalerta">—</span>' : "") +
+        '</div>';
+
+      var medidaCell = escapeHtml(formatMedidaCorrectora(r));
+      if (r.medidaCorrectora === "Arresto" && r.arrestoPendiente){
+        medidaCell = '<span class="status-pill programado">Pendiente</span>' +
+          '<div class="arresto-pendiente-form" data-sanid="' + r.id + '">' +
+            '<input type="date" class="arr-fecha-ini" title="Fecha inicio arresto">' +
+            '<input type="date" class="arr-fecha-fin" title="Fecha fin arresto">' +
+            '<button type="button" class="btn small ghost arr-guardar-btn">Fijar fecha</button>' +
+          '</div>';
+      }
+      if (esTrabajo(r)){
+        medidaCell += '<div class="arresto-pendiente-form" data-trabajoid="' + r.id + '">' +
+          '<label class="multi-list-item" style="margin:0;"><input type="checkbox" class="trab-hecho-check" data-trabajoid="' + r.id + '" ' + (r.trabajoHecho ? "checked" : "") + '><span>Hecho</span></label>' +
+          (trabajoVencido(r) ? '<span class="status-pill alerta" title="La fecha límite ya pasó y no se ha marcado como hecho">Vencido</span>' : "") +
+        '</div>';
+      }
+
       return "<tr>" +
         '<td><span class="expediente-tag">Nº ' + escapeHtml(String(r.expediente)) + '</span></td>' +
         "<td>" + escapeHtml(al.numero) + "</td>" +
@@ -4728,8 +5253,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         "<td>" + formatDateDisplay(r.fecha) + "</td>" +
         '<td><span class="status-pill ' + r.tipoFalta.toLowerCase() + '">' + (r.tipoFalta === "LEVE" ? "Leve" : "Grave") + "</span></td>" +
         '<td class="cat-cell">' + escapeHtml(r.motivo) + "</td>" +
-        '<td class="cat-cell">' + escapeHtml(formatMedidaCorrectora(r)) + "</td>" +
-        "<td>" + alertaCell + "</td>" +
+        '<td class="cat-cell">' + medidaCell + "</td>" +
+        "<td>" + alertBadges + "</td>" +
         '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
           (r.medidaCorrectora === "Amonestación verbal"
             ? '<button class="btn small ghost" data-amonref="' + r.id + '" data-amonnum="' + escapeHtml(al.numero) + '">' +
@@ -4762,12 +5287,59 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     sancionesTableBody.querySelectorAll("[data-delsan]").forEach(function(btn){
       btn.addEventListener("click", function(){ deleteSancion(btn.getAttribute("data-delsan")); });
     });
+    sancionesTableBody.querySelectorAll(".arresto-pendiente-form").forEach(function(form){
+      var btn = form.querySelector(".arr-guardar-btn");
+      if (!btn) return; // este mini-formulario es el de "trabajo hecho", no el de fijar fecha de arresto
+      btn.addEventListener("click", function(){
+        var ini = form.querySelector(".arr-fecha-ini").value;
+        var fin = form.querySelector(".arr-fecha-fin").value;
+        if (!ini || !fin || fin < ini){
+          alert("Indica una fecha de inicio y fin válidas (la fecha de fin debe ser igual o posterior a la de inicio).");
+          return;
+        }
+        var id = form.getAttribute("data-sanid");
+        var r = sanciones.filter(function(x){ return x.id === id; })[0];
+        if (!r) return;
+        var numerosArresto = (r.alumnos || []).map(function(al){ return al.numero; });
+        if (!confirmarFechaSinCoincidencia(numerosArresto, ini, fin, { excludeSancionId: r.id })){
+          return; // el usuario prefiere elegir otra fecha: no se guarda nada, el mini-formulario queda como estaba
+        }
+        btn.disabled = true;
+        fetch("/api/sanciones/" + encodeURIComponent(id) + "/arresto-fecha", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ arrestoFechaIni: ini, arrestoFechaFin: fin })
+        }).then(function(resp){ return resp.json().then(function(data){ return { ok: resp.ok, data: data }; }); })
+          .then(function(res){
+            btn.disabled = false;
+            if (!res.ok){
+              alert((res.data && res.data.error) || "No se ha podido fijar la fecha.");
+              return;
+            }
+            var idx = sanciones.findIndex(function(x){ return x.id === id; });
+            if (idx !== -1) sanciones[idx] = res.data.sancion;
+            renderSancionesList();
+          }).catch(function(){
+            btn.disabled = false;
+            alert("Error de conexión con el servidor.");
+          });
+      });
+    });
+    sancionesTableBody.querySelectorAll(".trab-hecho-check").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        cb.disabled = true;
+        toggleTrabajoHecho(cb.getAttribute("data-trabajoid"), cb.checked).then(function(){
+          renderSancionesList();
+        });
+      });
+    });
   }
 
   sanSearchInput.addEventListener("input", renderSancionesList);
   sanPelotonFilter.addEventListener("change", renderSancionesList);
   sanTipoFilter.addEventListener("change", renderSancionesList);
-  sanAlertaFilter.addEventListener("change", renderSancionesList);
+  sanAlertaTotalFilter.addEventListener("change", renderSancionesList);
+  sanAlertaFundamentoFilter.addEventListener("change", renderSancionesList);
 
   // ================= REFUERZOS TAB =================
   var refDraftBanner = document.getElementById("refDraftBanner");
@@ -4807,7 +5379,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var refTipo = document.getElementById("refTipo");
   var refHoraInicio = document.getElementById("refHoraInicio");
   var refDuracion = document.getElementById("refDuracion");
+  var refFindeWrap = document.getElementById("refFindeWrap");
+  var refHoraInicioFinde = document.getElementById("refHoraInicioFinde");
+  var refDuracionFinde = document.getElementById("refDuracionFinde");
   var refObservaciones = document.getElementById("refObservaciones");
+  var refEditBanner = document.getElementById("refEditBanner");
+  var refEditExpediente = document.getElementById("refEditExpediente");
+  var refEditCancelBtn = document.getElementById("refEditCancelBtn");
   var refSancionFields = document.getElementById("refSancionFields");
   var refAudDia = document.getElementById("refAudDia");
   var refAudHora = document.getElementById("refAudHora");
@@ -4944,10 +5522,32 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
   });
 
+  // Un periodo de refuerzo puede incluir sábados y/o domingos, que casi
+  // nunca pueden tener el mismo horario que entre semana (p.ej. "de lunes a
+  // sábado, de 18:00 a 21:00" no tiene sentido el sábado). Cuando el rango
+  // elegido contiene algún día de fin de semana, se muestra un campo de
+  // hora+duración aparte, exclusivo para esos días.
+  function esFinDeSemanaIso(iso){
+    if (!iso) return false;
+    var d = new Date(iso + "T00:00:00Z");
+    if (isNaN(d.getTime())) return false;
+    var dow = d.getUTCDay();
+    return dow === 0 || dow === 6;
+  }
+  function rangoTieneFinde(inicio, fin){
+    return isoDatesInRange(inicio, fin).some(esFinDeSemanaIso);
+  }
+  function updateRefFindeVisibility(){
+    var tiene = rangoTieneFinde(refFechaInicio.value, refFechaFin.value);
+    refFindeWrap.classList.toggle("hidden", !tiene);
+    return tiene;
+  }
+
   function validateRefDatesLive(){
     var ini = refFechaInicio.value, fin = refFechaFin.value;
     var bad = ini && fin && fin < ini;
     refFechaHint.classList.toggle("hidden", !bad);
+    updateRefFindeVisibility();
     return !bad;
   }
   refFechaInicio.addEventListener("change", validateRefDatesLive);
@@ -5003,6 +5603,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   function clearRefForm(){
     refuerzoDraft = null;
+    editingRefuerzoId = null;
+    refEditBanner.classList.add("hidden");
     refDraftBanner.classList.add("hidden");
     refInfraccionFields.classList.remove("hidden");
     refModeToggle.classList.remove("hidden");
@@ -5028,6 +5630,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refTipo.value = "IFM";
     refHoraInicio.value = "09:00";
     refDuracion.value = "1";
+    refFindeWrap.classList.add("hidden");
+    refHoraInicioFinde.value = "10:00";
+    refDuracionFinde.value = "1";
     refObservaciones.value = "";
     refFecha.value = "";
     refLugar.value = "ACTO";
@@ -5054,6 +5659,80 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     refFormMsg.textContent = "";
     refFormMsg.className = "form-msg";
   });
+
+  refEditCancelBtn.addEventListener("click", function(){
+    clearRefForm();
+    refFormMsg.textContent = "";
+    refFormMsg.className = "form-msg";
+  });
+
+  // Permite corregir un refuerzo ya guardado (y, si ya se había generado su
+  // documento, volver a generarlo con los datos correctos). A diferencia del
+  // borrador traído desde una sanción, aquí SIEMPRE se puede tocar
+  // cualquier campo — alumno(s), fechas/horario y datos del documento —
+  // porque se trata de arreglar algo que ya está creado, venga de donde
+  // venga.
+  function startEditRefuerzo(id){
+    var record = refuerzos.filter(function(r){ return r.id === id; })[0];
+    if (!record) return;
+
+    clearRefForm();
+    editingRefuerzoId = id;
+    refEditBanner.classList.remove("hidden");
+    refEditExpediente.textContent = record.expediente ? ("Nº " + record.expediente) : ("de " + (record.alumnos && record.alumnos[0] ? record.alumnos[0].nombre : ""));
+
+    if (record.alumnos && record.alumnos.length > 1){
+      setRefMode("multiple");
+      refMultiSelected = record.alumnos.map(function(al){ return al.numero; });
+      renderRefMultiList();
+      renderRefMultiChips();
+    } else {
+      setRefMode("individual");
+      var al = (record.alumnos || [])[0];
+      if (al){
+        var row = findCadetByNumero(al.numero);
+        refSelectedCadete = row || al;
+        refCadeteInput.value = al.numero + " — " + [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + al.nombre;
+        refCadetePreview.innerHTML = '<span class="num">Nº ' + escapeHtml(al.numero) + '</span><span>' + escapeHtml([al.ape1,al.ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(al.nombre) + (al.peloton ? ' · Pelotón ' + escapeHtml(al.peloton) : '') + '</span>';
+        refCadetePreview.classList.add("show");
+        refCadeteHint.classList.add("hidden");
+      }
+    }
+
+    refFechaInicio.value = record.fechaInicio || "";
+    refFechaFin.value = record.fechaFin || "";
+    refTipo.value = record.tipo || "IFM";
+    refHoraInicio.value = record.horaInicio || "09:00";
+    refDuracion.value = record.duracion || "1";
+    var tieneFinde = updateRefFindeVisibility();
+    if (tieneFinde){
+      refHoraInicioFinde.value = record.horaInicioFinde || "10:00";
+      refDuracionFinde.value = record.duracionFinde || "1";
+    }
+    refObservaciones.value = record.observaciones || "";
+
+    refFecha.value = record.fecha || "";
+    refLugar.value = record.lugar || "ACTO";
+    refHora.value = record.hora || "08:00";
+    refTipoFalta.value = record.tipoFalta || "";
+    refTipoFalta.dispatchEvent(new Event("change"));
+    refFundamento.value = record.fundamento || "";
+    refMotivoInput.value = record.motivo || "";
+
+    refEmpleo.value = record.profEmpleo || "";
+    refProfNombreInput.value = record.profNombre || "";
+    refProfApellidosInput.value = record.profApellidos || "";
+    refProfDniInput.value = record.profDni || "";
+
+    refAudDia.value = record.audDia || "";
+    refAudHora.value = record.audHora || "";
+    refJefeCia.value = record.jefeCia || "";
+    refLugarFecha.value = record.lugarFecha || "San Fernando, a ";
+
+    refFormMsg.textContent = "";
+    refFormMsg.className = "form-msg";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   refSaveBtn.addEventListener("click", function(){
     var ok = true;
@@ -5103,6 +5782,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if (!refTipo.value) ok = false;
     if (!refHoraInicio.value) ok = false;
     if (!refDuracion.value || isNaN(parseFloat(refDuracion.value))) ok = false;
+    var tieneFinde = updateRefFindeVisibility();
+    if (tieneFinde){
+      if (!refHoraInicioFinde.value) ok = false;
+      if (!refDuracionFinde.value || isNaN(parseFloat(refDuracionFinde.value))) ok = false;
+    }
     // Estos campos hacen falta siempre para poder generar el documento
     // (ANEXO) del refuerzo, tanto si viene de una sanción como si es manual.
     if (!refAudDia.value) ok = false;
@@ -5123,6 +5807,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return;
     }
 
+    var refNumeros = alumnos.map(function(al){ return al.numero; });
+    if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId })){
+      return; // el usuario prefiere elegir otra fecha
+    }
+
     var manualTipoFalta = refTipoFalta.value;
     var manualList = FALTA_CATALOG[manualTipoFalta] || [];
     var manualIdx = manualList.indexOf(refFundamento.value);
@@ -5138,6 +5827,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       tipo: refTipo.value,
       horaInicio: refHoraInicio.value,
       duracion: refDuracion.value.trim(),
+      horaInicioFinde: tieneFinde ? refHoraInicioFinde.value : "",
+      duracionFinde: tieneFinde ? refDuracionFinde.value.trim() : "",
       observaciones: refObservaciones.value.trim(),
       fecha: refuerzoDraft ? refuerzoDraft.fecha : refFecha.value,
       lugar: refuerzoDraft ? refuerzoDraft.lugar : refLugar.value.trim(),
@@ -5156,9 +5847,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       lugarFecha: refLugarFecha.value.trim()
     };
 
+    var esEdicion = !!editingRefuerzoId;
+    var url = esEdicion ? "/api/refuerzos/" + encodeURIComponent(editingRefuerzoId) : "/api/refuerzos";
+    var metodo = esEdicion ? "PUT" : "POST";
+
     refSaveBtn.disabled = true;
-    fetch("/api/refuerzos", {
-      method: "POST",
+    fetch(url, {
+      method: metodo,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
@@ -5169,12 +5864,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           refFormMsg.className = "form-msg error";
           return;
         }
-        refuerzos.unshift(res.data.refuerzo);
-        refFormMsg.textContent = "Refuerzo guardado.";
-        refFormMsg.className = "form-msg ok";
-        clearRefForm();
-        renderRefuerzosTab();
-        renderSancionesList();
+        var record = res.data.refuerzo;
+        if (esEdicion){
+          var idx = refuerzos.findIndex(function(r){ return r.id === record.id; });
+          if (idx !== -1) refuerzos[idx] = record; else refuerzos.unshift(record);
+          refFormMsg.textContent = "Cambios guardados. Generando el documento actualizado…";
+          refFormMsg.className = "form-msg ok";
+          clearRefForm();
+          renderRefuerzosTab();
+          renderSancionesList();
+          generarDocumentoPDF(record);
+        } else {
+          refuerzos.unshift(record);
+          refFormMsg.textContent = "Refuerzo guardado.";
+          refFormMsg.className = "form-msg ok";
+          clearRefForm();
+          renderRefuerzosTab();
+          renderSancionesList();
+        }
       }).catch(function(){
         refSaveBtn.disabled = false;
         refFormMsg.textContent = "Error de conexión con el servidor.";
@@ -5267,8 +5974,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       var origenCell = r.origen === "sancion"
         ? '<span class="origin-tag sancion">Exp. ' + escapeHtml(String(r.expediente)) + '</span>'
         : '<span class="origin-tag manual">Manual</span>';
-      var pdfBtn = r.origen === "sancion"
-        ? '<button class="btn small primary" data-pdfref="' + r.id + '">Rellenar documento</button>'
+      var pdfBtn = '<button class="btn small primary" data-pdfref="' + r.id + '">Rellenar documento</button>';
+      var rellenadoTitle = "Documento generado el " + formatDateDisplay(r.rellenadoFecha ? r.rellenadoFecha.slice(0,10) : "") +
+        (r.editado && r.editadoFecha ? " · Editado por última vez el " + formatDateDisplay(r.editadoFecha.slice(0,10)) : "") +
+        " — pulsa para corregir los datos y regenerarlo";
+      var rellenadoBadge = r.rellenado
+        ? '<button type="button" class="fill-badge" data-editref="' + r.id + '" title="' + escapeHtml(rellenadoTitle) + '">RELLENADO ✎</button>'
         : "";
       return "<tr>" +
         "<td>" + escapeHtml(al.numero) + "</td>" +
@@ -5279,7 +5990,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         "<td>" + escapeHtml(r.tipo) + "</td>" +
         "<td>" + escapeHtml(r.horaInicio || "—") + "</td>" +
         "<td>" + origenCell + "</td>" +
-        '<td style="display:flex;gap:6px;flex-wrap:wrap;">' + pdfBtn + '<button class="btn small danger-ghost" data-delref="' + r.id + '">Eliminar</button></td>' +
+        '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + pdfBtn + rellenadoBadge + '<button class="btn small danger-ghost" data-delref="' + r.id + '">Eliminar</button></td>' +
         "</tr>";
     }).join("");
 
@@ -5291,6 +6002,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         var id = btn.getAttribute("data-pdfref");
         var record = refuerzos.filter(function(r){ return r.id === id; })[0];
         if (record) generarDocumentoPDF(record);
+      });
+    });
+    refuerzosTableBody.querySelectorAll("[data-editref]").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        startEditRefuerzo(btn.getAttribute("data-editref"));
       });
     });
   }
@@ -5479,19 +6196,31 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
       var dias = isoDatesInRange(record.fechaInicio, record.fechaFin);
       var horaFin = sumarHoras(record.horaInicio, record.duracion);
+      var usaHorarioFinde = dias.some(esFinDeSemanaIso) && record.horaInicioFinde && record.duracionFinde;
+      var horaFinFinde = usaHorarioFinde ? sumarHoras(record.horaInicioFinde, record.duracionFinde) : null;
+
       var lineasDias = dias.map(function(iso){
         var diaMes = parseInt(iso.split("-")[2], 10);
-        return diaSemanaEs(iso) + " día " + diaMes + ": hora (de " + (record.horaInicio || "—") + " a " + (horaFin || "—") + ")";
+        var esFinde = usaHorarioFinde && esFinDeSemanaIso(iso);
+        var horaIniDia = esFinde ? record.horaInicioFinde : record.horaInicio;
+        var horaFinDia = esFinde ? horaFinFinde : horaFin;
+        return diaSemanaEs(iso) + " día " + diaMes + ": hora (de " + (horaIniDia || "—") + " a " + (horaFinDia || "—") + ")";
       });
-      var nombresDiasUnicos = [];
+      var nombresDiasSemana = [], nombresDiasFinde = [];
       dias.forEach(function(iso){
         var n = diaSemanaEs(iso).toLowerCase();
-        if (nombresDiasUnicos.indexOf(n) === -1) nombresDiasUnicos.push(n);
+        var lista = (usaHorarioFinde && esFinDeSemanaIso(iso)) ? nombresDiasFinde : nombresDiasSemana;
+        if (lista.indexOf(n) === -1) lista.push(n);
       });
       var numHoras = parseFloat(record.duracion) || 1;
       var correccionTexto = "Dedicar " + horasEnLetra(record.duracion) + " hora" + (numHoras === 1 ? "" : "s") +
-        " al día durante " + joinDiasEs(nombresDiasUnicos) + " a realizar ejercicios de " + tipoEjercicioTexto(record.tipo) +
-        ".\n" + lineasDias.join("\n");
+        " al día durante " + joinDiasEs(nombresDiasSemana) + " a realizar ejercicios de " + tipoEjercicioTexto(record.tipo);
+      if (nombresDiasFinde.length){
+        var numHorasFinde = parseFloat(record.duracionFinde) || 1;
+        correccionTexto += ", y " + horasEnLetra(record.duracionFinde) + " hora" + (numHorasFinde === 1 ? "" : "s") +
+          " al día durante " + joinDiasEs(nombresDiasFinde);
+      }
+      correccionTexto += ".\n" + lineasDias.join("\n");
       if (record.observaciones) correccionTexto += "\n" + record.observaciones;
       setF("res_correccion_texto", correccionTexto);
 
@@ -5511,6 +6240,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       a.click();
       document.body.removeChild(a);
       setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+
+      // Marca el refuerzo como "documento generado" para mostrar la
+      // insignia RELLENADO en el listado (no bloquea la descarga si falla).
+      fetch("/api/refuerzos/" + encodeURIComponent(record.id) + "/rellenado", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" }
+      }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+        .then(function(res){
+          if (res.ok && res.data.refuerzo){
+            var idx = refuerzos.findIndex(function(x){ return x.id === record.id; });
+            if (idx !== -1) refuerzos[idx] = res.data.refuerzo;
+            renderRefuerzosList();
+          }
+        }).catch(function(){ /* la descarga ya se ha hecho; se ignora el fallo al marcar */ });
     } catch(err){
       console.error(err);
       alert("No se pudo generar el documento PDF: " + (err && err.message ? err.message : err));
@@ -5535,6 +6278,233 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return [motivoSlug, fechaSlug, sufijo].filter(Boolean).join("_") + ".pdf";
   }
 
+  // ================= ACTIVIDADES TAB (FFMG / FFE) =================
+  // A diferencia del resto de esta sección, aquí no hay "borrador" ni
+  // validación de firma: es simplemente un catálogo de actividades del
+  // ciclo (vive en el servidor, compartido) con la lista de quién ha
+  // participado en cada una.
+  var actFaseFFMGBtn = document.getElementById("actFaseFFMGBtn");
+  var actFaseFFEBtn = document.getElementById("actFaseFFEBtn");
+  var actNombreInput = document.getElementById("actNombreInput");
+  var actFechaInput = document.getElementById("actFechaInput");
+  var actAddBtn = document.getElementById("actAddBtn");
+  var actFormHint = document.getElementById("actFormHint");
+  var actividadesTableBody = document.getElementById("actividadesTableBody");
+  var actividadesEmptyState = document.getElementById("actividadesEmptyState");
+
+  var actParticipantesModal = document.getElementById("actParticipantesModal");
+  var actParticipantesTitle = document.getElementById("actParticipantesTitle");
+  var actParticipantesCloseBtn = document.getElementById("actParticipantesCloseBtn");
+  var actParticipantesSearch = document.getElementById("actParticipantesSearch");
+  var actSeleccionarTodos = document.getElementById("actSeleccionarTodos");
+  var actParticipantesList = document.getElementById("actParticipantesList");
+  var actParticipantesCount = document.getElementById("actParticipantesCount");
+  var actParticipantesGuardarBtn = document.getElementById("actParticipantesGuardarBtn");
+  var actParticipantesCancelarBtn = document.getElementById("actParticipantesCancelarBtn");
+
+  var actFase = "FFE"; // "FFMG" | "FFE"
+  var actParticipantesActividadId = null; // actividad que se está editando en el modal
+  var actParticipantesSeleccion = []; // copia de trabajo de números seleccionados, hasta pulsar "Guardar"
+
+  function setActFase(fase){
+    actFase = fase;
+    actFaseFFMGBtn.classList.toggle("active", fase === "FFMG");
+    actFaseFFEBtn.classList.toggle("active", fase === "FFE");
+    renderActividadesTab();
+  }
+  actFaseFFMGBtn.addEventListener("click", function(){ setActFase("FFMG"); });
+  actFaseFFEBtn.addEventListener("click", function(){ setActFase("FFE"); });
+
+  function actividadesDeFase(fase){
+    return actividades.filter(function(a){ return a.fase === fase; })
+      .sort(function(a, b){ return (a.orden || 0) - (b.orden || 0); });
+  }
+
+  function renderActividadesTab(){
+    var lista = actividadesDeFase(actFase);
+    if (!lista.length){
+      actividadesTableBody.innerHTML = "";
+      actividadesEmptyState.classList.remove("hidden");
+      return;
+    }
+    actividadesEmptyState.classList.add("hidden");
+    actividadesTableBody.innerHTML = lista.map(function(a, i){
+      var n = (a.participantes || []).length;
+      return "<tr>" +
+        "<td>" + (i + 1) + "</td>" +
+        "<td>" + escapeHtml(a.nombre) + "</td>" +
+        '<td><input type="date" data-actfecha="' + a.id + '" value="' + escapeHtml(a.fecha || "") + '"></td>' +
+        '<td><button type="button" class="btn small ghost" data-actpart="' + a.id + '">' + n + " participante" + (n === 1 ? "" : "s") + '</button></td>' +
+        '<td><button type="button" class="btn small danger-ghost" data-actdel="' + a.id + '">Eliminar</button></td>' +
+        "</tr>";
+    }).join("");
+
+    actividadesTableBody.querySelectorAll("[data-actfecha]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var id = inp.getAttribute("data-actfecha");
+        fetch("/api/actividades/" + encodeURIComponent(id), {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fecha: inp.value })
+        }).then(function(r){ return r.json(); }).then(function(data){
+          if (data && data.actividad){
+            var a = actividades.filter(function(x){ return x.id === id; })[0];
+            if (a) a.fecha = data.actividad.fecha;
+          }
+        });
+      });
+    });
+    actividadesTableBody.querySelectorAll("[data-actpart]").forEach(function(btn){
+      btn.addEventListener("click", function(){ openActParticipantesModal(btn.getAttribute("data-actpart")); });
+    });
+    actividadesTableBody.querySelectorAll("[data-actdel]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-actdel");
+        if (!confirm("¿Eliminar esta actividad? Se perderá también la lista de participantes registrada. Esta acción no se puede deshacer.")) return;
+        fetch("/api/actividades/" + encodeURIComponent(id), { method: "DELETE" }).then(function(r){ return r.json(); }).then(function(data){
+          if (data && data.ok){
+            actividades = actividades.filter(function(a){ return a.id !== id; });
+            renderActividadesTab();
+          } else {
+            alert((data && data.error) || "No se ha podido eliminar la actividad.");
+          }
+        });
+      });
+    });
+  }
+
+  actAddBtn.addEventListener("click", function(){
+    var nombre = actNombreInput.value.trim();
+    if (!nombre){
+      actFormHint.classList.remove("hidden");
+      return;
+    }
+    actFormHint.classList.add("hidden");
+    actAddBtn.disabled = true;
+    fetch("/api/actividades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fase: actFase, nombre: nombre, fecha: actFechaInput.value || "" })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        actAddBtn.disabled = false;
+        if (!res.ok){
+          alert(res.data.error || "No se ha podido crear la actividad.");
+          return;
+        }
+        actividades.push(res.data.actividad);
+        actNombreInput.value = "";
+        actFechaInput.value = "";
+        renderActividadesTab();
+      }).catch(function(){
+        actAddBtn.disabled = false;
+        alert("Error de conexión con el servidor.");
+      });
+  });
+
+  // ---------- selección de participantes (modal) ----------
+  function todosLosNumeros(){
+    var k = state.keys;
+    return state.rows.map(function(row){ return getVal(row, k.numero); }).filter(Boolean);
+  }
+
+  function openActParticipantesModal(actividadId){
+    var a = actividades.filter(function(x){ return x.id === actividadId; })[0];
+    if (!a) return;
+    actParticipantesActividadId = actividadId;
+    actParticipantesSeleccion = (a.participantes || []).slice();
+    actParticipantesTitle.textContent = "Participantes — " + a.nombre + (a.fecha ? " (" + formatDateDisplay(a.fecha) + ")" : "");
+    actParticipantesSearch.value = "";
+    renderActParticipantesList();
+    actParticipantesModal.classList.remove("hidden");
+  }
+
+  function closeActParticipantesModal(){
+    actParticipantesModal.classList.add("hidden");
+    actParticipantesActividadId = null;
+    actParticipantesSeleccion = [];
+  }
+  actParticipantesCloseBtn.addEventListener("click", closeActParticipantesModal);
+  actParticipantesCancelarBtn.addEventListener("click", closeActParticipantesModal);
+  actParticipantesModal.addEventListener("click", function(e){ if (e.target === actParticipantesModal) closeActParticipantesModal(); });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !actParticipantesModal.classList.contains("hidden")) closeActParticipantesModal();
+  });
+
+  function updateActSeleccionarTodosState(){
+    var total = todosLosNumeros().length;
+    var marcados = actParticipantesSeleccion.length;
+    actSeleccionarTodos.checked = total > 0 && marcados === total;
+    actSeleccionarTodos.indeterminate = marcados > 0 && marcados < total;
+    actParticipantesCount.textContent = marcados + " de " + total + " alumnos seleccionados";
+  }
+
+  function renderActParticipantesList(){
+    var q = stripAccents(actParticipantesSearch.value || "");
+    var k = state.keys;
+    var rows = state.rows.filter(function(row){
+      if (!q) return true;
+      var hay = [getVal(row,k.numero), getVal(row,k.ape1), getVal(row,k.ape2), getVal(row,k.nombre)].join(" ");
+      return stripAccents(hay).indexOf(q) !== -1;
+    });
+    if (!rows.length){
+      actParticipantesList.innerHTML = '<div class="multi-list-empty">Sin resultados.</div>';
+    } else {
+      actParticipantesList.innerHTML = rows.map(function(row){
+        var numero = getVal(row,k.numero);
+        var ape1 = getVal(row,k.ape1), ape2 = getVal(row,k.ape2), nombre = getVal(row,k.nombre), pel = getVal(row,k.peloton);
+        var checked = actParticipantesSeleccion.indexOf(numero) !== -1;
+        return '<label class="multi-list-item"><input type="checkbox" data-actnumero="' + escapeHtml(numero) + '" ' + (checked ? 'checked' : '') + '><span>Nº ' + escapeHtml(numero) + ' — ' + escapeHtml([ape1,ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(nombre) + (pel ? ' (Pelotón ' + escapeHtml(pel) + ')' : '') + '</span></label>';
+      }).join("");
+      actParticipantesList.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+        cb.addEventListener("change", function(){
+          var numero = cb.getAttribute("data-actnumero");
+          if (cb.checked){
+            if (actParticipantesSeleccion.indexOf(numero) === -1) actParticipantesSeleccion.push(numero);
+          } else {
+            actParticipantesSeleccion = actParticipantesSeleccion.filter(function(n){ return n !== numero; });
+          }
+          updateActSeleccionarTodosState();
+        });
+      });
+    }
+    updateActSeleccionarTodosState();
+  }
+  actParticipantesSearch.addEventListener("input", renderActParticipantesList);
+
+  // "Seleccionar todos" marca a TODO el personal de la sección (no solo el
+  // filtrado por el buscador), para poder luego desmarcar uno a uno a
+  // quien no hizo la actividad.
+  actSeleccionarTodos.addEventListener("change", function(){
+    actParticipantesSeleccion = actSeleccionarTodos.checked ? todosLosNumeros() : [];
+    renderActParticipantesList();
+  });
+
+  actParticipantesGuardarBtn.addEventListener("click", function(){
+    if (!actParticipantesActividadId) return;
+    actParticipantesGuardarBtn.disabled = true;
+    fetch("/api/actividades/" + encodeURIComponent(actParticipantesActividadId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ participantes: actParticipantesSeleccion })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        actParticipantesGuardarBtn.disabled = false;
+        if (res.ok && res.data.actividad){
+          var a = actividades.filter(function(x){ return x.id === actParticipantesActividadId; })[0];
+          if (a) a.participantes = res.data.actividad.participantes;
+          renderActividadesTab();
+        } else {
+          alert((res.data && res.data.error) || "No se han podido guardar los participantes.");
+        }
+        closeActParticipantesModal();
+      }).catch(function(){
+        actParticipantesGuardarBtn.disabled = false;
+        alert("Error de conexión con el servidor.");
+        closeActParticipantesModal();
+      });
+  });
+
   // ================= CONSULTAS TAB =================
   var consTipoSelect = document.getElementById("consTipoSelect");
   var consFechasWrap = document.getElementById("consFechasWrap");
@@ -5548,6 +6518,23 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var consResultadosWrap = document.getElementById("consResultadosWrap");
   var consResultados = document.getElementById("consResultados");
 
+  var consActividadFaseWrap = document.getElementById("consActividadFaseWrap");
+  var consActModoActividadBtn = document.getElementById("consActModoActividadBtn");
+  var consActModoAlumnoBtn = document.getElementById("consActModoAlumnoBtn");
+  var consActPorActividadWrap = document.getElementById("consActPorActividadWrap");
+  var consActPorAlumnoWrap = document.getElementById("consActPorAlumnoWrap");
+  var consActFaseSelect = document.getElementById("consActFaseSelect");
+  var consActActividadSelect = document.getElementById("consActActividadSelect");
+  var consActNoParticiparonCheck = document.getElementById("consActNoParticiparonCheck");
+  var consActAlumnoInput = document.getElementById("consActAlumnoInput");
+  var consActAlumnoList = document.getElementById("consActAlumnoList");
+  var consActAlumnoPreview = document.getElementById("consActAlumnoPreview");
+  var consActAlumnoHint = document.getElementById("consActAlumnoHint");
+  var consArrestoPendienteWrap = document.getElementById("consArrestoPendienteWrap");
+  var consArrestoAgruparCheck = document.getElementById("consArrestoAgruparCheck");
+  var consTrabajosWrap = document.getElementById("consTrabajosWrap");
+  var consTrabajosSoloVencidosCheck = document.getElementById("consTrabajosSoloVencidosCheck");
+
   function rangosSolapan(aIni, aFin, bIni, bFin){
     if (!aIni || !aFin || !bIni || !bFin) return false;
     return aIni <= bFin && aFin >= bIni;
@@ -5556,6 +6543,410 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function sortByApellido(list){
     return list.slice().sort(function(a, b){
       return (String(a.ape1 || "") + String(a.ape2 || "")).localeCompare(String(b.ape1 || "") + String(b.ape2 || ""), "es");
+    });
+  }
+
+  function resolverAlumno(numero){
+    var k = state.keys;
+    var row = findCadetByNumero(numero);
+    if (row){
+      return { numero: numero, ape1: getVal(row,k.ape1), ape2: getVal(row,k.ape2), nombre: getVal(row,k.nombre), peloton: getVal(row,k.peloton) };
+    }
+    return { numero: numero, ape1: "", ape2: "", nombre: "(alumno no encontrado en el roster actual)", peloton: "" };
+  }
+
+  // ---------------- Consultas: participación en actividades ----------------
+  // Modo "Por actividad": para cada actividad de la fase (o solo la elegida),
+  // la lista de quién participó — o, si se marca "invertir", de quién NO
+  // participó (comparando contra todo el personal de la sección).
+  function computeConsultaActividadesPorActividad(fase, actividadId, invertir){
+    var lista = actividadesDeFase(fase);
+    if (actividadId) lista = lista.filter(function(a){ return a.id === actividadId; });
+    var todos = todosLosNumeros();
+
+    return lista.map(function(a){
+      var partIds = a.participantes || [];
+      var numeros = invertir ? todos.filter(function(n){ return partIds.indexOf(n) === -1; }) : partIds;
+      return { actividad: a, personas: sortByApellido(numeros.map(resolverAlumno)) };
+    });
+  }
+
+  function renderConsultaActividadesPorActividadResultados(fase, invertir, data){
+    var total = data.reduce(function(sum, g){ return sum + g.personas.length; }, 0);
+
+    function tablaSeccionAct(titulo, rows){
+      var body;
+      if (!rows.length){
+        body = '<div class="empty-state">' + (invertir ? "Todo el personal ha participado." : "Sin participantes registrados.") + '</div>';
+      } else {
+        body = '<table class="consulta-table"><thead><tr>' +
+          '<th>Número</th><th>Alumno</th><th>Pelotón</th>' +
+          '</tr></thead><tbody>' +
+          rows.map(function(r){
+            return "<tr>" +
+              "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
+              "<td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "") + "</td>" +
+              "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
+              "</tr>";
+          }).join("") +
+          "</tbody></table>";
+      }
+      return '<div class="consulta-section"><h4>' + escapeHtml(titulo) + ' <span class="historial-count">' + rows.length + '</span></h4>' + body + '</div>';
+    }
+
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Fase: ' + escapeHtml(fase) + ' — ' + (invertir ? "Personal que NO ha participado" : "Participación en actividades") + '</div>';
+    html += '<div class="consulta-report-meta">Total: ' + total + (invertir ? ' pendiente' : ' participaci') + (invertir ? (total === 1 ? "" : "s") : (total === 1 ? "ón" : "ones")) + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+
+    if (!data.length){
+      html += '<div class="empty-state">No hay actividades registradas en la fase ' + escapeHtml(fase) + '.</div>';
+    } else {
+      data.forEach(function(grupo){
+        var titulo = grupo.actividad.nombre + (grupo.actividad.fecha ? " · " + formatDateDisplay(grupo.actividad.fecha) : " · sin fecha asignada");
+        html += tablaSeccionAct(titulo, grupo.personas);
+      });
+    }
+
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
+  }
+
+  // Modo "Por alumno": todas las actividades de la fase, con su fecha y si
+  // el alumno elegido participó o no en cada una.
+  function computeConsultaActividadesPorAlumno(fase, numero){
+    return actividadesDeFase(fase).map(function(a){
+      return { actividad: a, participo: (a.participantes || []).indexOf(numero) !== -1 };
+    });
+  }
+
+  function renderConsultaActividadesPorAlumnoResultados(fase, alumno, data){
+    var hechas = data.filter(function(d){ return d.participo; }).length;
+
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Fase: ' + escapeHtml(fase) + ' — ' + escapeHtml([alumno.ape1, alumno.ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(alumno.nombre) + ' (Nº ' + escapeHtml(alumno.numero) + ')</div>';
+    html += '<div class="consulta-report-meta">Ha participado en ' + hechas + ' de ' + data.length + ' actividades · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+
+    if (!data.length){
+      html += '<div class="empty-state">No hay actividades registradas en la fase ' + escapeHtml(fase) + '.</div>';
+    } else {
+      html += '<table class="consulta-table"><thead><tr><th>#</th><th>Actividad</th><th>Fecha</th><th>¿Participó?</th></tr></thead><tbody>' +
+        data.map(function(d, i){
+          var badge = d.participo
+            ? '<span class="status-pill vigente">Sí</span>'
+            : '<span class="status-pill alerta">No</span>';
+          return "<tr>" +
+            "<td>" + (i + 1) + "</td>" +
+            "<td>" + escapeHtml(d.actividad.nombre) + "</td>" +
+            "<td>" + (d.actividad.fecha ? formatDateDisplay(d.actividad.fecha) : "—") + "</td>" +
+            "<td>" + badge + "</td>" +
+            "</tr>";
+        }).join("") +
+        "</tbody></table>";
+    }
+
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
+  }
+
+  var consActModo = "actividad"; // "actividad" | "alumno"
+  var consActSelectedAlumno = null;
+
+  function setConsActModo(modo){
+    consActModo = modo;
+    consActModoActividadBtn.classList.toggle("active", modo === "actividad");
+    consActModoAlumnoBtn.classList.toggle("active", modo === "alumno");
+    consActPorActividadWrap.classList.toggle("hidden", modo !== "actividad");
+    consActPorAlumnoWrap.classList.toggle("hidden", modo !== "alumno");
+    consResultadosWrap.classList.add("hidden");
+    consResultados.innerHTML = "";
+    consImprimirBtn.disabled = true;
+  }
+  consActModoActividadBtn.addEventListener("click", function(){ setConsActModo("actividad"); });
+  consActModoAlumnoBtn.addEventListener("click", function(){ setConsActModo("alumno"); });
+
+  function buildConsActAlumnoOptions(){
+    var k = state.keys;
+    consActAlumnoList.innerHTML = state.rows.map(function(row){
+      var num = getVal(row, k.numero);
+      var ape1 = getVal(row, k.ape1);
+      var ape2 = getVal(row, k.ape2);
+      var nombre = getVal(row, k.nombre);
+      var pel = getVal(row, k.peloton);
+      var label = num + " — " + [ape1, ape2].filter(Boolean).join(" ") + ", " + nombre + (pel ? " (Pelotón " + pel + ")" : "");
+      return '<option value="' + escapeHtml(label) + '">';
+    }).join("");
+  }
+
+  consActAlumnoInput.addEventListener("input", function(){
+    var val = consActAlumnoInput.value.trim();
+    var m = val.match(/^(\S+)\s*—/);
+    var numero = m ? m[1] : (val.match(/^(\d+)$/) ? val : null);
+    var row = numero ? findCadetByNumero(numero) : null;
+    if (row){
+      var k = state.keys;
+      var ape1 = getVal(row,k.ape1), ape2 = getVal(row,k.ape2), nombre = getVal(row,k.nombre), pel = getVal(row,k.peloton);
+      consActSelectedAlumno = { numero: numero, ape1: ape1, ape2: ape2, nombre: nombre, peloton: pel };
+      consActAlumnoPreview.innerHTML = '<span class="num">Nº ' + escapeHtml(numero) + '</span><span>' + escapeHtml([ape1,ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(nombre) + (pel ? ' · Pelotón ' + escapeHtml(pel) : '') + '</span>';
+      consActAlumnoPreview.classList.add("show");
+      consActAlumnoHint.classList.add("hidden");
+    } else {
+      consActSelectedAlumno = null;
+      consActAlumnoPreview.classList.remove("show");
+      consActAlumnoHint.classList.toggle("hidden", val === "");
+    }
+  });
+
+  function refreshConsActActividadOptions(){
+    var fase = consActFaseSelect.value;
+    if (!fase){
+      consActActividadSelect.disabled = true;
+      consActActividadSelect.innerHTML = '<option value="">Elige primero la fase…</option>';
+      return;
+    }
+    consActActividadSelect.disabled = false;
+    var lista = actividadesDeFase(fase);
+    consActActividadSelect.innerHTML = '<option value="">Todas las actividades de esta fase</option>' +
+      lista.map(function(a){ return '<option value="' + escapeHtml(a.id) + '">' + escapeHtml(a.nombre) + '</option>'; }).join("");
+  }
+  consActFaseSelect.addEventListener("change", refreshConsActActividadOptions);
+
+  // ---------------- Consultas: arresto pendiente ----------------
+  function computeConsultaArrestoPendiente(){
+    var rows = [];
+    sanciones.forEach(function(r){
+      if (r.medidaCorrectora !== "Arresto" || !r.arrestoPendiente) return;
+      (r.alumnos || []).forEach(function(al){
+        rows.push({
+          numero: al.numero, ape1: al.ape1, ape2: al.ape2, nombre: al.nombre, peloton: al.peloton,
+          expediente: r.expediente, fecha: r.fecha, motivo: r.motivo, sancionId: r.id
+        });
+      });
+    });
+    return sortByApellido(rows);
+  }
+
+  function renderConsultaArrestoPendienteResultados(rows){
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Sanciones de arresto con fecha pendiente de fijar</div>';
+    html += '<div class="consulta-report-meta">Total: ' + rows.length + ' sanci' + (rows.length === 1 ? "ón" : "ones") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+
+    if (!rows.length){
+      html += '<div class="empty-state">No hay sanciones de arresto con la fecha pendiente.</div>';
+    } else {
+      html += '<table class="consulta-table"><thead><tr>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha sanción</th><th>Motivo</th><th class="no-print">Acciones</th>' +
+        '</tr></thead><tbody>' +
+        rows.map(function(r){
+          return "<tr>" +
+            '<td><span class="expediente-tag">Nº ' + escapeHtml(String(r.expediente)) + '</span></td>' +
+            "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
+            "<td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "") + "</td>" +
+            "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
+            "<td>" + formatDateDisplay(r.fecha) + "</td>" +
+            "<td>" + escapeHtml(r.motivo || "—") + "</td>" +
+            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
+            "</tr>";
+        }).join("") +
+        "</tbody></table>";
+    }
+
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
+    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
+  }
+
+  function computeConsultaArrestoPendienteAgrupado(){
+    var grupos = [];
+    sanciones.forEach(function(r){
+      if (r.medidaCorrectora !== "Arresto" || !r.arrestoPendiente) return;
+      var alumnos = sortByApellido((r.alumnos || []).map(function(al){
+        return { numero: al.numero, ape1: al.ape1, ape2: al.ape2, nombre: al.nombre, peloton: al.peloton };
+      }));
+      grupos.push({ expediente: r.expediente, fecha: r.fecha, motivo: r.motivo, alumnos: alumnos, sancionId: r.id });
+    });
+    grupos.sort(function(a, b){ return (a.expediente || 0) - (b.expediente || 0); });
+    return grupos;
+  }
+
+  function renderConsultaArrestoPendienteAgrupadoResultados(grupos){
+    var totalAlumnos = grupos.reduce(function(sum, g){ return sum + g.alumnos.length; }, 0);
+
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Sanciones de arresto con fecha pendiente de fijar — agrupado por expediente</div>';
+    html += '<div class="consulta-report-meta">Total: ' + grupos.length + ' expediente' + (grupos.length === 1 ? "" : "s") + ' · ' + totalAlumnos + ' alumno' + (totalAlumnos === 1 ? "" : "s") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+
+    if (!grupos.length){
+      html += '<div class="empty-state">No hay sanciones de arresto con la fecha pendiente.</div>';
+    } else {
+      html += '<div class="hint no-print" style="margin-bottom:10px;">Marca los expedientes que quieras incluir al pulsar "Imprimir". Si no marcas ninguno, se imprime el informe completo.</div>';
+      grupos.forEach(function(g, idx){
+        var titulo = "Expediente Nº " + g.expediente + " · " + formatDateDisplay(g.fecha) + (g.motivo ? " · " + g.motivo : "");
+        var body;
+        if (!g.alumnos.length){
+          body = '<div class="empty-state">Sin alumnos.</div>';
+        } else {
+          body = '<table class="consulta-table"><thead><tr>' +
+            '<th>Número</th><th>Alumno</th><th>Pelotón</th><th class="no-print">Acciones</th>' +
+            '</tr></thead><tbody>' +
+            g.alumnos.map(function(r){
+              return "<tr>" +
+                "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
+                "<td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "") + "</td>" +
+                "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
+                "<td class=\"no-print\">" + botonQuitarExpedienteHtml(g.sancionId, r.numero, r.ape1, r.ape2, r.nombre, g.expediente) + "</td>" +
+                "</tr>";
+            }).join("") +
+            "</tbody></table>";
+        }
+        html += '<div class="consulta-section" data-exp-idx="' + idx + '"><h4>' +
+          '<label class="exp-print-check no-print"><input type="checkbox" class="consExpPrintCheck" data-exp-idx="' + idx + '"><span>Imprimir</span></label>' +
+          escapeHtml(titulo) + ' <span class="historial-count">' + g.alumnos.length + '</span></h4>' + body + '</div>';
+      });
+    }
+
+    consResultados.innerHTML = html;
+    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
+    consResultadosWrap.classList.remove("hidden");
+  }
+
+  // ---------------- Consultas: trabajos ----------------
+  function computeConsultaTrabajos(soloVencidos){
+    var rows = [];
+    sanciones.forEach(function(r){
+      if (!esTrabajo(r)) return;
+      var vencido = trabajoVencido(r);
+      if (soloVencidos && !vencido) return;
+      (r.alumnos || []).forEach(function(al){
+        rows.push({
+          numero: al.numero, ape1: al.ape1, ape2: al.ape2, nombre: al.nombre, peloton: al.peloton,
+          expediente: r.expediente, fecha: r.fecha, motivo: r.motivo,
+          trabajoFechaFin: r.trabajoFechaFin, trabajoHecho: r.trabajoHecho, trabajoHechoFecha: r.trabajoHechoFecha,
+          vencido: vencido, sancionId: r.id
+        });
+      });
+    });
+    rows = sortByApellido(rows);
+    rows.sort(function(a, b){
+      function rango(row){ return row.vencido ? 0 : (row.trabajoHecho ? 2 : 1); }
+      return rango(a) - rango(b);
+    });
+    return rows;
+  }
+
+  function renderConsultaTrabajosResultados(rows, soloVencidos){
+    var vencidosCount = rows.filter(function(r){ return r.vencido; }).length;
+
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Sanciones de trabajo' + (soloVencidos ? " — solo vencidos" : ": hechos, pendientes y vencidos") + '</div>';
+    html += '<div class="consulta-report-meta">Total: ' + rows.length + ' trabajo' + (rows.length === 1 ? "" : "s") + (soloVencidos ? "" : (" · " + vencidosCount + " vencido" + (vencidosCount === 1 ? "" : "s"))) + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+
+    if (!rows.length){
+      html += '<div class="empty-state">' + (soloVencidos ? "No hay trabajos vencidos: todo está al día." : "No hay sanciones con medida «Trabajo no superior a 5 horas» registradas.") + '</div>';
+    } else {
+      html += '<table class="consulta-table"><thead><tr>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha límite</th><th>Estado</th><th class="no-print">Marcar</th><th class="no-print">Acciones</th>' +
+        '</tr></thead><tbody>' +
+        rows.map(function(r){
+          var estadoCell = r.trabajoHecho
+            ? '<span class="status-pill noalerta">Hecho' + (r.trabajoHechoFecha ? " el " + formatDateDisplay(String(r.trabajoHechoFecha).slice(0,10)) : "") + '</span>'
+            : (r.vencido ? '<span class="status-pill alerta">Vencido</span>' : '<span class="status-pill programado">Pendiente</span>');
+          return "<tr>" +
+            '<td><span class="expediente-tag">Nº ' + escapeHtml(String(r.expediente)) + '</span></td>' +
+            "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
+            "<td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "") + "</td>" +
+            "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
+            "<td>" + formatDateDisplay(r.trabajoFechaFin) + "</td>" +
+            "<td>" + estadoCell + "</td>" +
+            '<td class="no-print"><label class="multi-list-item" style="margin:0;"><input type="checkbox" class="cons-trab-hecho-check" data-trabajoid="' + escapeHtml(String(r.sancionId)) + '" ' + (r.trabajoHecho ? 'checked' : '') + '><span>Hecho</span></label></td>' +
+            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
+            "</tr>";
+        }).join("") +
+        "</tbody></table>";
+    }
+
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
+    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
+    consResultados.querySelectorAll(".cons-trab-hecho-check").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        cb.disabled = true;
+        toggleTrabajoHecho(cb.getAttribute("data-trabajoid"), cb.checked).then(function(){
+          consBuscarBtn.click();
+        });
+      });
+    });
+  }
+
+  // ---------------- Consultas: quitar un alumno de un expediente ----------------
+  // Quita a UN alumno de UNA sanción concreta (identificada por su id),
+  // no borra el expediente: si esa sanción tiene más alumnos, o si el
+  // mismo número de expediente tiene otras sanciones vinculadas, esas
+  // no se ven afectadas en absoluto. Solo si el alumno quitado era el
+  // único que quedaba en esa sanción concreta, esa sanción (esa falta)
+  // desaparece por quedarse sin nadie — el número de expediente en sí
+  // no se "borra" como concepto, sigue existiendo si tiene más contenido.
+  function quitarAlumnoDeExpedienteDesdeConsulta(sancionId, numero, nombreCompleto, expediente, callback){
+    var confirmMsg = "¿Quitar a " + nombreCompleto + " (Nº " + numero + ") del expediente Nº " + expediente + "?\n\n" +
+      "Esto NO elimina el expediente ni afecta a otros alumnos u otras sanciones que compartan ese mismo número. " +
+      "Si era el único alumno de esta sanción en concreto, esa sanción desaparecerá por quedarse sin nadie; " +
+      "el expediente seguirá existiendo si tiene más contenido.";
+    if (!confirm(confirmMsg)) return;
+    fetch("/api/sanciones/" + encodeURIComponent(sancionId) + "/quitar-alumno", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero: numero })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok){
+          alert((res.data && res.data.error) || "No se ha podido quitar al alumno del expediente.");
+          return;
+        }
+        if (res.data.eliminada){
+          sanciones = sanciones.filter(function(r){ return r.id !== sancionId; });
+        } else {
+          var record = sanciones.filter(function(r){ return r.id === sancionId; })[0];
+          if (record) record.alumnos = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
+        }
+        if (callback) callback();
+      }).catch(function(){
+        alert("Error de conexión con el servidor.");
+      });
+  }
+
+  function botonQuitarExpedienteHtml(sancionId, numero, ape1, ape2, nombre, expediente){
+    var nombreCompleto = [ape1, ape2].filter(Boolean).join(" ") + ", " + (nombre || "");
+    return '<button type="button" class="btn small danger-ghost" data-quitar-san="' + escapeHtml(String(sancionId)) +
+      '" data-quitar-num="' + escapeHtml(String(numero)) + '" data-quitar-nombre="' + escapeHtml(nombreCompleto) +
+      '" data-quitar-exp="' + escapeHtml(String(expediente)) + '">Quitar del expediente</button>';
+  }
+
+  function wireQuitarAlumnoDeExpedienteEnConsulta(container){
+    container.querySelectorAll("[data-quitar-san]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        btn.disabled = true;
+        quitarAlumnoDeExpedienteDesdeConsulta(
+          btn.getAttribute("data-quitar-san"),
+          btn.getAttribute("data-quitar-num"),
+          btn.getAttribute("data-quitar-nombre"),
+          btn.getAttribute("data-quitar-exp"),
+          function(){ consBuscarBtn.click(); }
+        );
+      });
     });
   }
 
@@ -5595,7 +6986,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         sanResult.push({
           numero: al.numero, ape1: al.ape1, ape2: al.ape2, nombre: al.nombre, peloton: al.peloton,
           desde: r.arrestoFechaIni, hasta: r.arrestoFechaFin,
-          detalle: "Exp. Nº " + r.expediente + (r.arrestoDias ? " · " + r.arrestoDias + (r.arrestoDias === 1 ? " día" : " días") : "")
+          detalle: "Exp. Nº " + r.expediente + (r.arrestoDias ? " · " + r.arrestoDias + (r.arrestoDias === 1 ? " día" : " días") : ""),
+          sancionId: r.id, expediente: r.expediente
         });
       });
     });
@@ -5610,13 +7002,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function renderConsultaResultados(fechaIni, fechaFin, data){
     var total = data.rebajados.length + data.refuerzo.length + data.sancionados.length;
 
-    function tablaSeccion(titulo, rows){
+    function tablaSeccion(titulo, rows, esSancionados){
       var body;
       if (!rows.length){
         body = '<div class="empty-state">Sin resultados en este periodo.</div>';
       } else {
         body = '<table class="consulta-table"><thead><tr>' +
           '<th>Número</th><th>Alumno</th><th>Pelotón</th><th>Desde</th><th>Hasta</th><th>Detalle</th>' +
+          (esSancionados ? '<th class="no-print">Acciones</th>' : "") +
           '</tr></thead><tbody>' +
           rows.map(function(r){
             return "<tr>" +
@@ -5626,6 +7019,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               "<td>" + formatDateDisplay(r.desde) + "</td>" +
               "<td>" + formatDateDisplay(r.hasta) + "</td>" +
               "<td>" + escapeHtml(r.detalle || "—") + "</td>" +
+              (esSancionados ? ("<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>") : "") +
               "</tr>";
           }).join("") +
           "</tbody></table>";
@@ -5639,12 +7033,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     html += '<div class="consulta-report-sub">Personal con rebaje, refuerzo o arresto en el periodo del ' + formatDateDisplay(fechaIni) + ' al ' + formatDateDisplay(fechaFin) + '</div>';
     html += '<div class="consulta-report-meta">Total: ' + total + ' registro' + (total === 1 ? "" : "s") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
-    html += tablaSeccion("Rebajados", data.rebajados);
-    html += tablaSeccion("En refuerzo", data.refuerzo);
-    html += tablaSeccion("Sancionados (arresto)", data.sancionados);
+    html += tablaSeccion("Rebajados", data.rebajados, false);
+    html += tablaSeccion("En refuerzo", data.refuerzo, false);
+    html += tablaSeccion("Sancionados (arresto)", data.sancionados, true);
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
+    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   function validateConsFechasLive(){
@@ -5657,18 +7052,113 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   consFechaFin.addEventListener("change", validateConsFechasLive);
 
   consTipoSelect.addEventListener("change", function(){
-    var activo = consTipoSelect.value === "estado_periodo";
-    consFechasWrap.classList.toggle("hidden", !activo);
-    consActions.classList.toggle("hidden", !activo);
+    var tipo = consTipoSelect.value;
+    var esEstadoPeriodo = tipo === "estado_periodo";
+    var esActividades = tipo === "actividades";
+    var esArrestoPendiente = tipo === "arresto_pendiente";
+    var esTrabajos = tipo === "trabajos";
+    consFechasWrap.classList.toggle("hidden", !esEstadoPeriodo);
+    consActividadFaseWrap.classList.toggle("hidden", !esActividades);
+    consArrestoPendienteWrap.classList.toggle("hidden", !esArrestoPendiente);
+    consTrabajosWrap.classList.toggle("hidden", !esTrabajos);
+    consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos));
     consResultadosWrap.classList.add("hidden");
     consResultados.innerHTML = "";
     consImprimirBtn.disabled = true;
     consFormMsg.textContent = "";
     consFormMsg.className = "form-msg";
     consFechaHint.classList.add("hidden");
+    if (esArrestoPendiente){
+      consArrestoAgruparCheck.checked = false;
+    }
+    if (esTrabajos){
+      consTrabajosSoloVencidosCheck.checked = false;
+    }
+    if (esActividades){
+      consActFaseSelect.value = "";
+      consActNoParticiparonCheck.checked = false;
+      refreshConsActActividadOptions();
+      buildConsActAlumnoOptions();
+      consActAlumnoInput.value = "";
+      consActSelectedAlumno = null;
+      consActAlumnoPreview.classList.remove("show");
+      consActAlumnoHint.classList.add("hidden");
+      setConsActModo("actividad");
+    }
   });
 
   consBuscarBtn.addEventListener("click", function(){
+    var tipo = consTipoSelect.value;
+
+    if (tipo === "arresto_pendiente"){
+      if (consArrestoAgruparCheck.checked){
+        var dataPendGrp = computeConsultaArrestoPendienteAgrupado();
+        renderConsultaArrestoPendienteAgrupadoResultados(dataPendGrp);
+        var totalAlumnosGrp = dataPendGrp.reduce(function(sum, g){ return sum + g.alumnos.length; }, 0);
+        consFormMsg.textContent = "Consulta realizada: " + dataPendGrp.length + " expediente" + (dataPendGrp.length === 1 ? "" : "s") + " (" + totalAlumnosGrp + " alumno" + (totalAlumnosGrp === 1 ? "" : "s") + ") con arresto pendiente de fecha.";
+        consFormMsg.className = "form-msg ok";
+        consImprimirBtn.disabled = false;
+        return;
+      }
+      var dataPend = computeConsultaArrestoPendiente();
+      renderConsultaArrestoPendienteResultados(dataPend);
+      consFormMsg.textContent = "Consulta realizada: " + dataPend.length + " sanci" + (dataPend.length === 1 ? "ón" : "ones") + " con arresto pendiente de fecha.";
+      consFormMsg.className = "form-msg ok";
+      consImprimirBtn.disabled = false;
+      return;
+    }
+
+    if (tipo === "trabajos"){
+      var soloVencidos = consTrabajosSoloVencidosCheck.checked;
+      var dataTrab = computeConsultaTrabajos(soloVencidos);
+      renderConsultaTrabajosResultados(dataTrab, soloVencidos);
+      var vencidosCount = dataTrab.filter(function(t){ return t.vencido; }).length;
+      consFormMsg.textContent = "Consulta realizada: " + dataTrab.length + " trabajo" + (dataTrab.length === 1 ? "" : "s") + (soloVencidos ? "" : (" (" + vencidosCount + " vencido" + (vencidosCount === 1 ? "" : "s") + ")")) + ".";
+      consFormMsg.className = "form-msg ok";
+      consImprimirBtn.disabled = false;
+      return;
+    }
+
+    if (tipo === "actividades"){
+      var fase = consActFaseSelect.value;
+      if (!fase){
+        consFormMsg.textContent = "Selecciona una fase.";
+        consFormMsg.className = "form-msg error";
+        consResultadosWrap.classList.add("hidden");
+        consImprimirBtn.disabled = true;
+        return;
+      }
+
+      if (consActModo === "alumno"){
+        if (!consActSelectedAlumno){
+          consActAlumnoHint.classList.remove("hidden");
+          consFormMsg.textContent = "Selecciona un alumno de la lista.";
+          consFormMsg.className = "form-msg error";
+          consResultadosWrap.classList.add("hidden");
+          consImprimirBtn.disabled = true;
+          return;
+        }
+        var dataAlumno = computeConsultaActividadesPorAlumno(fase, consActSelectedAlumno.numero);
+        renderConsultaActividadesPorAlumnoResultados(fase, consActSelectedAlumno, dataAlumno);
+        var hechas = dataAlumno.filter(function(d){ return d.participo; }).length;
+        consFormMsg.textContent = "Consulta realizada: ha participado en " + hechas + " de " + dataAlumno.length + " actividades.";
+        consFormMsg.className = "form-msg ok";
+        consImprimirBtn.disabled = false;
+        return;
+      }
+
+      var actividadId = consActActividadSelect.value;
+      var invertir = consActNoParticiparonCheck.checked;
+      var dataAct = computeConsultaActividadesPorActividad(fase, actividadId, invertir);
+      renderConsultaActividadesPorActividadResultados(fase, invertir, dataAct);
+      var totalAct = dataAct.reduce(function(sum, g){ return sum + g.personas.length; }, 0);
+      consFormMsg.textContent = "Consulta realizada: " + totalAct + (invertir ? " pendiente" : " participaci") + (invertir ? (totalAct === 1 ? "" : "s") : (totalAct === 1 ? "ón" : "ones")) + ".";
+      consFormMsg.className = "form-msg ok";
+      consImprimirBtn.disabled = false;
+      return;
+    }
+
+    // tipo === "estado_periodo"
     var ok = true;
     if (!consFechaIni.value || !consFechaFin.value) ok = false;
     if (!validateConsFechasLive()) ok = false;
@@ -5696,11 +7186,26 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   consImprimirBtn.addEventListener("click", function(){
     if (consImprimirBtn.disabled) return;
+    // Si el informe está agrupado por expediente y se ha marcado alguno con
+    // su casilla "Imprimir", solo se incluyen esos; si no se marcó ninguno,
+    // se imprime el informe completo, igual que hasta ahora.
+    var checks = consResultados.querySelectorAll(".consExpPrintCheck:checked");
+    if (checks.length){
+      var seleccionados = Array.prototype.map.call(checks, function(c){ return c.getAttribute("data-exp-idx"); });
+      consResultados.querySelectorAll(".consulta-section[data-exp-idx]").forEach(function(sec){
+        sec.classList.toggle("print-selected", seleccionados.indexOf(sec.getAttribute("data-exp-idx")) !== -1);
+      });
+      document.body.classList.add("print-filtro-expediente");
+    }
     document.body.classList.add("print-consulta");
     window.print();
   });
   window.addEventListener("afterprint", function(){
     document.body.classList.remove("print-consulta");
+    document.body.classList.remove("print-filtro-expediente");
+    consResultados.querySelectorAll(".consulta-section.print-selected").forEach(function(sec){
+      sec.classList.remove("print-selected");
+    });
   });
 
   // ================= USUARIOS TAB =================
@@ -6053,12 +7558,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   var currentUser = null;
 
   function arrancar(){
-    Promise.all([fetchRebajes(), fetchSanciones(), fetchRefuerzosServer(), fetchRosterFromServer()])
+    Promise.all([fetchRebajes(), fetchSanciones(), fetchRefuerzosServer(), fetchRosterFromServer(), fetchActividades()])
       .then(function(results){
         var hayRoster = results[3];
         renderRebajesTab();
         renderSancionesTab();
         renderRefuerzosTab();
+        renderActividadesTab();
         if (hayRoster){
           renderRoster();
           showApp();
