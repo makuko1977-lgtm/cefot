@@ -6,6 +6,17 @@
     "border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 16px rgba(0,0,0,.18);cursor:pointer;";
 
   function pintarBarra(esCapitan){
+    if (esCapitan && !document.getElementById("cefot-capitan-top")){
+      var top = document.createElement("div");
+      top.id = "cefot-capitan-top";
+      top.setAttribute("style",
+        "position:sticky;top:0;z-index:99997;background:#2f6690;color:#fff;" +
+        "padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;");
+      top.innerHTML =
+        "<span>Estás en una sección como capitán de compañía.</span>" +
+        "<a href=\"/capitan.html\" style=\"color:#fff;font-weight:700;background:#1d4e72;padding:8px 14px;border-radius:8px;text-decoration:none;\">Volver a compañía</a>";
+      document.body.insertBefore(top, document.body.firstChild);
+    }
     if (document.getElementById("cefot-extras-bar")) return;
     var bar = document.createElement("div");
     bar.id = "cefot-extras-bar";
@@ -18,7 +29,6 @@
       html += '<a href="/usuarios.html" style="' + b + 'background:#2f6690;">Jefes de pelotón</a>';
     }
     html +=
-      '<a href="/login.html" style="' + b + 'background:#1f7a3d;">Modo servidor</a>' +
       '<button type="button" id="cefotSyncPull" style="' + b + 'background:#345c34;">Traer del servidor</button>' +
       '<button type="button" id="cefotSyncPush" style="' + b + 'background:#8a5f1c;">Publicar en servidor</button>' +
       '<button type="button" id="cefotLogout" style="' + b + 'background:#b23b30;">Cerrar sesión</button>';
@@ -41,9 +51,11 @@
     var t = document.createElement("script");
     t.src = "/shared/instructor-trabajo.js";
     document.body.appendChild(t);
-    var a = document.createElement("script");
-    a.src = "/shared/seccion-avisos.js";
-    document.body.appendChild(a);
+    if (!esCapitan){
+      var a = document.createElement("script");
+      a.src = "/shared/seccion-avisos.js";
+      document.body.appendChild(a);
+    }
   }
 
   fetch("/api/auth/me").then(function (r){ return r.ok ? r.json() : null; }).then(function (me){
