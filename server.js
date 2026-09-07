@@ -35,6 +35,7 @@ app.use("/api/roster", require("./routes/roster"));
 app.use("/api/sanciones", require("./routes/sanciones"));
 app.use("/api/rebajes", require("./routes/rebajes"));
 app.use("/api/refuerzos", require("./routes/refuerzos"));
+app.use("/api/actividades", require("./routes/actividades"));
 app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/superadmin", require("./routes/superadmin"));
