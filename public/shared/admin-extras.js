@@ -1,4 +1,4 @@
-/* Barra de copia y sync en admin.html y seccion3.html */
+/* Barra servidor en seccion3.html */
 (function (){
   if (document.getElementById("cefot-extras-bar")) return;
   var bar = document.createElement("div");
@@ -10,6 +10,7 @@
   var pagina = (location.pathname || "").toLowerCase();
   if (pagina.indexOf("seccion3") !== -1){
     bar.innerHTML =
+      '<a href="/usuarios.html" style="' + b + 'background:#2f6690;">Jefes de pelotón</a>' +
       '<a href="/login.html" style="' + b + 'background:#1f7a3d;">Modo servidor</a>' +
       '<button type="button" id="cefotSyncPull" style="' + b + 'background:#345c34;">Traer del servidor</button>' +
       '<button type="button" id="cefotSyncPush" style="' + b + 'background:#8a5f1c;">Publicar en servidor</button>';
@@ -23,9 +24,5 @@
       if (push) push.onclick = function (){ window.cefotSync && window.cefotSync.publicar(); };
     };
     document.body.appendChild(s);
-  } else {
-    bar.innerHTML =
-      '<a href="/copia.html" style="' + b + 'background:#1f7a3d;">Copia / sync</a>';
-    document.body.appendChild(bar);
   }
 })();
