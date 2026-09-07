@@ -46,15 +46,14 @@ function serveHtmlWithExtras(fileName, extraSrc){
     const file = path.join(PUBLIC, fileName);
     fs.readFile(file, "utf8", function (err, html){
       if (err) return next();
-      if (extraSrc) html = injectScript(html, extraSrc);
-      else html = injectScript(html, "/shared/admin-extras.js");
+      html = injectScript(html, extraSrc || "/shared/admin-extras.js");
       res.type("html").send(html);
     });
   };
 }
 
-app.get("/admin.html", serveHtmlWithExtras("admin.html"));
 app.get("/seccion3.html", serveHtmlWithExtras("seccion3.html"));
+app.get("/seccion3_completo.html", serveHtmlWithExtras("seccion3_completo.html"));
 app.get("/superadmin.html", serveHtmlWithExtras("superadmin.html", "/shared/superadmin-estudios.js"));
 
 app.use(express.static(PUBLIC));
