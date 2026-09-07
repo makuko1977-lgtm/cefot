@@ -34,24 +34,28 @@ app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/superadmin", require("./routes/superadmin"));
 app.use("/api/capitan", require("./routes/capitan"));
+app.use("/api/estudios", require("./routes/estudios"));
 
-function serveHtmlWithExtras(fileName){
+function injectScript(html, src){
+  if (html.indexOf(src) !== -1) return html;
+  return html.replace(/<\/body>/i, "<script src=\"" + src + "\"></script></body>");
+}
+
+function serveHtmlWithExtras(fileName, extraSrc){
   return function (req, res, next){
     const file = path.join(PUBLIC, fileName);
     fs.readFile(file, "utf8", function (err, html){
       if (err) return next();
-      if (html.indexOf("/shared/admin-extras.js") !== -1){
-        return res.type("html").send(html);
-      }
-      res.type("html").send(
-        html.replace(/<\/body>/i, "<script src=\"/shared/admin-extras.js\"></script></body>")
-      );
+      if (extraSrc) html = injectScript(html, extraSrc);
+      else html = injectScript(html, "/shared/admin-extras.js");
+      res.type("html").send(html);
     });
   };
 }
 
 app.get("/admin.html", serveHtmlWithExtras("admin.html"));
 app.get("/seccion3.html", serveHtmlWithExtras("seccion3.html"));
+app.get("/superadmin.html", serveHtmlWithExtras("superadmin.html", "/shared/superadmin-estudios.js"));
 
 app.use(express.static(PUBLIC));
 
