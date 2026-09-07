@@ -3,12 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="0;url=/login.html">
-<title>CEFOT-2</title>
+<title>CEFOT-2 · Acceso</title>
 <link rel="manifest" href="/manifest.webmanifest">
-<script>location.replace("/login.html");</script>
+<link rel="icon" href="/shared/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/shared/app.css">
+<style>
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;margin:0;background:#f5f2e6;font-family:"Public Sans",system-ui,sans-serif;}
+  .card{width:100%;max-width:420px;background:#fff;border:1px solid #dfe3d1;border-radius:16px;padding:36px 32px;box-shadow:0 10px 26px rgba(64,74,45,.14);}
+  .mark{width:52px;height:52px;border-radius:12px;background:linear-gradient(150deg,#1f7a3d 0%,#4a8f4f 55%,#345c34 100%);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#0e150f;margin:0 auto 18px;}
+  h1{text-align:center;font-size:19px;margin:0 0 4px;}
+  .sub{text-align:center;font-size:13px;color:#5c6752;margin:0 0 24px;}
+  .btn{display:block;width:100%;text-align:center;text-decoration:none;padding:12px 14px;border-radius:10px;font-weight:600;font-size:15px;box-sizing:border-box;}
+  .btn.primary{background:#1f7a3d;color:#fff;margin-bottom:10px;}
+  .btn.ghost{background:#eef1e2;color:#20261b;}
+  .hint{margin-top:16px;font-size:12px;color:#5c6752;text-align:center;line-height:1.45;}
+</style>
 </head>
 <body>
-<p><a href="/login.html">Ir al acceso</a></p>
+  <div class="card">
+    <div class="mark">S·3</div>
+    <h1>CEFOT-2 · BAL/3ª CÍA</h1>
+    <p class="sub">Elige cómo quieres entrar</p>
+    <a class="btn primary" href="/login.html">Modo servidor</a>
+    <a class="btn ghost" href="/seccion3.html">Modo local (este dispositivo)</a>
+    <p class="hint">El modo servidor usa usuario y contraseña y comparte los datos entre quien tenga cuenta. El modo local guarda todo solo en este navegador.</p>
+  </div>
 </body>
 </html>
