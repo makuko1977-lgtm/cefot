@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 
 const db = require("./lib/db");
 const auth = require("./lib/auth");
+const avisos = require("./lib/avisos");
 
 const app = express();
 const PUBLIC = path.join(__dirname, "public");
@@ -26,7 +27,19 @@ app.use(function (req, res, next){
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/roster", require("./routes/roster"));
-app.use("/api/sanciones", require("./routes/sanciones"));
+app.use("/api/sanciones", function (req, res, next){
+  if (req.method === "POST" && (req.path === "/" || req.path === "")){
+    const origJson = res.json.bind(res);
+    res.json = function (body){
+      if (res.statusCode === 201 && body && body.sancion && req.db){
+        avisos.registrarParte(req.db, body.sancion, body.sancion.createdBy);
+        db.save();
+      }
+      return origJson(body);
+    };
+  }
+  next();
+}, require("./routes/sanciones"));
 app.use("/api/rebajes", require("./routes/rebajes"));
 app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/actividades", require("./routes/actividades"));
@@ -42,7 +55,6 @@ function injectScript(html, src){
   if (html.indexOf(src) !== -1) return html;
   return html.replace(/<\/body>/i, "<script src=\"" + src + "\"></script></body>");
 }
-
 function serveHtmlWithExtras(fileName, extraSrc){
   return function (req, res, next){
     const file = path.join(PUBLIC, fileName);
