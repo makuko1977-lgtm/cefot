@@ -34,8 +34,8 @@
 
     <form id="loginForm">
       <div class="field">
-        <label for="loginDni">DNI</label>
-        <input type="text" id="loginDni" autocomplete="username" autocapitalize="characters" required>
+        <label for="loginDni">Usuario</label>
+        <input type="text" id="loginDni" autocomplete="username" autocapitalize="characters" placeholder="El identificador que te asignaron" required>
       </div>
       <div class="field">
         <label for="loginPassword">Contraseña</label>
@@ -53,12 +53,6 @@
   var form = document.getElementById("loginForm");
   var msg = document.getElementById("loginMsg");
 
-  // Adónde va cada cual tras iniciar sesión: el Súper Administrador entra
-  // siempre en su panel (aunque también sea jefe de sección de una sección
-  // propia — desde ese panel tiene un acceso directo a ella); un capitán de
-  // compañía (sin sección propia todavía) entra en /capitan.html a elegir
-  // sección; si no, jefe de sección a /admin.html y jefe de pelotón a
-  // /instructor.html.
   function destinoTrasLogin(me){
     if (me.superAdmin) return "/superadmin.html";
     if (me.capitanCompania && !(me.tenant && me.tenant.role === "admin")) return "/capitan.html";
@@ -66,7 +60,6 @@
     return "/instructor.html";
   }
 
-  // Si ya hay sesión iniciada, redirige directamente.
   fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
     if (me) location.href = destinoTrasLogin(me);
   }).catch(function(){});
