@@ -56,6 +56,7 @@ function serveHtmlWithExtras(fileName, extraSrc){
 app.get("/seccion3.html", serveHtmlWithExtras("seccion3.html"));
 app.get("/seccion3_completo.html", serveHtmlWithExtras("seccion3_completo.html"));
 app.get("/superadmin.html", serveHtmlWithExtras("superadmin.html", "/shared/superadmin-estudios.js"));
+app.get("/instructor.html", serveHtmlWithExtras("instructor.html", "/shared/instructor-trabajo.js"));
 
 app.use(express.static(PUBLIC));
 
