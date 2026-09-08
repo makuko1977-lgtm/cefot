@@ -7,10 +7,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="/shared/icon.svg" type="image/svg+xml">
-<script src="shared/xlsx.full.min.js"></script>
-<script src="shared/pdf-lib.min.js"></script>
-<script src="shared/exceljs.min.js"></script>
+<!-- Librerías en /shared/ (sin incrustar xlsx en la página). -->
+<script src="/shared/xlsx.full.min.js"></script>
+<script src="/shared/pdf-lib.min.js"></script>
+<script src="/shared/exceljs.min.js"></script>
+
 <style>
   :root{
     --bg:#f5f2e6;
@@ -348,6 +349,32 @@
     white-space:nowrap;
     position:sticky;
     top:0;
+    vertical-align:top;
+  }
+  thead th .th-label{
+    display:block;
+    margin-bottom:6px;
+  }
+  thead th .th-filter,
+  thead th .th-filter-select{
+    display:block;
+    width:100%;
+    min-width:72px;
+    margin:0;
+    padding:5px 7px;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:0;
+    text-transform:none;
+    color:var(--text);
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:6px;
+  }
+  thead th .th-filter:focus,
+  thead th .th-filter-select:focus{
+    outline:2px solid rgba(90,110,50,.25);
+    border-color:#8a9a62;
   }
   tbody td{
     padding:10px 14px;
@@ -664,6 +691,29 @@
   }
   .chip .x:hover{background:rgba(0,0,0,.32);}
 
+  .validacion-banner{
+    border-radius:10px;
+    padding:12px 14px;
+    margin:0 0 14px;
+    border:1px solid var(--border);
+    background:var(--panel-2);
+  }
+  .validacion-banner.ok{
+    border-color:#8aaa6a;
+    background:#eef6e4;
+  }
+  .validacion-banner.warn{
+    border-color:#c4a24a;
+    background:#fbf4e2;
+  }
+  .validacion-banner.error{
+    border-color:#c47a6a;
+    background:#f8ece8;
+  }
+  .validacion-banner strong{display:block; margin-bottom:4px;}
+  .validacion-banner ul{margin:6px 0 0 18px; padding:0;}
+  .validacion-preview{margin-top:8px;}
+
   .expediente-tag{
     display:inline-flex;
     align-items:center;
@@ -736,6 +786,185 @@
   .modal-overlay.hidden{display:none;}
   @keyframes overlayIn{from{opacity:0;} to{opacity:1;}}
   @keyframes modalIn{from{opacity:0; transform:translateY(8px) scale(.985);} to{opacity:1; transform:none;}}
+  /* ---------- Resolución de coincidencia de fechas ---------- */
+  .fecha-coincidencia-card{
+    max-width:1040px;
+  }
+  .fecha-coincidencia-alert{
+    padding:12px 14px;
+    border:1px solid var(--warn);
+    background:var(--warn-soft);
+    border-radius:8px;
+    margin-bottom:14px;
+  }
+  .fecha-coincidencia-alumno{
+    font-weight:700;
+    margin-bottom:4px;
+  }
+  .fecha-coincidencia-detalle{
+    color:var(--text-dim);
+    font-size:13px;
+    line-height:1.5;
+  }
+  .fecha-coincidencia-casos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:16px;
+    margin-top:16px;
+  }
+  .fecha-coincidencia-caso{
+    border:1px solid var(--border);
+    background:var(--panel-2);
+    border-radius:12px;
+    padding:14px;
+    min-width:0;
+  }
+  .fecha-coincidencia-caso-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .fecha-coincidencia-caso-name{
+    font-weight:700;
+    line-height:1.35;
+  }
+  .fecha-coincidencia-caso-ref{
+    color:var(--text-dim);
+    font-size:12px;
+    margin-top:3px;
+  }
+  .fecha-coincidencia-busy{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .fecha-coincidencia-busy span{
+    font-size:11px;
+    border:1px solid var(--danger);
+    color:var(--danger);
+    background:var(--danger-soft);
+    border-radius:999px;
+    padding:3px 7px;
+  }
+  .fecha-cal-wrap{
+    border:1px solid var(--border-light);
+    background:var(--panel);
+    border-radius:10px;
+    padding:10px;
+  }
+  .fecha-cal-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .fecha-cal-title{
+    font-family:var(--font-display);
+    font-size:14px;
+    font-weight:700;
+    text-transform:capitalize;
+  }
+  .fecha-cal-nav{
+    display:flex;
+    gap:6px;
+  }
+  .fecha-cal-nav button{
+    width:30px; height:30px;
+    padding:0;
+  }
+  .fecha-cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    gap:4px;
+  }
+  .fecha-cal-weekday{
+    font-size:10px;
+    color:var(--text-dim);
+    text-align:center;
+    padding:2px 0 4px;
+    font-weight:700;
+  }
+  .fecha-cal-day{
+    position:relative;
+    min-height:36px;
+    border:1px solid var(--border-light);
+    border-radius:7px;
+    background:var(--panel);
+    cursor:pointer;
+    font-size:12px;
+    font-weight:600;
+  }
+  .fecha-cal-day:hover:not(.disabled){
+    border-color:var(--accent);
+    background:#e6ecdc;
+  }
+  .fecha-cal-day.other-month{
+    opacity:.28;
+    cursor:default;
+  }
+  .fecha-cal-day.busy{
+    color:var(--danger);
+    background:var(--danger-soft);
+    border-color:var(--danger);
+    text-decoration:line-through;
+    cursor:not-allowed;
+  }
+  .fecha-cal-day.disabled{
+    cursor:not-allowed;
+  }
+  .fecha-cal-day.selected{
+    outline:2px solid var(--accent2);
+    outline-offset:1px;
+    background:var(--accent2-soft);
+  }
+  .fecha-cal-day.in-range:not(.busy){
+    background:var(--accent2-soft);
+  }
+  .fecha-cal-dot{
+    position:absolute;
+    width:5px; height:5px;
+    border-radius:50%;
+    bottom:4px; left:50%;
+    transform:translateX(-50%);
+    background:var(--danger);
+  }
+  .fecha-coincidencia-selection{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+  }
+  .fecha-coincidencia-selection .field label{font-size:11px;}
+  .fecha-coincidencia-selection input{width:100%;box-sizing:border-box;}
+  .fecha-coincidencia-step{
+    margin-top:8px;
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  .fecha-coincidencia-error{
+    margin-top:10px;
+  }
+  .fecha-coincidencia-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-top:16px;
+    flex-wrap:wrap;
+  }
+  .fecha-coincidencia-summary{
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  @media (max-width:600px){
+    .fecha-coincidencia-selection{grid-template-columns:1fr;}
+    .fecha-coincidencia-casos{grid-template-columns:1fr;}
+  }
+
   .modal-card{
     background:var(--panel); border:1px solid var(--border); border-radius:16px;
     padding:26px; width:100%; max-width:780px;
@@ -1270,8 +1499,17 @@
           <table id="sancionesTable">
             <thead>
               <tr>
-                <th class="no-print"></th><th>Exp.</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha</th><th>Tipo</th>
-                <th>Motivo</th><th>Medida correctora</th><th>Alertas</th><th></th>
+                <th class="no-print"></th>
+                <th><span class="th-label">Exp.</span><input type="search" class="th-filter" id="sanFiltroExp" placeholder="Filtrar exp." autocomplete="off"></th>
+                <th><span class="th-label">Número</span><input type="search" class="th-filter" id="sanFiltroNumero" placeholder="Filtrar nº" autocomplete="off"></th>
+                <th><span class="th-label">Alumno</span><input type="search" class="th-filter" id="sanFiltroAlumno" placeholder="Filtrar alumno" autocomplete="off"></th>
+                <th><span class="th-label">Pelotón</span><input type="search" class="th-filter" id="sanFiltroPelotonCol" placeholder="Filtrar pelotón" autocomplete="off"></th>
+                <th><span class="th-label">Fecha</span><input type="search" class="th-filter" id="sanFiltroFecha" placeholder="dd/mm/aaaa" autocomplete="off"></th>
+                <th><span class="th-label">Tipo</span><select class="th-filter-select" id="sanFiltroTipoCol"><option value="">Todos</option><option value="LEVE">Leve</option><option value="GRAVE">Grave</option></select></th>
+                <th><span class="th-label">Motivo</span><input type="search" class="th-filter" id="sanFiltroMotivo" placeholder="Filtrar motivo" autocomplete="off"></th>
+                <th><span class="th-label">Medida correctora</span><input type="search" class="th-filter" id="sanFiltroMedida" placeholder="Filtrar medida" autocomplete="off"></th>
+                <th><span class="th-label">Alertas</span></th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="sancionesTableBody"></tbody>
@@ -1565,7 +1803,7 @@
 
       <div class="panel corner-accent">
         <h3>Consultas</h3>
-        <div class="panel-sub">Genera un listado del personal de la sección con rebaje, refuerzo o arresto en un periodo de fechas concreto.</div>
+        <div class="panel-sub">Elige el tipo de consulta: periodo de rebaje/refuerzo/arresto, actividades, arrestos pendientes, trabajos, o el informe completo de un expediente por su número.</div>
 
         <div class="field-grid">
           <div class="field" style="grid-column:1/-1;">
@@ -1576,6 +1814,7 @@
               <option value="actividades">Personal que ha participado en una actividad</option>
               <option value="arresto_pendiente">Sanciones de arresto con fecha pendiente</option>
               <option value="trabajos">Sanciones de trabajo: hechos, pendientes y vencidos</option>
+              <option value="expediente">Consulta de expediente (informe completo)</option>
             </select>
           </div>
         </div>
@@ -1649,6 +1888,17 @@
           </label>
         </div>
 
+        <div class="hidden" id="consExpedienteWrap" style="margin-top:4px;">
+          <div class="field" style="grid-column:1/-1;">
+            <label for="consExpedienteInput">Número de expediente</label>
+            <input type="text" id="consExpedienteInput" list="consExpedienteList" placeholder="Escribe el número de expediente..." autocomplete="off">
+            <datalist id="consExpedienteList"></datalist>
+            <div class="cadet-preview" id="consExpedientePreview"></div>
+            <div class="hint error hidden" id="consExpedienteHint">El número no es válido o no existe ningún expediente con ese valor.</div>
+            <div class="hint">El número debe ser entero positivo. «4» y «004» se consideran el mismo. Si hay varias sanciones o refuerzos con ese número, el informe los muestra todos.</div>
+          </div>
+        </div>
+
         <div class="form-actions hidden" id="consActions">
           <button class="btn primary" id="consBuscarBtn" type="button">Consultar</button>
           <button class="btn ghost" id="consImprimirBtn" type="button" disabled>Imprimir</button>
@@ -1690,6 +1940,32 @@
     </div>
 
   </section>
+
+  <!-- ---------- RESOLUCIÓN DE COINCIDENCIA DE FECHAS (modal) ---------- -->
+  <div id="fechaCoincidenciaModal" class="modal-overlay hidden">
+    <div class="modal-card fecha-coincidencia-card">
+      <div class="modal-header">
+        <h3>Coincidencia de fechas · asignación alternativa</h3>
+        <button type="button" class="modal-close" id="fechaCoincidenciaCloseBtn">&times;</button>
+      </div>
+      <div class="fecha-coincidencia-alert">
+        <div class="fecha-coincidencia-alumno" id="fechaCoincidenciaAlumno">Fechas incompatibles detectadas</div>
+        <div class="fecha-coincidencia-detalle" id="fechaCoincidenciaDetalle"></div>
+      </div>
+      <div class="hint">
+        Cada alumno afectado dispone de <strong>su propio calendario</strong>. Los días ocupados por otro refuerzo o arresto aparecen en <strong>rojo y tachados</strong> y no pueden seleccionarse.
+        La fecha alternativa de cada alumno generará un <strong>expediente independiente</strong>, copiando todos los datos del registro original y modificando únicamente el periodo asignado.
+      </div>
+      <div id="fechaCoincidenciaCasos" class="fecha-coincidencia-casos"></div>
+      <div class="fecha-coincidencia-footer">
+        <span id="fechaCoincidenciaSummary" class="fecha-coincidencia-summary"></span>
+        <div class="form-actions" style="margin-top:0;">
+          <button type="button" class="btn primary" id="fechaCoincidenciaGuardarBtn">Generar expedientes con nuevas fechas</button>
+          <button type="button" class="btn ghost" id="fechaCoincidenciaCancelarBtn">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ---------- FICHA DEL ALUMNO (modal) ---------- -->
   <div id="fichaModal" class="modal-overlay hidden">
@@ -1816,6 +2092,18 @@
 
   <footer class="info">Los datos se guardan únicamente en este navegador (almacenamiento local). Nadie más tiene acceso a ellos.</footer>
 </div>
+
+<script>
+!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).dayjs=e()}(this,(function(){"use strict";var t=1e3,e=6e4,n=36e5,r="millisecond",i="second",s="minute",u="hour",a="day",o="week",c="month",f="quarter",h="year",d="date",l="Invalid Date",$=/^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/,y=/\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,M={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_"),ordinal:function(t){var e=["th","st","nd","rd"],n=t%100;return"["+t+(e[(n-20)%10]||e[n]||e[0])+"]"}},m=function(t,e,n){var r=String(t);return!r||r.length>=e?t:""+Array(e+1-r.length).join(n)+t},v={s:m,z:function(t){var e=-t.utcOffset(),n=Math.abs(e),r=Math.floor(n/60),i=n%60;return(e<=0?"+":"-")+m(r,2,"0")+":"+m(i,2,"0")},m:function t(e,n){if(e.date()<n.date())return-t(n,e);var r=12*(n.year()-e.year())+(n.month()-e.month()),i=e.clone().add(r,c),s=n-i<0,u=e.clone().add(r+(s?-1:1),c);return+(-(r+(n-i)/(s?i-u:u-i))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(t){return{M:c,y:h,w:o,d:a,D:d,h:u,m:s,s:i,ms:r,Q:f}[t]||String(t||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},g="en",D={};D[g]=M;var p="$isDayjsObject",S=function(t){return t instanceof _||!(!t||!t[p])},w=function t(e,n,r){var i;if(!e)return g;if("string"==typeof e){var s=e.toLowerCase();D[s]&&(i=s),n&&(D[s]=n,i=s);var u=e.split("-");if(!i&&u.length>1)return t(u[0])}else{var a=e.name;D[a]=e,i=a}return!r&&i&&(g=i),i||!r&&g},O=function(t,e){if(S(t))return t.clone();var n="object"==typeof e?e:{};return n.date=t,n.args=arguments,new _(n)},b=v;b.l=w,b.i=S,b.w=function(t,e){return O(t,{locale:e.$L,utc:e.$u,x:e.$x,$offset:e.$offset})};var _=function(){function M(t){this.$L=w(t.locale,null,!0),this.parse(t),this.$x=this.$x||t.x||{},this[p]=!0}var m=M.prototype;return m.parse=function(t){this.$d=function(t){var e=t.date,n=t.utc;if(null===e)return new Date(NaN);if(b.u(e))return new Date;if(e instanceof Date)return new Date(e);if("string"==typeof e&&!/Z$/i.test(e)){var r=e.match($);if(r){var i=r[2]-1||0,s=(r[7]||"0").substring(0,3);return n?new Date(Date.UTC(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)):new Date(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)}}return new Date(e)}(t),this.init()},m.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds()},m.$utils=function(){return b},m.isValid=function(){return!(this.$d.toString()===l)},m.isSame=function(t,e){var n=O(t);return this.startOf(e)<=n&&n<=this.endOf(e)},m.isAfter=function(t,e){return O(t)<this.startOf(e)},m.isBefore=function(t,e){return this.endOf(e)<O(t)},m.$g=function(t,e,n){return b.u(t)?this[e]:this.set(n,t)},m.unix=function(){return Math.floor(this.valueOf()/1e3)},m.valueOf=function(){return this.$d.getTime()},m.startOf=function(t,e){var n=this,r=!!b.u(e)||e,f=b.p(t),l=function(t,e){var i=b.w(n.$u?Date.UTC(n.$y,e,t):new Date(n.$y,e,t),n);return r?i:i.endOf(a)},$=function(t,e){return b.w(n.toDate()[t].apply(n.toDate("s"),(r?[0,0,0,0]:[23,59,59,999]).slice(e)),n)},y=this.$W,M=this.$M,m=this.$D,v="set"+(this.$u?"UTC":"");switch(f){case h:return r?l(1,0):l(31,11);case c:return r?l(1,M):l(0,M+1);case o:var g=this.$locale().weekStart||0,D=(y<g?y+7:y)-g;return l(r?m-D:m+(6-D),M);case a:case d:return $(v+"Hours",0);case u:return $(v+"Minutes",1);case s:return $(v+"Seconds",2);case i:return $(v+"Milliseconds",3);default:return this.clone()}},m.endOf=function(t){return this.startOf(t,!1)},m.$set=function(t,e){var n,o=b.p(t),f="set"+(this.$u?"UTC":""),l=(n={},n[a]=f+"Date",n[d]=f+"Date",n[c]=f+"Month",n[h]=f+"FullYear",n[u]=f+"Hours",n[s]=f+"Minutes",n[i]=f+"Seconds",n[r]=f+"Milliseconds",n)[o],$=o===a?this.$D+(e-this.$W):e;if(o===c||o===h){var y=this.clone().set(d,1);y.$d[l]($),y.init(),this.$d=y.set(d,Math.min(this.$D,y.daysInMonth())).$d}else l&&this.$d[l]($);return this.init(),this},m.set=function(t,e){return this.clone().$set(t,e)},m.get=function(t){return this[b.p(t)]()},m.add=function(r,f){var d,l=this;r=Number(r);var $=b.p(f),y=function(t){var e=O(l);return b.w(e.date(e.date()+Math.round(t*r)),l)};if($===c)return this.set(c,this.$M+r);if($===h)return this.set(h,this.$y+r);if($===a)return y(1);if($===o)return y(7);var M=(d={},d[s]=e,d[u]=n,d[i]=t,d)[$]||1,m=this.$d.getTime()+r*M;return b.w(m,this)},m.subtract=function(t,e){return this.add(-1*t,e)},m.format=function(t){var e=this,n=this.$locale();if(!this.isValid())return n.invalidDate||l;var r=t||"YYYY-MM-DDTHH:mm:ssZ",i=b.z(this),s=this.$H,u=this.$m,a=this.$M,o=n.weekdays,c=n.months,f=n.meridiem,h=function(t,n,i,s){return t&&(t[n]||t(e,r))||i[n].slice(0,s)},d=function(t){return b.s(s%12||12,t,"0")},$=f||function(t,e,n){var r=t<12?"AM":"PM";return n?r.toLowerCase():r};return r.replace(y,(function(t,r){return r||function(t){switch(t){case"YY":return String(e.$y).slice(-2);case"YYYY":return b.s(e.$y,4,"0");case"M":return a+1;case"MM":return b.s(a+1,2,"0");case"MMM":return h(n.monthsShort,a,c,3);case"MMMM":return h(c,a);case"D":return e.$D;case"DD":return b.s(e.$D,2,"0");case"d":return String(e.$W);case"dd":return h(n.weekdaysMin,e.$W,o,2);case"ddd":return h(n.weekdaysShort,e.$W,o,3);case"dddd":return o[e.$W];case"H":return String(s);case"HH":return b.s(s,2,"0");case"h":return d(1);case"hh":return d(2);case"a":return $(s,u,!0);case"A":return $(s,u,!1);case"m":return String(u);case"mm":return b.s(u,2,"0");case"s":return String(e.$s);case"ss":return b.s(e.$s,2,"0");case"SSS":return b.s(e.$ms,3,"0");case"Z":return i}return null}(t)||i.replace(":","")}))},m.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},m.diff=function(r,d,l){var $,y=this,M=b.p(d),m=O(r),v=(m.utcOffset()-this.utcOffset())*e,g=this-m,D=function(){return b.m(y,m)};switch(M){case h:$=D()/12;break;case c:$=D();break;case f:$=D()/3;break;case o:$=(g-v)/6048e5;break;case a:$=(g-v)/864e5;break;case u:$=g/n;break;case s:$=g/e;break;case i:$=g/t;break;default:$=g}return l?$:b.a($)},m.daysInMonth=function(){return this.endOf(c).$D},m.$locale=function(){return D[this.$L]},m.locale=function(t,e){if(!t)return this.$L;var n=this.clone(),r=w(t,e,!0);return r&&(n.$L=r),n},m.clone=function(){return b.w(this.$d,this)},m.toDate=function(){return new Date(this.valueOf())},m.toJSON=function(){return this.isValid()?this.toISOString():null},m.toISOString=function(){return this.$d.toISOString()},m.toString=function(){return this.$d.toUTCString()},M}(),k=_.prototype;return O.prototype=k,[["$ms",r],["$s",i],["$m",s],["$H",u],["$W",a],["$M",c],["$y",h],["$D",d]].forEach((function(t){k[t[1]]=function(e){return this.$g(e,t[0],t[1])}})),O.extend=function(t,e){return t.$i||(t(e,_,O),t.$i=!0),O},O.locale=w,O.isDayjs=S,O.unix=function(t){return O(1e3*t)},O.en=D[g],O.Ls=D,O.p={},O}));
+</script>
+<script>
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e="undefined"!=typeof globalThis?globalThis:e||self).dayjs_plugin_customParseFormat=t()}(this,(function(){"use strict";var e={LTS:"h:mm:ss A",LT:"h:mm A",L:"MM/DD/YYYY",LL:"MMMM D, YYYY",LLL:"MMMM D, YYYY h:mm A",LLLL:"dddd, MMMM D, YYYY h:mm A"},t=/(\[[^[]*\])|([-_:/.,()\s]+)|(A|a|Q|YYYY|YY?|ww?|MM?M?M?|Do|DD?|hh?|HH?|mm?|ss?|S{1,3}|z|ZZ?)/g,n=/\d/,r=/\d\d/,i=/\d\d?/,o=/\d*[^-_:/,()\s\d]+/,s={},a=function(e){return(e=+e)+(e>68?1900:2e3)};var f=function(e){return function(t){this[e]=+t}},h=[/[+-]\d\d:?(\d\d)?|Z/,function(e){(this.zone||(this.zone={})).offset=function(e){if(!e)return 0;if("Z"===e)return 0;var t=e.match(/([+-]|\d\d)/g),n=60*t[1]+(+t[2]||0);return 0===n?0:"+"===t[0]?-n:n}(e)}],u=function(e){var t=s[e];return t&&(t.indexOf?t:t.s.concat(t.f))},d=function(e,t){var n,r=s.meridiem;if(r){for(var i=1;i<=24;i+=1)if(e.indexOf(r(i,0,t))>-1){n=i>12;break}}else n=e===(t?"pm":"PM");return n},c={A:[o,function(e){this.afternoon=d(e,!1)}],a:[o,function(e){this.afternoon=d(e,!0)}],Q:[n,function(e){this.month=3*(e-1)+1}],S:[n,function(e){this.milliseconds=100*+e}],SS:[r,function(e){this.milliseconds=10*+e}],SSS:[/\d{3}/,function(e){this.milliseconds=+e}],s:[i,f("seconds")],ss:[i,f("seconds")],m:[i,f("minutes")],mm:[i,f("minutes")],H:[i,f("hours")],h:[i,f("hours")],HH:[i,f("hours")],hh:[i,f("hours")],D:[i,f("day")],DD:[r,f("day")],Do:[o,function(e){var t=s.ordinal,n=e.match(/\d+/);if(this.day=n[0],t)for(var r=1;r<=31;r+=1)t(r).replace(/\[|\]/g,"")===e&&(this.day=r)}],w:[i,f("week")],ww:[r,f("week")],M:[i,f("month")],MM:[r,f("month")],MMM:[o,function(e){var t=u("months"),n=(u("monthsShort")||t.map((function(e){return e.slice(0,3)}))).indexOf(e)+1;if(n<1)throw new Error;this.month=n%12||n}],MMMM:[o,function(e){var t=u("months").indexOf(e)+1;if(t<1)throw new Error;this.month=t%12||t}],Y:[/[+-]?\d+/,f("year")],YY:[r,function(e){this.year=a(e)}],YYYY:[/\d{4}/,f("year")],Z:h,ZZ:h};function l(n){var r,i;r=n,i=s&&s.formats;for(var o=(n=r.replace(/(\[[^\]]+])|(LTS?|l{1,4}|L{1,4})/g,(function(t,n,r){var o=r&&r.toUpperCase();return n||i[r]||e[r]||i[o].replace(/(\[[^\]]+])|(MMMM|MM|DD|dddd)/g,(function(e,t,n){return t||n.slice(1)}))}))).match(t),a=o.length,f=0;f<a;f+=1){var h=o[f],u=c[h],d=u&&u[0],l=u&&u[1];o[f]=l?{regex:d,parser:l}:h.replace(/^\[|\]$/g,"")}return function(e){for(var t={},n=0,r=0;n<a;n+=1){var i=o[n];if("string"==typeof i)r+=i.length;else{var s=i.regex,f=i.parser,h=e.slice(r),u=s.exec(h)[0];f.call(t,u),e=e.replace(u,"")}}return function(e){var t=e.afternoon;if(void 0!==t){var n=e.hours;t?n<12&&(e.hours+=12):12===n&&(e.hours=0),delete e.afternoon}}(t),t}}return function(e,t,n){n.p.customParseFormat=!0,e&&e.parseTwoDigitYear&&(a=e.parseTwoDigitYear);var r=t.prototype,i=r.parse;r.parse=function(e){var t=e.date,r=e.utc,o=e.args;this.$u=r;var a=o[1];if("string"==typeof a){var f=!0===o[2],h=!0===o[3],u=f||h,d=o[2];h&&(d=o[2]),s=this.$locale(),!f&&d&&(s=n.Ls[d]),this.$d=function(e,t,n,r){try{if(["x","X"].indexOf(t)>-1)return new Date(("X"===t?1e3:1)*e);var i=l(t)(e),o=i.year,s=i.month,a=i.day,f=i.hours,h=i.minutes,u=i.seconds,d=i.milliseconds,c=i.zone,m=i.week,M=new Date,Y=a||(o||s?1:M.getDate()),p=o||M.getFullYear(),v=0;o&&!s||(v=s>0?s-1:M.getMonth());var D,w=f||0,g=h||0,y=u||0,L=d||0;return c?new Date(Date.UTC(p,v,Y,w,g,y,L+60*c.offset*1e3)):n?new Date(Date.UTC(p,v,Y,w,g,y,L)):(D=new Date(p,v,Y,w,g,y,L),m&&(D=r(D).week(m).toDate()),D)}catch(e){return new Date("")}}(t,a,r,n),this.init(),d&&!0!==d&&(this.$L=this.locale(d).$L),u&&t!=this.format(a)&&(this.$d=new Date("")),s={}}else if(a instanceof Array)for(var c=a.length,m=1;m<=c;m+=1){o[1]=a[m-1];var M=n.apply(this,o);if(M.isValid()){this.$d=M.$d,this.$L=M.$L,this.init();break}m===c&&(this.$d=new Date(""))}else i.call(this,e)}}}));
+</script>
+<script>
+if (window.dayjs && window.dayjs_plugin_customParseFormat) {
+  dayjs.extend(window.dayjs_plugin_customParseFormat);
+}
+</script>
 
 <script>
 (function(){
@@ -2009,17 +2297,54 @@
   }
 
   function todayIso(){
-    var d = new Date();
-    var m = String(d.getMonth()+1).padStart(2,"0");
-    var day = String(d.getDate()).padStart(2,"0");
-    return d.getFullYear() + "-" + m + "-" + day;
+    return dayjs().format("YYYY-MM-DD");
+  }
+
+  function parseFechaIso(iso){
+    if (iso == null) return null;
+    var s = String(iso).trim();
+    if (!s) return null;
+    if (s.length > 10 && s.charAt(10) === "T") s = s.slice(0, 10);
+    var d = (typeof dayjs === "function") ? dayjs(s, "YYYY-MM-DD", true) : null;
+    if (!d || !d.isValid()) return null;
+    return d.startOf("day");
   }
 
   function formatDateDisplay(iso){
-    if (!iso) return "—";
-    var parts = iso.split("-");
-    if (parts.length !== 3) return iso;
-    return parts[2] + "/" + parts[1] + "/" + parts[0];
+    var d = parseFechaIso(iso);
+    if (!d) return iso ? String(iso) : "—";
+    return d.format("DD/MM/YYYY");
+  }
+
+  // Valida un rango con dayjs (formato estricto YYYY-MM-DD y orden).
+  // opts.requerido: ambas fechas obligatorias.
+  function validarRangoFechas(ini, fin, opts){
+    opts = opts || {};
+    var rawIni = ini == null ? "" : String(ini).trim();
+    var rawFin = fin == null ? "" : String(fin).trim();
+    if (opts.requerido && (!rawIni || !rawFin)){
+      return { ok: false, codigo: "vacio", mensaje: "Indica la fecha de inicio y la fecha de fin." };
+    }
+    var a = rawIni ? parseFechaIso(rawIni) : null;
+    var b = rawFin ? parseFechaIso(rawFin) : null;
+    if (rawIni && !a) return { ok: false, codigo: "formato_ini", mensaje: "La fecha de inicio no es válida." };
+    if (rawFin && !b) return { ok: false, codigo: "formato_fin", mensaje: "La fecha de fin no es válida." };
+    if ((rawIni && !rawFin) || (!rawIni && rawFin)){
+      if (opts.requerido || opts.ambos){
+        return { ok: false, codigo: "incompleto", mensaje: "Indica la fecha de inicio y la fecha de fin." };
+      }
+    }
+    if (a && b && b.isBefore(a, "day")){
+      return { ok: false, codigo: "orden", mensaje: "La fecha de fin debe ser igual o posterior a la de inicio." };
+    }
+    return {
+      ok: true,
+      codigo: "ok",
+      mensaje: "",
+      ini: a,
+      fin: b,
+      dias: (a && b) ? (b.diff(a, "day") + 1) : 0
+    };
   }
 
   function formatMedidaCorrectora(r){
@@ -2048,7 +2373,9 @@
     return r.medidaCorrectora === "Trabajo no superior a 5 horas" && !!r.trabajoFechaFin;
   }
   function trabajoVencido(r){
-    return esTrabajo(r) && !r.trabajoHecho && r.trabajoFechaFin < todayIso();
+    var limite = parseFechaIso(r.trabajoFechaFin);
+    var hoy = parseFechaIso(todayIso());
+    return esTrabajo(r) && !r.trabajoHecho && !!limite && !!hoy && limite.isBefore(hoy, "day");
   }
 
   // Marca/desmarca un trabajo como hecho y persiste el cambio. Se usa tanto
@@ -2080,21 +2407,15 @@
   var refuerzoDraft = null; // borrador de refuerzo generado desde una sanción, pendiente de guardar
 
   // ---------------- aviso de fechas coincidentes (arresto / refuerzo) ----------------
-  // Un arresto (sanción con medida "Arresto" y fecha ya conocida) y un
-  // refuerzo son los dos únicos periodos con fecha de inicio y fin que puede
-  // tener un cadete. Antes de guardar cualquiera de los dos, se comprueba si
-  // ese mismo alumno ya tiene otro arresto o refuerzo cuyas fechas se solapan
-  // (aunque solo compartan un día), y si es así se le pregunta al usuario si
-  // quiere mantenerlas igualmente o prefiere volver a elegir otra fecha.
-  function rangosFechaSeSolapan(iniA, finA, iniB, finB){
-    if (!iniA || !finA || !iniB || !finB) return false;
-    return iniA <= finB && iniB <= finA;
+  // Un único criterio de solape para coincidencias y consultas: ambos
+  // extremos inclusive; si falta cualquier fecha, no hay solape.
+  function rangosSolapan(aIni, aFin, bIni, bFin){
+    var va = validarRangoFechas(aIni, aFin);
+    var vb = validarRangoFechas(bIni, bFin);
+    if (!va.ok || !va.ini || !va.fin || !vb.ok || !vb.ini || !vb.fin) return false;
+    return !va.fin.isBefore(vb.ini, "day") && !vb.fin.isBefore(va.ini, "day");
   }
 
-  // Devuelve, para un conjunto de números de alumno y un rango de fechas, los
-  // arrestos/refuerzos ya registrados que se solapan con ese rango para
-  // alguno de esos alumnos. `opts.excludeRefuerzoId` / `opts.excludeSancionId`
-  // permiten que, al editar un registro, no se compare consigo mismo.
   function buscarFechasCoincidentes(numeros, ini, fin, opts){
     opts = opts || {};
     var out = [];
@@ -2102,7 +2423,7 @@
 
     refuerzos.forEach(function(r){
       if (opts.excludeRefuerzoId && r.id === opts.excludeRefuerzoId) return;
-      if (!rangosFechaSeSolapan(ini, fin, r.fechaInicio, r.fechaFin)) return;
+      if (!rangosSolapan(ini, fin, r.fechaInicio, r.fechaFin)) return;
       (r.alumnos || []).forEach(function(al){
         if (numeros.indexOf(al.numero) === -1) return;
         out.push({
@@ -2118,7 +2439,7 @@
     sanciones.forEach(function(r){
       if (opts.excludeSancionId && r.id === opts.excludeSancionId) return;
       if (r.medidaCorrectora !== "Arresto" || r.arrestoPendiente) return;
-      if (!rangosFechaSeSolapan(ini, fin, r.arrestoFechaIni, r.arrestoFechaFin)) return;
+      if (!rangosSolapan(ini, fin, r.arrestoFechaIni, r.arrestoFechaFin)) return;
       (r.alumnos || []).forEach(function(al){
         if (numeros.indexOf(al.numero) === -1) return;
         out.push({
@@ -2134,10 +2455,6 @@
     return out;
   }
 
-  // Comprueba coincidencias y, si las hay, pregunta al usuario. Devuelve
-  // true si se debe continuar guardando con estas fechas (no había
-  // coincidencias, o el usuario decidió mantenerlas de todos modos), y false
-  // si el usuario prefiere volver a elegir otra fecha (no se debe guardar).
   function confirmarFechaSinCoincidencia(numeros, ini, fin, opts){
     var coincidencias = buscarFechasCoincidentes(numeros, ini, fin, opts);
     if (!coincidencias.length) return true;
@@ -2150,6 +2467,318 @@
       "\n\nPulsa \"Aceptar\" para mantener igualmente estas fechas, o \"Cancelar\" para volver a elegir otra fecha."
     );
   }
+
+  // ---------------- resolución visual de coincidencias por alumno ----------------
+  // Un caso = un alumno con conflicto. Cada caso tiene su propio calendario.
+  var fechaCoincidenciaModal = document.getElementById("fechaCoincidenciaModal");
+  var fechaCoincidenciaAlumno = document.getElementById("fechaCoincidenciaAlumno");
+  var fechaCoincidenciaDetalle = document.getElementById("fechaCoincidenciaDetalle");
+  var fechaCoincidenciaCasos = document.getElementById("fechaCoincidenciaCasos");
+  var fechaCoincidenciaSummary = document.getElementById("fechaCoincidenciaSummary");
+  var fechaCoincidenciaGuardarBtn = document.getElementById("fechaCoincidenciaGuardarBtn");
+  var fechaCoincidenciaCancelarBtn = document.getElementById("fechaCoincidenciaCancelarBtn");
+  var fechaCoincidenciaCloseBtn = document.getElementById("fechaCoincidenciaCloseBtn");
+  var fechaCoincidenciaResolver = null;
+  var fechaCoincidenciaCasosState = [];
+
+  var FECHA_CAL_MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var FECHA_CAL_DIAS = ["LU","MA","MI","JU","VI","SA","DO"];
+
+  function isoDateFromParts(y, m, d){
+    return String(y) + "-" + String(m + 1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
+  }
+
+  function dateFromIsoLocal(iso){
+    var d = parseFechaIso(iso);
+    return d ? d.toDate() : null;
+  }
+
+  function addDaysIso(iso, days){
+    var d = parseFechaIso(iso);
+    if (!d) return "";
+    return d.add(days, "day").format("YYYY-MM-DD");
+  }
+
+  function diffDaysInclusive(ini, fin){
+    var v = validarRangoFechas(ini, fin);
+    return (v.ok && v.ini && v.fin) ? v.dias : 0;
+  }
+
+  function rangoTieneCoincidencia(numero, ini, fin, opts){
+    if (!ini || !fin) return false;
+    return buscarFechasCoincidentes([numero], ini, fin, opts || {}).length > 0;
+  }
+
+  function rangoEstaDentroDeDiasOcupados(caso, ini, fin){
+    var v = validarRangoFechas(ini, fin, { requerido: true });
+    if (!v.ok) return true;
+    return rangoTieneCoincidencia(caso.alumno.numero, ini, fin, caso.opts);
+  }
+
+  function casoEscapedAlumno(caso){
+    return escapeHtml([caso.alumno.ape1, caso.alumno.ape2].filter(Boolean).join(" ") + ", " + (caso.alumno.nombre || ""));
+  }
+
+  function renderFechaCasoCalendario(caso){
+    var root = document.getElementById(caso.domId);
+    if (!root) return;
+    var y = caso.monthYear;
+    var m = caso.monthMonth;
+    var first = new Date(y, m, 1);
+    var mondayIndex = (first.getDay() + 6) % 7;
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var prevDays = new Date(y, m, 0).getDate();
+    var cells = [];
+    for (var i = 0; i < mondayIndex; i++){
+      cells.push({ day: prevDays - mondayIndex + i + 1, other: true });
+    }
+    for (var d = 1; d <= daysInMonth; d++) cells.push({ day:d, other:false });
+    while (cells.length < 42) cells.push({ day: cells.length - mondayIndex - daysInMonth + 1, other:true });
+
+    var html = '';
+    html += '<div class="fecha-cal-toolbar">';
+    html += '<div class="fecha-cal-title">' + FECHA_CAL_MESES[m] + ' ' + y + '</div>';
+    html += '<div class="fecha-cal-nav">';
+    html += '<button type="button" class="btn small ghost fecha-cal-prev" data-caso="' + caso.id + '">‹</button>';
+    html += '<button type="button" class="btn small ghost fecha-cal-next" data-caso="' + caso.id + '">›</button>';
+    html += '</div></div>';
+    html += '<div class="fecha-cal-grid">';
+    FECHA_CAL_DIAS.forEach(function(w){ html += '<div class="fecha-cal-weekday">' + w + '</div>'; });
+
+    cells.forEach(function(c){
+      var iso = isoDateFromParts(y, m, c.day);
+      var busy = !c.other && !!rangoTieneCoincidencia(caso.alumno.numero, iso, iso, caso.opts);
+      var selectedStart = iso === caso.ini;
+      var selectedEnd = iso === caso.fin;
+      var inRange = caso.ini && caso.fin && iso >= caso.ini && iso <= caso.fin;
+      var cls = "fecha-cal-day";
+      if (c.other) cls += " other-month disabled";
+      if (busy) cls += " busy disabled";
+      if (inRange) cls += " in-range";
+      if (selectedStart || selectedEnd) cls += " selected";
+      var disabledAttr = (c.other || busy) ? ' disabled' : '';
+      html += '<button type="button" class="' + cls + '" data-caso="' + caso.id + '" data-iso="' + iso + '"' + disabledAttr + '>';
+      html += String(c.day);
+      if (busy) html += '<span class="fecha-cal-dot"></span>';
+      html += '</button>';
+    });
+    html += '</div>';
+    root.querySelector('.fecha-cal-wrap').innerHTML = html;
+
+    var step = root.querySelector('.fecha-cal-step');
+    if (step){
+      step.textContent = caso.selecting === "fin"
+        ? "Selecciona ahora la fecha de fin. El intervalo completo debe quedar libre."
+        : "Selecciona la fecha de inicio y después la fecha de fin.";
+    }
+    var iniInput = root.querySelector('.fecha-cal-ini');
+    var finInput = root.querySelector('.fecha-cal-fin');
+    if (iniInput) iniInput.value = caso.ini || "";
+    if (finInput) finInput.value = caso.fin || "";
+    root.querySelectorAll('.fecha-cal-day:not(.disabled)').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var iso = btn.getAttribute('data-iso');
+        if (caso.selecting === "fin"){
+          if (iso < caso.ini){
+            caso.ini = iso;
+            caso.fin = "";
+            caso.selecting = "fin";
+          } else if (rangoEstaDentroDeDiasOcupados(caso, caso.ini, iso)){
+            setCasoError(caso, "El intervalo elegido contiene un día ocupado. Selecciona otra fecha de fin.");
+            caso.fin = "";
+          } else {
+            caso.fin = iso;
+            caso.selecting = "inicio";
+            setCasoError(caso, "");
+          }
+        } else {
+          caso.ini = iso;
+          caso.fin = "";
+          caso.selecting = "fin";
+          setCasoError(caso, "");
+        }
+        renderFechaCasoCalendario(caso);
+        actualizarFechaCoincidenciaSummary();
+      });
+    });
+    root.querySelectorAll('.fecha-cal-prev,.fecha-cal-next').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var delta = btn.classList.contains('fecha-cal-prev') ? -1 : 1;
+        var dt = new Date(caso.monthYear, caso.monthMonth + delta, 1);
+        caso.monthYear = dt.getFullYear();
+        caso.monthMonth = dt.getMonth();
+        renderFechaCasoCalendario(caso);
+      });
+    });
+    if (iniInput){
+      iniInput.onchange = function(){
+        caso.ini = iniInput.value;
+        caso.fin = "";
+        caso.selecting = caso.ini ? "fin" : "inicio";
+        setCasoError(caso, "");
+        if (caso.ini){ var dt = dateFromIsoLocal(caso.ini); caso.monthYear=dt.getFullYear(); caso.monthMonth=dt.getMonth(); }
+        renderFechaCasoCalendario(caso);
+        actualizarFechaCoincidenciaSummary();
+      };
+    }
+    if (finInput){
+      finInput.onchange = function(){
+        caso.fin = finInput.value;
+        if (!caso.ini){
+          caso.fin = "";
+          setCasoError(caso, "Selecciona primero la fecha de inicio.");
+        } else if (!caso.fin || rangoEstaDentroDeDiasOcupados(caso, caso.ini, caso.fin)){
+          caso.fin = "";
+          setCasoError(caso, "La nueva fecha coincide con otro periodo. Elige un intervalo libre.");
+        } else if (caso.fin < caso.ini){
+          caso.fin = "";
+          setCasoError(caso, "La fecha de fin debe ser igual o posterior a la de inicio.");
+        } else {
+          setCasoError(caso, "");
+          caso.selecting = "inicio";
+        }
+        renderFechaCasoCalendario(caso);
+        actualizarFechaCoincidenciaSummary();
+      };
+    }
+  }
+
+  function setCasoError(caso, msg){
+    caso.error = msg || "";
+    var root = document.getElementById(caso.domId);
+    if (!root) return;
+    var el = root.querySelector('.fecha-cal-error');
+    if (!el) return;
+    el.textContent = caso.error;
+    el.classList.toggle('hidden', !caso.error);
+  }
+
+  function renderFechaCoincidenciaCasos(){
+    fechaCoincidenciaCasos.innerHTML = fechaCoincidenciaCasosState.map(function(caso){
+      var busy = caso.coincidencias.map(function(c){
+        return '<span>' + escapeHtml(c.tipo === 'refuerzo' ? 'Refuerzo' : 'Arresto') + ' · ' +
+          escapeHtml(formatDateDisplay(c.ini)) + '–' + escapeHtml(formatDateDisplay(c.fin)) +
+          ' · Exp. ' + escapeHtml(String(c.ref)) + '</span>';
+      }).join('');
+      return '<div class="fecha-coincidencia-caso" id="' + caso.domId + '">' +
+        '<div class="fecha-coincidencia-caso-head">' +
+          '<div><div class="fecha-coincidencia-caso-name">' + casoEscapedAlumno(caso) + '</div>' +
+          '<div class="fecha-coincidencia-caso-ref">Nº ' + escapeHtml(String(caso.alumno.numero)) + ' · Fecha solicitada: ' +
+          escapeHtml(formatDateDisplay(caso.originalIni)) + '–' + escapeHtml(formatDateDisplay(caso.originalFin)) + '</div></div>' +
+        '</div>' +
+        '<div class="fecha-coincidencia-busy">' + busy + '</div>' +
+        '<div class="fecha-cal-wrap"></div>' +
+        '<div class="fecha-coincidencia-selection">' +
+          '<div class="field"><label>Nueva fecha inicio</label><input type="date" class="fecha-cal-ini"></div>' +
+          '<div class="field"><label>Nueva fecha fin</label><input type="date" class="fecha-cal-fin"></div>' +
+        '</div>' +
+        '<div class="fecha-coincidencia-step">Selecciona la fecha de inicio y después la fecha de fin.</div>' +
+        '<div class="hint error hidden fecha-cal-error"></div>' +
+      '</div>';
+    }).join('');
+
+    fechaCoincidenciaCasosState.forEach(renderFechaCasoCalendario);
+    actualizarFechaCoincidenciaSummary();
+  }
+
+  function actualizarFechaCoincidenciaSummary(){
+    var total = fechaCoincidenciaCasosState.length;
+    var completos = 0;
+    fechaCoincidenciaCasosState.forEach(function(c){
+      if (c.ini && c.fin && c.fin >= c.ini && !c.error && !rangoEstaDentroDeDiasOcupados(c, c.ini, c.fin)) completos++;
+    });
+    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida.";
+    fechaCoincidenciaGuardarBtn.disabled = completos !== total;
+  }
+
+  function cerrarFechaCoincidencia(resultado){
+    fechaCoincidenciaModal.classList.add("hidden");
+    var resolver = fechaCoincidenciaResolver;
+    fechaCoincidenciaResolver = null;
+    fechaCoincidenciaCasosState = [];
+    fechaCoincidenciaCasos.innerHTML = "";
+    if (resolver) resolver(resultado);
+  }
+
+  function pedirNuevasFechasParaAlumnos(casos){
+    return new Promise(function(resolve){
+      fechaCoincidenciaResolver = resolve;
+      fechaCoincidenciaCasosState = casos.map(function(caso, idx){
+        var base = dateFromIsoLocal(caso.originalIni || todayIso());
+        return {
+          id: "caso-" + idx + "-" + Date.now(),
+          domId: "fecha-caso-" + idx + "-" + Date.now(),
+          alumno: caso.alumno,
+          coincidencias: caso.coincidencias,
+          originalIni: caso.originalIni,
+          originalFin: caso.originalFin,
+          opts: caso.opts || {},
+          ini: "",
+          fin: "",
+          selecting: "inicio",
+          monthYear: base.getFullYear(),
+          monthMonth: base.getMonth(),
+          error: ""
+        };
+      });
+      fechaCoincidenciaAlumno.textContent = fechaCoincidenciaCasosState.length === 1
+        ? "1 alumno necesita una fecha alternativa"
+        : fechaCoincidenciaCasosState.length + " alumnos necesitan una fecha alternativa";
+      fechaCoincidenciaDetalle.innerHTML = "Se han detectado coincidencias en el periodo solicitado. Selecciona un intervalo libre para cada alumno afectado.";
+      fechaCoincidenciaModal.classList.remove("hidden");
+      renderFechaCoincidenciaCasos();
+    });
+  }
+
+  async function resolverCoincidenciasPorAlumno(alumnos, ini, fin, opts){
+    opts = opts || {};
+    var normal = [];
+    var casos = [];
+    alumnos.forEach(function(alumno){
+      var coincidencias = buscarFechasCoincidentes([alumno.numero], ini, fin, opts);
+      if (coincidencias.length){
+        casos.push({ alumno: alumno, coincidencias: coincidencias, originalIni: ini, originalFin: fin, opts: opts });
+      } else {
+        normal.push(alumno);
+      }
+    });
+    if (!casos.length) return { normal: normal, separados: [] };
+
+    var respuesta = await pedirNuevasFechasParaAlumnos(casos);
+    if (!respuesta) return null;
+    return {
+      normal: normal,
+      separados: respuesta.map(function(c){
+        return { alumno: c.alumno, ini: c.ini, fin: c.fin };
+      })
+    };
+  }
+
+  fechaCoincidenciaGuardarBtn.addEventListener("click", function(){
+    var invalid = null;
+    for (var i = 0; i < fechaCoincidenciaCasosState.length; i++){
+      var c = fechaCoincidenciaCasosState[i];
+      if (!c.ini || !c.fin || c.fin < c.ini){ invalid = c; break; }
+      if (rangoEstaDentroDeDiasOcupados(c, c.ini, c.fin)){
+        invalid = c;
+        setCasoError(c, "El intervalo elegido contiene días ocupados. Selecciona otro intervalo.");
+        break;
+      }
+    }
+    if (invalid){
+      var root = document.getElementById(invalid.domId);
+      if (root) root.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    cerrarFechaCoincidencia(fechaCoincidenciaCasosState.map(function(c){
+      return { alumno:c.alumno, ini:c.ini, fin:c.fin };
+    }));
+  });
+  fechaCoincidenciaCancelarBtn.addEventListener("click", function(){ cerrarFechaCoincidencia(null); });
+  fechaCoincidenciaCloseBtn.addEventListener("click", function(){ cerrarFechaCoincidencia(null); });
+  fechaCoincidenciaModal.addEventListener("click", function(e){
+    if (e.target === fechaCoincidenciaModal) cerrarFechaCoincidencia(null);
+  });
 
   // Compañía/Sección detectadas a partir de los números de protocolo de la tabla
   // cargada (1º dígito = compañía, 2º dígito = sección). Si no hay datos válidos,
@@ -3946,9 +4575,11 @@
   });
 
   function computeEstado(fechaInicio, fechaFin){
-    var t = todayIso();
-    if (fechaInicio && t < fechaInicio) return "programado";
-    if (fechaFin && t > fechaFin) return "finalizado";
+    var hoy = parseFechaIso(todayIso());
+    var ini = parseFechaIso(fechaInicio);
+    var fin = parseFechaIso(fechaFin);
+    if (ini && hoy.isBefore(ini, "day")) return "programado";
+    if (fin && hoy.isAfter(fin, "day")) return "finalizado";
     return "vigente";
   }
 
@@ -3972,10 +4603,10 @@
   rebFechaInicio.addEventListener("change", validateDatesLive);
   rebFechaFin.addEventListener("change", validateDatesLive);
   function validateDatesLive(){
-    var ini = rebFechaInicio.value, fin = rebFechaFin.value;
-    var bad = ini && fin && fin < ini;
-    rebFechaHint.classList.toggle("hidden", !bad);
-    return !bad;
+    var v = validarRangoFechas(rebFechaInicio.value, rebFechaFin.value);
+    rebFechaHint.classList.toggle("hidden", v.ok);
+    if (!v.ok && (rebFechaInicio.value || rebFechaFin.value)) rebFechaHint.textContent = v.mensaje;
+    return v.ok;
   }
 
   function clearRebForm(){
@@ -4185,6 +4816,14 @@
   var sanStatRow = document.getElementById("sanStatRow");
   var sanSearchInput = document.getElementById("sanSearchInput");
   var sanPelotonFilter = document.getElementById("sanPelotonFilter");
+  var sanFiltroExp = document.getElementById("sanFiltroExp");
+  var sanFiltroNumero = document.getElementById("sanFiltroNumero");
+  var sanFiltroAlumno = document.getElementById("sanFiltroAlumno");
+  var sanFiltroPelotonCol = document.getElementById("sanFiltroPelotonCol");
+  var sanFiltroFecha = document.getElementById("sanFiltroFecha");
+  var sanFiltroTipoCol = document.getElementById("sanFiltroTipoCol");
+  var sanFiltroMotivo = document.getElementById("sanFiltroMotivo");
+  var sanFiltroMedida = document.getElementById("sanFiltroMedida");
   var sanTipoFilter = document.getElementById("sanTipoFilter");
   var sanAlertaTotalFilter = document.getElementById("sanAlertaTotalFilter");
   var sanAlertaFundamentoFilter = document.getElementById("sanAlertaFundamentoFilter");
@@ -4261,6 +4900,85 @@
       };
     });
     return alerts;
+  }
+
+  // Normaliza un número de expediente para comparar: recorta espacios,
+  // acepta ceros a la izquierda ("004" = "4") y rechaza texto que no sea
+  // un entero positivo. Devuelve null si el valor no es un expediente válido.
+  function expedienteNorm(n){
+    var s = String(n == null ? "" : n).trim();
+    if (!s) return null;
+    if (!/^\d+$/.test(s)) return null;
+    var stripped = s.replace(/^0+/, "");
+    return stripped || "0";
+  }
+
+  function parseExpedienteInput(texto){
+    var raw = String(texto == null ? "" : texto).trim();
+    if (!raw) return { ok: false, codigo: "vacio", mensaje: "Indica el número de expediente.", raw: raw, norm: null };
+    var m = raw.match(/^(\d+)\s*—/);
+    var candidato = m ? m[1] : raw;
+    var norm = expedienteNorm(candidato);
+    if (norm === null || norm === "0"){
+      return { ok: false, codigo: "formato", mensaje: "El expediente debe ser un número entero positivo (se admiten ceros a la izquierda).", raw: raw, norm: null };
+    }
+    return { ok: true, codigo: "ok", mensaje: "", raw: raw, norm: norm, numero: parseInt(norm, 10) };
+  }
+
+  function registrosDeExpediente(norm){
+    if (!norm) return { sanciones: [], refuerzos: [] };
+    var sans = sanciones.filter(function(r){ return expedienteNorm(r.expediente) === norm; });
+    var refs = refuerzos.filter(function(r){ return expedienteNorm(r.expediente) === norm; });
+    sans.sort(function(a,b){ return String(a.fecha || "").localeCompare(String(b.fecha || "")); });
+    refs.sort(function(a,b){ return String(a.fechaInicio || "").localeCompare(String(b.fechaInicio || "")); });
+    return { sanciones: sans, refuerzos: refs };
+  }
+
+  // Valida un expediente: formato, existencia y completitud de los registros.
+  // Se usa al vincular una sanción, al consultar y al pintar el informe.
+  function validarExpediente(texto){
+    var parsed = parseExpedienteInput(texto);
+    if (!parsed.ok){
+      return {
+        ok: false, existe: false, codigo: parsed.codigo, mensaje: parsed.mensaje,
+        norm: null, raw: parsed.raw, sanciones: [], refuerzos: [], incidencias: []
+      };
+    }
+    var regs = registrosDeExpediente(parsed.norm);
+    if (!regs.sanciones.length && !regs.refuerzos.length){
+      return {
+        ok: false, existe: false, codigo: "inexistente",
+        mensaje: "No existe ningún expediente con el número " + parsed.norm + ".",
+        norm: parsed.norm, raw: parsed.raw, numero: parsed.numero,
+        sanciones: [], refuerzos: [], incidencias: []
+      };
+    }
+    var incidencias = [];
+    regs.sanciones.forEach(function(r, i){
+      var etq = regs.sanciones.length > 1 ? ("Sanción " + (i+1) + " (Exp. " + r.expediente + ")") : ("Sanción Exp. " + r.expediente);
+      if (!(r.alumnos && r.alumnos.length)) incidencias.push(etq + ": no tiene alumnos.");
+      if (!r.fecha) incidencias.push(etq + ": falta la fecha de la infracción.");
+      if (!r.motivo) incidencias.push(etq + ": falta el motivo.");
+      if (!r.fundamento) incidencias.push(etq + ": falta el fundamento legal.");
+      if (!r.medidaCorrectora) incidencias.push(etq + ": falta la medida correctora.");
+      if (r.medidaCorrectora === "Arresto" && r.arrestoPendiente) incidencias.push(etq + ": arresto con fecha pendiente de fijar.");
+      if (esTrabajo(r) && trabajoVencido(r)) incidencias.push(etq + ": trabajo vencido y no marcado como hecho.");
+    });
+    regs.refuerzos.forEach(function(r, i){
+      var etq = regs.refuerzos.length > 1 ? ("Refuerzo " + (i+1) + " (Exp. " + r.expediente + ")") : ("Refuerzo Exp. " + r.expediente);
+      if (!(r.alumnos && r.alumnos.length)) incidencias.push(etq + ": no tiene alumnos.");
+      if (!r.fechaInicio || !r.fechaFin) incidencias.push(etq + ": faltan las fechas del periodo.");
+    });
+    return {
+      ok: true,
+      existe: true,
+      codigo: incidencias.length ? "incidencias" : "completo",
+      mensaje: incidencias.length
+        ? ("Expediente Nº " + parsed.norm + " encontrado, con " + incidencias.length + " incidencia" + (incidencias.length === 1 ? "" : "s") + ".")
+        : ("Expediente Nº " + parsed.norm + " válido: " + regs.sanciones.length + " sanci" + (regs.sanciones.length === 1 ? "ón" : "ones") + " y " + regs.refuerzos.length + " refuerzo" + (regs.refuerzos.length === 1 ? "" : "s") + "."),
+      norm: parsed.norm, raw: parsed.raw, numero: parsed.numero,
+      sanciones: regs.sanciones, refuerzos: regs.refuerzos, incidencias: incidencias
+    };
   }
 
   function nextExpedienteNumero(){
@@ -4423,7 +5141,9 @@
   }
 
   function findSancionByExpediente(expediente){
-    var found = sanciones.filter(function(r){ return r.expediente === expediente; });
+    var want = expedienteNorm(expediente);
+    if (want === null) return null;
+    var found = sanciones.filter(function(r){ return expedienteNorm(r.expediente) === want; });
     return found.length ? found[0] : null;
   }
 
@@ -4442,11 +5162,9 @@
 
   sanExpedienteInput.addEventListener("input", function(){
     var val = sanExpedienteInput.value.trim();
-    var m = val.match(/^(\S+)\s*—/);
-    var seleccionadoDeLista = !!m; // el valor completo (con alumnos) solo aparece así cuando se elige de la lista, no al teclear un número a mano
-    var numStr = m ? m[1] : (val.match(/^(\d+)$/) ? val : null);
-    var expNum = numStr ? parseInt(numStr, 10) : NaN;
-    var record = !isNaN(expNum) ? findSancionByExpediente(expNum) : null;
+    var parsed = parseExpedienteInput(val);
+    var seleccionadoDeLista = /^(\d+)\s*—/.test(val);
+    var record = parsed.ok ? findSancionByExpediente(parsed.norm) : null;
     if (record){
       sanExpedienteSeleccionado = record.expediente;
       var alumnosResumen = (record.alumnos || []).map(function(al){
@@ -4475,11 +5193,8 @@
   }
 
   function actualizarDiasArresto(){
-    var ini = sanArrestoFechaIni.value, fin = sanArrestoFechaFin.value;
-    if (!ini || !fin){ sanArrestoDias.value = ""; return; }
-    var dIni = new Date(ini + "T00:00:00"), dFin = new Date(fin + "T00:00:00");
-    var dias = Math.round((dFin - dIni) / 86400000) + 1;
-    sanArrestoDias.value = dias > 0 ? dias : "";
+    var v = validarRangoFechas(sanArrestoFechaIni.value, sanArrestoFechaFin.value, { requerido: true });
+    sanArrestoDias.value = v.ok ? String(v.dias) : "";
   }
   sanArrestoFechaIni.addEventListener("change", actualizarDiasArresto);
   sanArrestoFechaFin.addEventListener("change", actualizarDiasArresto);
@@ -4594,7 +5309,9 @@
     if (!sanMotivoInput.value.trim()) ok = false;
 
     if (sanVincularExpedienteCheck.checked){
-      var expedienteOk = sanExpedienteSeleccionado != null;
+      var vExp = validarExpediente(sanExpedienteInput.value);
+      var expedienteOk = vExp.existe && sanExpedienteSeleccionado != null;
+      sanExpedienteHint.textContent = expedienteOk ? "" : (vExp.mensaje || "No se reconoce ningún expediente con ese texto. Selecciónalo de la lista.");
       sanExpedienteHint.classList.toggle("hidden", expedienteOk);
       if (!expedienteOk) ok = false;
     } else {
@@ -4602,9 +5319,12 @@
     }
 
     if (sanMedidaInput.value === "Arresto" && sanArrestoModo === "fecha"){
-      var arrestoOk = !!(sanArrestoFechaIni.value && sanArrestoFechaFin.value && sanArrestoFechaFin.value >= sanArrestoFechaIni.value);
-      sanArrestoHint.classList.toggle("hidden", arrestoOk);
-      if (!arrestoOk) ok = false;
+      var vArr = validarRangoFechas(sanArrestoFechaIni.value, sanArrestoFechaFin.value, { requerido: true });
+      sanArrestoHint.classList.toggle("hidden", vArr.ok);
+      if (!vArr.ok){
+        sanArrestoHint.textContent = vArr.mensaje;
+        ok = false;
+      }
     } else {
       sanArrestoHint.classList.add("hidden");
     }
@@ -4621,7 +5341,7 @@
     return ok ? alumnos : null;
   }
 
-  function buildSanRecord(alumnos){
+  function buildSanRecord(alumnos, forceNuevoExpediente){
     var k = state.keys;
     var tipo = sanTipoFalta.value;
     var list = FALTA_CATALOG[tipo] || [];
@@ -4629,7 +5349,7 @@
     var expedienteVinculado = sanVincularExpedienteCheck.checked && sanExpedienteSeleccionado != null;
     return {
       id: uid(),
-      expediente: expedienteVinculado ? sanExpedienteSeleccionado : nextExpedienteNumero(),
+      expediente: (!forceNuevoExpediente && expedienteVinculado) ? sanExpedienteSeleccionado : nextExpedienteNumero(),
       fecha: sanFecha.value,
       lugar: sanLugar.value.trim(),
       hora: sanHora.value,
@@ -4674,23 +5394,66 @@
     return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, {});
   }
 
-  sanSaveBtn.addEventListener("click", function(){
+  sanSaveBtn.addEventListener("click", async function(){
     var alumnos = validateSanForm();
     if (!alumnos){
       sanFormMsg.textContent = "Revisa los campos marcados.";
       sanFormMsg.className = "form-msg error";
       return;
     }
-    if (!validarFechaArrestoSinCoincidencia(alumnos)){
-      sanFormMsg.textContent = "Guardado cancelado: cambia la fecha del arresto antes de continuar.";
-      sanFormMsg.className = "form-msg error";
-      return;
+
+    var fechaResolucion = null;
+    if (sanMedidaInput.value === "Arresto" && sanArrestoModo === "fecha"){
+      fechaResolucion = await resolverCoincidenciasPorAlumno(
+        alumnos,
+        sanArrestoFechaIni.value,
+        sanArrestoFechaFin.value,
+        {}
+      );
+      if (!fechaResolucion){
+        sanFormMsg.textContent = "Guardado cancelado.";
+        sanFormMsg.className = "form-msg error";
+        return;
+      }
+    } else {
+      fechaResolucion = { normal: alumnos, separados: [] };
     }
+
     var fueVinculada = sanVincularExpedienteCheck.checked && sanExpedienteSeleccionado != null;
-    var record = buildSanRecord(alumnos);
-    sanciones.unshift(record);
+    var records = [];
+
+    // El expediente original conserva todos los alumnos que NO tienen conflicto.
+    if (fechaResolucion.normal.length){
+      var record = buildSanRecord(fechaResolucion.normal);
+      records.push(record);
+    }
+
+    // Cada alumno con conflicto obtiene un expediente independiente,
+    // clonando todos los datos del registro original y sustituyendo únicamente
+    // sus fechas de arresto.
+    fechaResolucion.separados.forEach(function(item){
+      var base = buildSanRecord([item.alumno], true);
+      var dIni = new Date(item.ini + "T00:00:00");
+      var dFin = new Date(item.fin + "T00:00:00");
+      var dias = Math.round((dFin - dIni) / 86400000) + 1;
+      base.arrestoFechaIni = item.ini;
+      base.arrestoFechaFin = item.fin;
+      base.arrestoDias = dias > 0 ? dias : "";
+      base.arrestoPendiente = false;
+      // buildSanRecord ya genera un expediente nuevo; se mantiene así a propósito.
+      records.push(base);
+    });
+
+    records.slice().reverse().forEach(function(r){ sanciones.unshift(r); });
     persistSanciones();
-    sanFormMsg.textContent = "Sanción guardada" + (fueVinculada ? " (vinculada al expediente nº " + record.expediente + ")." : (alumnos.length > 1 ? " (expediente compartido nº " + record.expediente + ", " + alumnos.length + " alumnos)." : "."));
+
+    var separadosCount = fechaResolucion.separados.length;
+    sanFormMsg.textContent =
+      "Sanción guardada" +
+      (records.length > 1
+        ? " · " + records.length + " expedientes generados" +
+          (separadosCount ? " · " + separadosCount + " alumno(s) con nueva fecha" : "")
+        : (fueVinculada ? " (vinculada al expediente nº " + records[0].expediente + ")." : "."));
     sanFormMsg.className = "form-msg ok";
     clearSanForm();
     refreshSanciondatalists();
@@ -4792,6 +5555,28 @@
       if (alertaTotalVal === "no" && (infoF && infoF.totalAlert)) return false;
       if (alertaFundamentoVal === "si" && !(infoF && infoF.fundamentoAlert)) return false;
       if (alertaFundamentoVal === "no" && (infoF && infoF.fundamentoAlert)) return false;
+      var fExp = stripAccents(sanFiltroExp && sanFiltroExp.value);
+      if (fExp && stripAccents(String(r.expediente)).indexOf(fExp) === -1) return false;
+      var fNum = stripAccents(sanFiltroNumero && sanFiltroNumero.value);
+      if (fNum && stripAccents(String(al.numero)).indexOf(fNum) === -1) return false;
+      var fAlu = stripAccents(sanFiltroAlumno && sanFiltroAlumno.value);
+      if (fAlu){
+        var nomAlu = [al.ape1, al.ape2, al.nombre].filter(Boolean).join(" ");
+        if (stripAccents(nomAlu).indexOf(fAlu) === -1) return false;
+      }
+      var fPelCol = stripAccents(sanFiltroPelotonCol && sanFiltroPelotonCol.value);
+      if (fPelCol && stripAccents(al.peloton || "").indexOf(fPelCol) === -1) return false;
+      var fFecha = stripAccents(sanFiltroFecha && sanFiltroFecha.value);
+      if (fFecha){
+        var fechaTxt = (r.fecha || "") + " " + formatDateDisplay(r.fecha);
+        if (stripAccents(fechaTxt).indexOf(fFecha) === -1) return false;
+      }
+      var fTipoCol = sanFiltroTipoCol ? sanFiltroTipoCol.value : "";
+      if (fTipoCol && r.tipoFalta !== fTipoCol) return false;
+      var fMot = stripAccents(sanFiltroMotivo && sanFiltroMotivo.value);
+      if (fMot && stripAccents(r.motivo || "").indexOf(fMot) === -1) return false;
+      var fMed = stripAccents(sanFiltroMedida && sanFiltroMedida.value);
+      if (fMed && stripAccents(formatMedidaCorrectora(r)).indexOf(fMed) === -1) return false;
       if (!q) return true;
       var hay = [al.numero, al.ape1, al.ape2, al.nombre, r.motivo, "exp " + r.expediente].join(" ");
       return stripAccents(hay).indexOf(q) !== -1;
@@ -4898,8 +5683,9 @@
       btn.addEventListener("click", function(){
         var ini = form.querySelector(".arr-fecha-ini").value;
         var fin = form.querySelector(".arr-fecha-fin").value;
-        if (!ini || !fin || fin < ini){
-          alert("Indica una fecha de inicio y fin válidas (la fecha de fin debe ser igual o posterior a la de inicio).");
+        var vPend = validarRangoFechas(ini, fin, { requerido: true });
+        if (!vPend.ok){
+          alert(vPend.mensaje);
           return;
         }
         var id = form.getAttribute("data-sanid");
@@ -5046,6 +5832,10 @@
   sanTipoFilter.addEventListener("change", renderSancionesList);
   sanAlertaTotalFilter.addEventListener("change", renderSancionesList);
   sanAlertaFundamentoFilter.addEventListener("change", renderSancionesList);
+  [sanFiltroExp, sanFiltroNumero, sanFiltroAlumno, sanFiltroPelotonCol, sanFiltroFecha, sanFiltroMotivo, sanFiltroMedida].forEach(function(el){
+    if (el) el.addEventListener("input", renderSancionesList);
+  });
+  if (sanFiltroTipoCol) sanFiltroTipoCol.addEventListener("change", renderSancionesList);
 
   // ================= REFUERZOS TAB =================
   var refDraftBanner = document.getElementById("refDraftBanner");
@@ -5234,10 +6024,9 @@
   // elegido contiene algún día de fin de semana, se muestra un campo de
   // hora+duración aparte, exclusivo para esos días.
   function esFinDeSemanaIso(iso){
-    if (!iso) return false;
-    var d = new Date(iso + "T00:00:00Z");
-    if (isNaN(d.getTime())) return false;
-    var dow = d.getUTCDay();
+    var d = parseFechaIso(iso);
+    if (!d) return false;
+    var dow = d.day();
     return dow === 0 || dow === 6;
   }
   function rangoTieneFinde(inicio, fin){
@@ -5250,11 +6039,11 @@
   }
 
   function validateRefDatesLive(){
-    var ini = refFechaInicio.value, fin = refFechaFin.value;
-    var bad = ini && fin && fin < ini;
-    refFechaHint.classList.toggle("hidden", !bad);
+    var v = validarRangoFechas(refFechaInicio.value, refFechaFin.value);
+    refFechaHint.classList.toggle("hidden", v.ok);
+    if (!v.ok && (refFechaInicio.value || refFechaFin.value)) refFechaHint.textContent = v.mensaje;
     updateRefFindeVisibility();
-    return !bad;
+    return v.ok;
   }
   refFechaInicio.addEventListener("change", validateRefDatesLive);
   refFechaFin.addEventListener("change", validateRefDatesLive);
@@ -5457,7 +6246,7 @@
     refFormMsg.className = "form-msg";
   });
 
-  refSaveBtn.addEventListener("click", function(){
+  refSaveBtn.addEventListener("click", async function(){
     var ok = true;
     var alumnos = [];
     if (refuerzoDraft){
@@ -5530,11 +6319,28 @@
       return;
     }
 
-    var refNumeros = alumnos.map(function(al){ return al.numero; });
-    if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId })){
-      refFormMsg.textContent = "Guardado cancelado: cambia la fecha antes de continuar.";
-      refFormMsg.className = "form-msg error";
-      return;
+    var fechaRefResolucion = { normal: alumnos, separados: [] };
+    // Para un alta nueva se permite separar individualmente los alumnos con conflicto.
+    // En una edición se conserva el flujo anterior: no se fragmenta la identidad existente.
+    if (!editingRefuerzoId){
+      fechaRefResolucion = await resolverCoincidenciasPorAlumno(
+        alumnos,
+        refFechaInicio.value,
+        refFechaFin.value,
+        {}
+      );
+      if (!fechaRefResolucion){
+        refFormMsg.textContent = "Guardado cancelado.";
+        refFormMsg.className = "form-msg error";
+        return;
+      }
+    } else {
+      var refNumeros = alumnos.map(function(al){ return al.numero; });
+      if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId })){
+        refFormMsg.textContent = "Guardado cancelado: cambia la fecha antes de continuar.";
+        refFormMsg.className = "form-msg error";
+        return;
+      }
     }
 
     var manualTipoFalta = refTipoFalta.value;
@@ -5591,20 +6397,38 @@
 
     if (baseRecord){
       refuerzos[refuerzos.indexOf(baseRecord)] = record;
-    } else {
-      refuerzos.unshift(record);
-    }
-    persistRefuerzos();
-    refreshRefuerzodatalists();
-
-    if (baseRecord){
+      persistRefuerzos();
+      refreshRefuerzodatalists();
       refFormMsg.textContent = "Cambios guardados. Generando el documento actualizado…";
       refFormMsg.className = "form-msg ok";
       clearRefForm();
       renderRefuerzosTab();
       generarDocumentoPDF(record);
     } else {
-      refFormMsg.textContent = "Refuerzo guardado.";
+      var refRecords = [];
+      if (fechaRefResolucion.normal.length){
+        record.alumnos = fechaRefResolucion.normal;
+        refRecords.push(record);
+      }
+      fechaRefResolucion.separados.forEach(function(item){
+        var separado = Object.assign({}, record);
+        separado.id = uid();
+        separado.expediente = nextExpedienteNumero();
+        separado.alumnos = [item.alumno];
+        separado.fechaInicio = item.ini;
+        separado.fechaFin = item.fin;
+        separado.createdAt = new Date().toISOString();
+        separado.editado = false;
+        separado.editadoFecha = null;
+        refRecords.push(separado);
+      });
+      // Inserción inversa para mantener el orden de alta más reciente primero.
+      refRecords.slice().reverse().forEach(function(r){ refuerzos.unshift(r); });
+      persistRefuerzos();
+      refreshRefuerzodatalists();
+      refFormMsg.textContent = refRecords.length > 1
+        ? "Refuerzo guardado · " + refRecords.length + " expedientes generados · " + fechaRefResolucion.separados.length + " alumno(s) con nueva fecha."
+        : "Refuerzo guardado.";
       refFormMsg.className = "form-msg ok";
       clearRefForm();
       renderRefuerzosTab();
@@ -5793,16 +6617,14 @@
 
   function isoDatesInRange(inicio, fin){
     var out = [];
-    if (!inicio) return out;
-    var d0 = new Date(inicio + "T00:00:00Z");
-    if (isNaN(d0.getTime())) return out;
-    var d1 = fin ? new Date(fin + "T00:00:00Z") : d0;
-    if (isNaN(d1.getTime()) || d1.getTime() < d0.getTime()) d1 = d0;
-    var cur = new Date(d0.getTime());
+    var v = validarRangoFechas(inicio, fin || inicio);
+    if (!v.ok || !v.ini) return out;
+    var cur = v.ini;
+    var last = v.fin || v.ini;
     var guard = 0;
-    while (cur.getTime() <= d1.getTime() && guard < 60){
-      out.push(cur.toISOString().slice(0,10));
-      cur.setUTCDate(cur.getUTCDate() + 1);
+    while (!cur.isAfter(last, "day") && guard < 60){
+      out.push(cur.format("YYYY-MM-DD"));
+      cur = cur.add(1, "day");
       guard++;
     }
     return out;
@@ -6260,17 +7082,17 @@
   var consArrestoAgruparCheck = document.getElementById("consArrestoAgruparCheck");
   var consTrabajosWrap = document.getElementById("consTrabajosWrap");
   var consTrabajosSoloVencidosCheck = document.getElementById("consTrabajosSoloVencidosCheck");
+  var consExpedienteWrap = document.getElementById("consExpedienteWrap");
+  var consExpedienteInput = document.getElementById("consExpedienteInput");
+  var consExpedienteList = document.getElementById("consExpedienteList");
+  var consExpedientePreview = document.getElementById("consExpedientePreview");
+  var consExpedienteHint = document.getElementById("consExpedienteHint");
   var consActions = document.getElementById("consActions");
   var consBuscarBtn = document.getElementById("consBuscarBtn");
   var consImprimirBtn = document.getElementById("consImprimirBtn");
   var consFormMsg = document.getElementById("consFormMsg");
   var consResultadosWrap = document.getElementById("consResultadosWrap");
   var consResultados = document.getElementById("consResultados");
-
-  function rangosSolapan(aIni, aFin, bIni, bFin){
-    if (!aIni || !aFin || !bIni || !bFin) return false;
-    return aIni <= bFin && aFin >= bIni;
-  }
 
   function sortByApellido(list){
     return list.slice().sort(function(a, b){
@@ -6714,10 +7536,10 @@
   }
 
   function validateConsFechasLive(){
-    var ini = consFechaIni.value, fin = consFechaFin.value;
-    var bad = !!(ini && fin && fin < ini);
-    consFechaHint.classList.toggle("hidden", !bad);
-    return !bad;
+    var v = validarRangoFechas(consFechaIni.value, consFechaFin.value);
+    consFechaHint.classList.toggle("hidden", v.ok);
+    if (!v.ok) consFechaHint.textContent = v.mensaje;
+    return v.ok;
   }
   consFechaIni.addEventListener("change", validateConsFechasLive);
   consFechaFin.addEventListener("change", validateConsFechasLive);
@@ -6787,17 +7609,172 @@
     }
   });
 
+  function buildConsExpedienteOptions(){
+    if (!consExpedienteList) return;
+    var nums = {};
+    sanciones.forEach(function(r){ if (r.expediente != null && r.expediente !== "") nums[String(r.expediente)] = true; });
+    refuerzos.forEach(function(r){ if (r.expediente != null && r.expediente !== "") nums[String(r.expediente)] = true; });
+    var list = Object.keys(nums).sort(function(a,b){
+      var na = parseInt(a,10), nb = parseInt(b,10);
+      if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+      return String(a).localeCompare(String(b), "es");
+    });
+    consExpedienteList.innerHTML = list.map(function(n){
+      return '<option value="' + escapeHtml(n) + '"></option>';
+    }).join("");
+  }
+
+  function computeConsultaExpediente(numTexto){
+    var v = validarExpediente(numTexto);
+    return {
+      query: v.norm || v.raw || "",
+      validacion: v,
+      sanciones: v.sanciones || [],
+      refuerzos: v.refuerzos || []
+    };
+  }
+
+  function actualizarValidacionConsultaExpediente(){
+    if (!consExpedienteInput) return null;
+    var val = consExpedienteInput.value.trim();
+    var v = validarExpediente(val);
+    if (!val){
+      if (consExpedientePreview) consExpedientePreview.classList.remove("show");
+      if (consExpedienteHint) consExpedienteHint.classList.add("hidden");
+      return v;
+    }
+    if (v.existe){
+      if (consExpedientePreview){
+        consExpedientePreview.innerHTML = '<span class="num">Nº ' + escapeHtml(v.norm) + '</span><span>' +
+          escapeHtml(v.sanciones.length + " sanci" + (v.sanciones.length === 1 ? "ón" : "ones") + " · " +
+            v.refuerzos.length + " refuerzo" + (v.refuerzos.length === 1 ? "" : "s") +
+            (v.incidencias.length ? " · " + v.incidencias.length + " incidencia" + (v.incidencias.length === 1 ? "" : "s") : " · sin incidencias")) +
+          '</span>';
+        consExpedientePreview.classList.add("show");
+      }
+      if (consExpedienteHint) consExpedienteHint.classList.add("hidden");
+    } else {
+      if (consExpedientePreview) consExpedientePreview.classList.remove("show");
+      if (consExpedienteHint){
+        consExpedienteHint.textContent = v.mensaje;
+        consExpedienteHint.classList.remove("hidden");
+      }
+    }
+    return v;
+  }
+
+  function filaDatoConsulta(label, valor){
+    return '<tr><th style="width:32%;white-space:normal;">' + escapeHtml(label) + '</th><td style="white-space:normal;">' + (valor || "—") + '</td></tr>';
+  }
+
+  function alumnosTablaHtml(alumnos){
+    if (!alumnos || !alumnos.length) return '<div class="empty-state">Sin alumnos en este registro.</div>';
+    return '<table class="consulta-table"><thead><tr><th>Número</th><th>Alumno</th><th>Pelotón</th></tr></thead><tbody>' +
+      alumnos.map(function(al){
+        return "<tr><td>" + escapeHtml(String(al.numero || "—")) + "</td><td>" +
+          escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre || "") +
+          "</td><td>" + (al.peloton ? '<span class="pelo-badge">' + escapeHtml(al.peloton) + '</span>' : "—") + "</td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+
+  function renderConsultaExpedienteResultados(data){
+    var html = '';
+    html += '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-sub">Informe completo del expediente Nº ' + escapeHtml(data.query || "—") + '</div>';
+    html += '</div>';
+
+    var v = data.validacion;
+    if (v){
+      var cls = !v.existe ? "error" : (v.incidencias && v.incidencias.length ? "warn" : "ok");
+      html += '<div class="validacion-banner ' + cls + '"><strong>' + escapeHtml(v.existe ? (v.incidencias.length ? "Expediente con incidencias" : "Expediente validado") : "Expediente no válido") + '</strong>';
+      html += '<div>' + escapeHtml(v.mensaje) + '</div>';
+      if (v.incidencias && v.incidencias.length){
+        html += '<ul>' + v.incidencias.map(function(inc){ return '<li>' + escapeHtml(inc) + '</li>'; }).join("") + '</ul>';
+      }
+      html += '</div>';
+    }
+
+    if (!data.sanciones.length && !data.refuerzos.length){
+      html += '<div class="empty-state">No hay sanciones ni refuerzos con ese número de expediente.</div>';
+      consResultados.innerHTML = html;
+      consResultadosWrap.classList.remove("hidden");
+      return;
+    }
+
+    data.sanciones.forEach(function(r, i){
+      html += '<div class="consulta-section">';
+      html += '<h4>Sanción ' + (data.sanciones.length > 1 ? (i+1) + ' de ' + data.sanciones.length : '') +
+        ' · Exp. Nº ' + escapeHtml(String(r.expediente)) + '</h4>';
+      html += '<table class="consulta-table"><tbody>';
+      html += filaDatoConsulta("Expediente", escapeHtml(String(r.expediente)));
+      html += filaDatoConsulta("Fecha de la infracción", escapeHtml(formatDateDisplay(r.fecha)));
+      html += filaDatoConsulta("Lugar", escapeHtml(r.lugar || "—"));
+      html += filaDatoConsulta("Hora", escapeHtml(r.hora || "—"));
+      html += filaDatoConsulta("Tipo de falta", escapeHtml(r.tipoFalta === "GRAVE" ? "Grave" : (r.tipoFalta === "LEVE" ? "Leve" : (r.tipoFalta || "—"))));
+      html += filaDatoConsulta("Fase", escapeHtml(r.fase || "—"));
+      html += filaDatoConsulta("Fundamento legal", escapeHtml((r.fundamentoLetra ? r.fundamentoLetra + ") " : "") + (r.fundamento || "—")));
+      html += filaDatoConsulta("Motivo", escapeHtml(r.motivo || "—"));
+      html += filaDatoConsulta("Medida correctora", escapeHtml(formatMedidaCorrectora(r)));
+      html += filaDatoConsulta("Profesor que ordena", escapeHtml([r.profEmpleo, r.profNombre, r.profApellidos].filter(Boolean).join(" ") || "—"));
+      html += filaDatoConsulta("DNI del profesor", escapeHtml(r.profDni || "—"));
+      html += filaDatoConsulta("Observaciones", escapeHtml(r.observaciones || "—"));
+      if (esTrabajo(r)){
+        html += filaDatoConsulta("Trabajo hecho", r.trabajoHecho ? "Sí" + (r.trabajoHechoFecha ? " (" + escapeHtml(formatDateDisplay(String(r.trabajoHechoFecha).slice(0,10))) + ")" : "") : "No");
+      }
+      html += '</tbody></table>';
+      html += '<div style="margin-top:10px;"><strong>Alumnos del registro</strong></div>';
+      html += alumnosTablaHtml(r.alumnos);
+      html += '</div>';
+    });
+
+    data.refuerzos.forEach(function(r, i){
+      html += '<div class="consulta-section">';
+      html += '<h4>Refuerzo ' + (data.refuerzos.length > 1 ? (i+1) + ' de ' + data.refuerzos.length : '') +
+        ' · Exp. Nº ' + escapeHtml(String(r.expediente || "—")) +
+        (r.origen === "sancion" ? " (derivado de sanción)" : " (manual)") + '</h4>';
+      html += '<table class="consulta-table"><tbody>';
+      html += filaDatoConsulta("Expediente", escapeHtml(String(r.expediente || "—")));
+      html += filaDatoConsulta("Tipo", escapeHtml(r.tipo || "—"));
+      html += filaDatoConsulta("Periodo", escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin)));
+      html += filaDatoConsulta("Horario entre semana", escapeHtml((r.horaInicio || "—") + (r.duracion ? " · " + r.duracion + " h/día" : "")));
+      if (r.horaInicioFinde || r.duracionFinde){
+        html += filaDatoConsulta("Horario fin de semana", escapeHtml((r.horaInicioFinde || "—") + (r.duracionFinde ? " · " + r.duracionFinde + " h/día" : "")));
+      }
+      html += filaDatoConsulta("Observaciones", escapeHtml(r.observaciones || "—"));
+      html += filaDatoConsulta("Día / lugar / hora de la infracción", escapeHtml([r.fechaInfraccion || r.diaInfraccion, r.lugar, r.hora].filter(Boolean).join(" · ") || "—"));
+      html += filaDatoConsulta("Tipo de falta", escapeHtml(r.tipoFalta || "—"));
+      html += filaDatoConsulta("Fundamento legal", escapeHtml(r.fundamento || "—"));
+      html += filaDatoConsulta("Motivo", escapeHtml(r.motivo || "—"));
+      html += filaDatoConsulta("Profesor", escapeHtml([r.profEmpleo || r.empleo, r.profNombre, r.profApellidos].filter(Boolean).join(" ") || "—"));
+      html += '</tbody></table>';
+      html += '<div style="margin-top:10px;"><strong>Alumnos del registro</strong></div>';
+      html += alumnosTablaHtml(r.alumnos);
+      html += '</div>';
+    });
+
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
+    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
+  }
+
+  if (consExpedienteInput){
+    consExpedienteInput.addEventListener("input", actualizarValidacionConsultaExpediente);
+  }
+
   consTipoSelect.addEventListener("change", function(){
     var tipo = consTipoSelect.value;
     var esEstadoPeriodo = tipo === "estado_periodo";
     var esActividades = tipo === "actividades";
     var esArrestoPendiente = tipo === "arresto_pendiente";
     var esTrabajos = tipo === "trabajos";
+    var esExpediente = tipo === "expediente";
     consFechasWrap.classList.toggle("hidden", !esEstadoPeriodo);
     consActividadFaseWrap.classList.toggle("hidden", !esActividades);
     consArrestoPendienteWrap.classList.toggle("hidden", !esArrestoPendiente);
     consTrabajosWrap.classList.toggle("hidden", !esTrabajos);
-    consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos));
+    consExpedienteWrap.classList.toggle("hidden", !esExpediente);
+    consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos || esExpediente));
     consResultadosWrap.classList.add("hidden");
     consResultados.innerHTML = "";
     consImprimirBtn.disabled = true;
@@ -6809,6 +7786,12 @@
     }
     if (esTrabajos){
       consTrabajosSoloVencidosCheck.checked = false;
+    }
+    if (esExpediente){
+      consExpedienteInput.value = "";
+      if (consExpedientePreview) consExpedientePreview.classList.remove("show");
+      if (consExpedienteHint) consExpedienteHint.classList.add("hidden");
+      buildConsExpedienteOptions();
     }
     if (esActividades){
       consActFaseSelect.value = "";
@@ -6840,6 +7823,24 @@
       renderConsultaArrestoPendienteResultados(dataPend);
       consFormMsg.textContent = "Consulta realizada: " + dataPend.length + " sanci" + (dataPend.length === 1 ? "ón" : "ones") + " con arresto pendiente de fecha.";
       consFormMsg.className = "form-msg ok";
+      consImprimirBtn.disabled = false;
+      return;
+    }
+
+    if (tipo === "expediente"){
+      var vExpCons = actualizarValidacionConsultaExpediente();
+      if (!vExpCons || !vExpCons.existe){
+        consFormMsg.textContent = (vExpCons && vExpCons.mensaje) || "Indica un número de expediente válido.";
+        consFormMsg.className = "form-msg error";
+        consResultadosWrap.classList.add("hidden");
+        consImprimirBtn.disabled = true;
+        return;
+      }
+      var dataExp = computeConsultaExpediente(consExpedienteInput.value);
+      renderConsultaExpedienteResultados(dataExp);
+      var nSan = dataExp.sanciones.length, nRef = dataExp.refuerzos.length;
+      consFormMsg.textContent = dataExp.validacion.mensaje;
+      consFormMsg.className = dataExp.validacion.incidencias.length ? "form-msg" : "form-msg ok";
       consImprimirBtn.disabled = false;
       return;
     }
