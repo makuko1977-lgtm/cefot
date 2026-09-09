@@ -1,7 +1,8 @@
 # Documentación de Sección 3
 
-- [CHANGELOG](CHANGELOG_seccion3.md)
-- [Addendum del manual (07/09/2026)](MANUAL_seccion3_addendum_2026-09-07.md)
+- [CHANGELOG](CHANGELOG_seccion3.md) — actualizado 09/09/2026
+- [Manual](MANUAL_seccion3.md) — actualizado 09/09/2026
+- [Addendum histórico 07/09/2026](MANUAL_seccion3_addendum_2026-09-07.md)
 
-El PDF `manual_seccion3_actualizado_2026-09-07.pdf` es el mismo addendum
-en formato imprimible. Se añade al final del manual original; no lo sustituye.
+Página canónica: `public/seccion3.html` (idéntica a
+`public/seccion3_22_coincidencia_fechas.html`).
