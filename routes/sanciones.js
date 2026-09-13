@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
 const catalog = require("../public/shared/catalog.js");
+const avisos = require("../lib/avisos.js");
 
 const router = express.Router();
 
@@ -47,6 +48,8 @@ function validarFirmas(alumnos, firmasInput){
 // Listado completo: solo el jefe de sección (ve todo lo introducido,
 // incluido lo que entra desde los jefes de pelotón).
 router.get("/", auth.requireAuth, auth.requireRole("admin"), function (req, res){
+  const cambiado = db.ensureSancionesTrabajoShape(req.db);
+  if (cambiado) db.save();
   res.json({ sanciones: req.db.sanciones });
 });
 
@@ -145,8 +148,7 @@ router.post("/", auth.requireAuth, function (req, res){
     arrestoDias: arrestoDias,
     arrestoPendiente: arrestoPendiente,
     trabajoFechaFin: trabajoFechaFin,
-    trabajoHecho: false,
-    trabajoHechoFecha: null,
+    trabajoHechoPor: {},
     observaciones: b.observaciones ? String(b.observaciones).trim() : "",
     alumnos: alumnos,
     firmas: firmasResult.firmas,
@@ -155,6 +157,10 @@ router.post("/", auth.requireAuth, function (req, res){
   };
 
   req.db.sanciones.unshift(record);
+  // Si quien da de alta el parte no es el jefe de sección (un jefe de
+  // pelotón), se genera un aviso para que el jefe de sección lo revise y
+  // confirme o cambie la medida correctora propuesta.
+  avisos.registrarParte(req.db, record, req.user);
   db.save();
   res.status(201).json({ ok: true, sancion: record });
 });
@@ -217,18 +223,26 @@ router.patch("/:id/arresto-fecha", auth.requireAuth, auth.requireRole("admin"), 
   res.json({ ok: true, sancion: record });
 });
 
-// Marca/desmarca como hecho un trabajo (medida correctora "Trabajo no
-// superior a 5 horas"). Se usa tanto desde el listado de Sanciones como
-// desde Consultas → Sanciones de trabajo.
+// Marca/desmarca como hecho el trabajo (medida correctora "Trabajo no
+// superior a 5 horas") de UN alumno concreto dentro del expediente — un
+// mismo expediente puede tener varios alumnos y cada uno completa su
+// trabajo en un momento distinto. Se usa tanto desde el listado de
+// Sanciones como desde Consultas → Sanciones de trabajo.
 router.patch("/:id/trabajo-hecho", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   const record = req.db.sanciones.find(function (r){ return r.id === req.params.id; });
   if (!record) return res.status(404).json({ error: "No encontrada." });
   if (record.medidaCorrectora !== "Trabajo no superior a 5 horas"){
     return res.status(400).json({ error: "Esta sanción no tiene medida de trabajo." });
   }
+  const numero = req.body && req.body.numero != null ? String(req.body.numero).trim() : "";
+  if (!numero) return res.status(400).json({ error: "Falta el número de alumno." });
   const hecho = !!(req.body && req.body.hecho);
-  record.trabajoHecho = hecho;
-  record.trabajoHechoFecha = hecho ? new Date().toISOString() : null;
+  record.trabajoHechoPor = record.trabajoHechoPor && typeof record.trabajoHechoPor === "object" ? record.trabajoHechoPor : {};
+  if (hecho){
+    record.trabajoHechoPor[numero] = new Date().toISOString();
+  } else {
+    delete record.trabajoHechoPor[numero];
+  }
   db.save();
   res.json({ ok: true, sancion: record });
 });
