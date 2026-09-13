@@ -1,0 +1,84 @@
+CEFOT-2 — Activación de "Jefe de estudios" y "Avisos de partes"
+==================================================================
+
+Este paquete contiene SOLO los archivos que cambian. Cada uno sustituye
+al archivo del mismo nombre y misma ruta que ya tienes en tu repositorio
+(la carpeta de este zip reproduce esa misma estructura, así que puedes
+arrastrar cada archivo a su sitio, o extraer el zip entero encima de la
+carpeta del repositorio y confirmar que sobrescriba).
+
+Archivos y dónde va cada uno
+-----------------------------
+1. server.js
+   → sustituye a la raíz del repositorio: /server.js
+   Qué cambia: monta las cuatro piezas que ya existían en tu repositorio
+   pero nunca se activaban (routes/estudios.js, routes/avisos.js,
+   routes/jefesEstudiosAdmin.js, routes/sancionesMedida.js).
+
+2. lib/db.js
+   → sustituye a /lib/db.js
+   Qué cambia: el inicio de sesión nunca miraba la lista de "jefes de
+   estudios" (findUserGlobal no la consultaba). Sin este cambio, aunque
+   crearas la cuenta, nunca habría podido entrar con ella — lo detecté
+   al probarlo y lo corregí.
+
+3. routes/sanciones.js
+   → sustituye a /routes/sanciones.js
+   Qué cambia: al dar de alta un parte, ahora se llama a
+   avisos.registrarParte(...) para generar el aviso cuando quien lo
+   crea no es el jefe de sección (antes esa llamada no existía en
+   ningún sitio, así que los avisos nunca se generaban).
+
+4. public/shared/admin-extras.js
+   → sustituye a /public/shared/admin-extras.js
+   Qué cambia: se ha quitado el botón "Publicar en servidor" (ya
+   desactivado desde el arreglo anterior) para que, si en el futuro se
+   usa este script en alguna página, no reaparezca un botón inútil.
+   Ahora mismo esta página no la carga nada, así que este cambio es
+   solo por prevención.
+
+Archivos que YA modifiqué directamente en tu ordenador
+--------------------------------------------------------
+Estos dos ya están aplicados en tu carpeta — no hace falta que hagas
+nada con ellos, se mencionan aquí solo para que sepas qué cambió y
+dónde están las copias de seguridad por si quieres deshacerlo:
+
+- public/admin.html
+  Se añadió una línea: <script src="/shared/seccion-avisos.js"></script>
+  (justo después de amonestacion.js). Copia previa guardada como
+  public/admin.html.bak_preavisos
+
+- public/superadmin.html
+  Se añadió una línea: <script src="/shared/superadmin-estudios.js"></script>
+  (justo antes de </body>). Copia previa guardada como
+  public/superadmin.html.bak_preestudios
+
+Para deshacer cualquiera de los dos, basta con renombrar la copia
+.bak_* de vuelta al nombre original.
+
+Archivos que ya existían y NO hace falta tocar
+-------------------------------------------------
+routes/estudios.js, routes/avisos.js, routes/jefesEstudiosAdmin.js,
+routes/sancionesMedida.js, lib/avisos.js, lib/estadisticas.js,
+public/shared/seccion-avisos.js, public/shared/superadmin-estudios.js.
+Ya estaban en tu repositorio, escritos y correctos — el problema era
+solo que nada los conectaba entre sí. Con los 4 archivos de arriba
+quedan conectados.
+
+Qué vas a notar después de subir esto
+----------------------------------------
+- En el panel de Súper Administrador aparece un bloque nuevo "Jefe de
+  estudios" para dar de alta esa cuenta (usuario sin espacios, p. ej.
+  ESTUDIOS) y ver quién la tiene.
+- Esa cuenta, al entrar con su usuario y contraseña, ve estadísticas
+  agregadas de todas las secciones (sin datos personales de alumnos).
+- En el panel del jefe de sección (admin.html), cuando un jefe de
+  pelotón da de alta un parte, aparece un aviso arriba de la pantalla
+  para confirmar o cambiar la medida correctora; al guardarla, el
+  aviso desaparece solo.
+
+Todo esto lo he probado de principio a fin arrancando el servidor en
+local (crear la cuenta de jefe de estudios, iniciar sesión con ella,
+consultar estadísticas, y el ciclo completo de un parte de pelotón
+generando un aviso y quedando resuelto al fijar la medida) — sin
+errores en ningún paso.
