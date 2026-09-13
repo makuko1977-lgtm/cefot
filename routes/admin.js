@@ -1,8 +1,17 @@
 const express = require("express");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
+const mailer = require("../lib/mailer");
 
 const router = express.Router();
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_CONTACTOS = 15;
+const MAX_ENVIOS_HISTORIAL = 20;
+
+function normalizarEmail(raw){
+  return String(raw || "").trim().toLowerCase();
+}
 
 function publicUser(u){
   return {
@@ -14,148 +23,110 @@ function publicUser(u){
   };
 }
 
-function pick(row, names){
-  if (!row || typeof row !== "object") return "";
-  const keys = Object.keys(row);
-  for (let i = 0; i < names.length; i++){
-    const want = String(names[i]).trim().toUpperCase();
-    for (let k = 0; k < keys.length; k++){
-      if (String(keys[k]).trim().toUpperCase() === want){
-        const v = row[keys[k]];
-        return v == null ? "" : String(v);
-      }
-    }
-  }
-  return "";
-}
-
-function canonRosterRow(row){
-  if (!row || typeof row !== "object") return null;
-  const numero = pick(row, ["numero", "NUMERO", "NÚMERO", "Nº", "PROTOCOLO", "Nº PROTOCOLO"]);
-  if (!numero) return null;
-  const out = {
-    numero: numero,
-    ape1: pick(row, ["ape1", "APE1", "APELLIDO", "APELLIDOS", "PRIMER APELLIDO"]),
-    ape2: pick(row, ["ape2", "APE2", "SEGUNDO APELLIDO"]),
-    nombre: pick(row, ["nombre", "NOMBRE"]),
-    peloton: pick(row, ["peloton", "PELOTON", "PELOTÓN"]),
-    sexo: pick(row, ["sexo", "SEXO"]),
-    unidad: pick(row, ["unidad", "UNIDAD"]),
-    dni: pick(row, ["dni", "DNI"]),
-    telefono: pick(row, ["telefono", "TELEFONO", "TELÉFONO", "TEL"])
-  };
-  if (row._foto) out._foto = row._foto;
-  if (row._adjuntos) out._adjuntos = row._adjuntos;
-  if (row._cuestionario) out._cuestionario = row._cuestionario;
-  if (row._cuestionarioFecha) out._cuestionarioFecha = row._cuestionarioFecha;
-  return out;
-}
-
-function extraerRoster(payload){
-  if (!payload) return [];
-  if (Array.isArray(payload.roster)) return payload.roster;
-  if (payload.roster && Array.isArray(payload.roster.rows)) return payload.roster.rows;
-  if (Array.isArray(payload.rosterCanonico)) return payload.rosterCanonico;
-  return [];
-}
-
-function snapshotSeccion(req){
-  const roster = req.db.roster || [];
-  const rows = roster.map(function (r){
-    return {
-      NUMERO: r.numero, APE1: r.ape1, APE2: r.ape2, NOMBRE: r.nombre,
-      PELOTON: r.peloton, SEXO: r.sexo, UNIDAD: r.unidad, DNI: r.dni, TELEFONO: r.telefono,
-      numero: r.numero, ape1: r.ape1, ape2: r.ape2, nombre: r.nombre,
-      peloton: r.peloton, sexo: r.sexo, unidad: r.unidad, dni: r.dni, telefono: r.telefono
-    };
-  });
-  return {
-    tipo: "seccion3_backup",
-    version: 2,
-    exportadoEl: new Date().toISOString(),
-    exportedAt: new Date().toISOString(),
-    seccion: { compania: req.db.compania, seccion: req.db.seccion, nombre: req.db.nombre },
-    roster: {
-      headers: ["NUMERO", "APE1", "APE2", "NOMBRE", "PELOTON", "SEXO", "UNIDAD", "DNI", "TELEFONO"],
-      rows: rows,
-      meta: { origen: "servidor", count: rows.length }
-    },
-    rosterCanonico: roster,
-    sanciones: req.db.sanciones || [],
-    rebajes: req.db.rebajes || [],
-    refuerzos: req.db.refuerzos || [],
-    actividades: req.db.actividades || [],
-    expedienteCounter: req.db.expedienteCounter || 0
-  };
-}
-
+// Copia de seguridad de solo lectura: descarga todo el contenido actual de
+// ESTA sección (roster, bajas, sanciones, rebajes, refuerzos, actividades y
+// horas UA) en un único JSON. No incluye contraseñas.
 router.get("/backup", auth.requireAuth, auth.requireRole("admin"), function (req, res){
-  const snapshot = snapshotSeccion(req);
+  const snapshot = db.buildBackupSnapshot(req.db);
   res.setHeader("Content-Disposition", "attachment; filename=cefot2_copia_seguridad.json");
   res.json(snapshot);
 });
 
-// Restaura una copia exportada desde el servidor o desde el HTML local
-// (tipo seccion3_backup). Sustituye roster/sanciones/rebajes/refuerzos/
-// actividades de ESTA sección. No toca usuarios ni otras secciones.
-router.post("/backup", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, async function (req, res){
-  const CONFIRMACION = "RESTAURAR";
-  const b = req.body || {};
-  if (String(b.confirmacion || "").trim() !== CONFIRMACION){
-    return res.status(400).json({ error: "Escribe RESTAURAR para confirmar. Esto sustituye los datos de la sección." });
-  }
-  const payload = b.copia && typeof b.copia === "object" ? b.copia : b;
-  const rawRoster = extraerRoster(payload);
-  if (!Array.isArray(rawRoster) && !Array.isArray(payload.sanciones) && !Array.isArray(payload.rebajes)){
-    return res.status(400).json({ error: "El archivo no parece una copia de seguridad de Sección 3 ni del servidor." });
-  }
+// ---------------- copia de seguridad por email ----------------
 
-  const roster = rawRoster.map(canonRosterRow).filter(Boolean);
-  const sanciones = Array.isArray(payload.sanciones) ? payload.sanciones : [];
-  const rebajes = Array.isArray(payload.rebajes) ? payload.rebajes : [];
-  const refuerzos = Array.isArray(payload.refuerzos) ? payload.refuerzos : [];
-  const actividades = Array.isArray(payload.actividades) ? payload.actividades : [];
-
-  let maxExp = 0;
-  sanciones.forEach(function (s){
-    const n = parseInt(s && s.expediente, 10);
-    if (!isNaN(n) && n > maxExp) maxExp = n;
-  });
-  refuerzos.forEach(function (s){
-    const n = parseInt(s && s.expediente, 10);
-    if (!isNaN(n) && n > maxExp) maxExp = n;
-  });
-  const counterIn = parseInt(payload.expedienteCounter, 10);
-  const expedienteCounter = Math.max(maxExp, isNaN(counterIn) ? 0 : counterIn, req.db.expedienteCounter || 0);
-
-  req.db.roster = roster;
-  req.db.rosterUpdatedAt = new Date().toISOString();
-  req.db.rosterUpdatedBy = req.user.dni;
-  req.db.sanciones = sanciones;
-  req.db.rebajes = rebajes;
-  req.db.refuerzos = refuerzos;
-  req.db.actividades = actividades;
-  req.db.expedienteCounter = expedienteCounter;
-
-  try {
-    await db.saveStrict();
-  } catch (err){
-    return res.status(500).json({ error: "No se ha podido guardar la restauración. Inténtalo de nuevo." });
-  }
-
-  res.json({
-    ok: true,
-    restaurado: {
-      roster: roster.length,
-      sanciones: sanciones.length,
-      rebajes: rebajes.length,
-      refuerzos: refuerzos.length,
-      actividades: actividades.length,
-      expedienteCounter: expedienteCounter
-    }
-  });
+// Direcciones guardadas ("filtro") para no tener que volver a teclearlas
+// cada vez que se envía la copia de seguridad, más el historial reciente de
+// envíos (para trazabilidad: son datos personales de los alumnos).
+router.get("/backup-contactos", auth.requireAuth, auth.requireRole("admin"), function (req, res){
+  db.ensureBackupShape(req.db);
+  res.json({ contactos: req.db.backupContactos, envios: req.db.backupEnvios });
 });
 
+router.post("/backup-contactos", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  db.ensureBackupShape(req.db);
+  const email = normalizarEmail(req.body && req.body.email);
+  if (!EMAIL_RE.test(email)){
+    return res.status(400).json({ error: "Dirección de correo no válida." });
+  }
+  const yaExiste = req.db.backupContactos.some(function (c){ return c.email === email; });
+  if (!yaExiste){
+    if (req.db.backupContactos.length >= MAX_CONTACTOS){
+      return res.status(400).json({ error: "Ya hay " + MAX_CONTACTOS + " direcciones guardadas; elimina alguna antes de añadir otra." });
+    }
+    req.db.backupContactos.push({ email: email, addedAt: new Date().toISOString() });
+    db.save();
+  }
+  res.status(201).json({ ok: true, contactos: req.db.backupContactos });
+});
+
+router.delete("/backup-contactos/:email", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  db.ensureBackupShape(req.db);
+  const email = normalizarEmail(decodeURIComponent(req.params.email));
+  const before = req.db.backupContactos.length;
+  req.db.backupContactos = req.db.backupContactos.filter(function (c){ return c.email !== email; });
+  if (req.db.backupContactos.length !== before) db.save();
+  res.json({ ok: true, contactos: req.db.backupContactos });
+});
+
+// Genera la copia de seguridad ampliada y la envía por correo a UNA
+// dirección. Si `guardarContacto` es verdadero (o si es la única vez que se
+// usa esa dirección) se guarda además como contacto para próximos envíos.
+router.post("/backup/enviar", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, async function (req, res){
+  db.ensureBackupShape(req.db);
+  const email = normalizarEmail(req.body && req.body.email);
+  if (!EMAIL_RE.test(email)){
+    return res.status(400).json({ error: "Dirección de correo no válida." });
+  }
+  const guardarContacto = !!(req.body && req.body.guardarContacto);
+
+  const snapshot = db.buildBackupSnapshot(req.db);
+  const nombreSeccion = req.db.nombre || ("Sección " + req.db.seccion);
+  const fechaLegible = new Date().toLocaleString("es-ES");
+
+  try {
+    await mailer.enviarCopiaSeguridad({
+      to: email,
+      remitenteNombre: "CEFOT-2 · " + nombreSeccion,
+      asunto: "Copia de seguridad — " + nombreSeccion + " (" + fechaLegible + ")",
+      textoPlano:
+        "Copia de seguridad de " + nombreSeccion + ", generada el " + fechaLegible + ".\n\n" +
+        "Contiene: roster (" + snapshot.roster.length + " alumnos activos, " + snapshot.bajas.length + " de baja), " +
+        snapshot.sanciones.length + " sanciones, " + snapshot.rebajes.length + " rebajes, " +
+        snapshot.refuerzos.length + " refuerzos y " + snapshot.actividades.length + " actividades.\n\n" +
+        "Este correo contiene datos personales de los alumnos: consérvalo únicamente en un dispositivo de confianza.\n\n" +
+        "Enviado por " + req.user.nombre + " (" + req.user.dni + ") desde la aplicación CEFOT-2.",
+      adjuntoNombre: "cefot2_copia_seguridad_" + req.db.compania + "-" + req.db.seccion + ".json",
+      adjuntoJson: snapshot
+    });
+  } catch (err){
+    const mensaje = err && err.code === "SMTP_NOT_CONFIGURED"
+      ? err.message
+      : "No se ha podido enviar el correo. Comprueba la dirección y vuelve a intentarlo en unos minutos.";
+    return res.status(502).json({ error: mensaje });
+  }
+
+  const envio = {
+    fecha: new Date().toISOString(),
+    email: email,
+    enviadoPor: { dni: req.user.dni, nombre: req.user.nombre }
+  };
+  req.db.backupEnvios.unshift(envio);
+  req.db.backupEnvios = req.db.backupEnvios.slice(0, MAX_ENVIOS_HISTORIAL);
+
+  if (guardarContacto && !req.db.backupContactos.some(function (c){ return c.email === email; })){
+    if (req.db.backupContactos.length < MAX_CONTACTOS){
+      req.db.backupContactos.push({ email: email, addedAt: new Date().toISOString() });
+    }
+  }
+  db.save();
+
+  res.json({ ok: true, envio: envio, contactos: req.db.backupContactos, envios: req.db.backupEnvios });
+});
+
+// Resumen para la pantalla de "Cerrar curso": cuántos registros hay ahora
+// mismo (para que el jefe de sección sepa qué va a borrar antes de
+// confirmar) y el historial de cierres anteriores (quién, cuándo, cuántos
+// registros). Todo referido siempre a la sección de quien pregunta.
 router.get("/resumen-curso", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   res.json({
     actual: {
@@ -168,6 +139,9 @@ router.get("/resumen-curso", auth.requireAuth, auth.requireRole("admin"), functi
   });
 });
 
+// Cierra el curso académico de ESTA sección: vacía sanciones, rebajes y
+// refuerzos (siempre) y, si se pide explícitamente, también el roster
+// completo. No afecta a ninguna otra sección.
 router.post("/cerrar-curso", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, async function (req, res){
   const incluirRoster = !!(req.body && req.body.incluirRoster);
   const CONFIRMACION = "CERRAR CURSO";
@@ -196,7 +170,7 @@ router.post("/cerrar-curso", auth.requireAuth, auth.requireRole("admin"), auth.b
   }
   req.db.cursosHistorial = req.db.cursosHistorial || [];
   req.db.cursosHistorial.unshift(resumen);
-  req.db.cursosHistorial = req.db.cursosHistorial.slice(0, 20);
+  req.db.cursosHistorial = req.db.cursosHistorial.slice(0, 20); // no crecer sin límite
 
   try {
     await db.saveStrict();
@@ -206,26 +180,31 @@ router.post("/cerrar-curso", auth.requireAuth, auth.requireRole("admin"), auth.b
   res.json({ ok: true, resumen: resumen });
 });
 
+// Usuarios de ESTA sección: siempre jefes de pelotón (rol "instructor"). El
+// jefe de sección en sí mismo no aparece aquí ni se gestiona desde esta
+// pantalla — eso lo da de alta el Súper Administrador.
 router.get("/usuarios", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   const usuarios = req.db.users.filter(function (u){ return u.role === "instructor"; }).map(publicUser);
   res.json({ usuarios: usuarios });
 });
 
 router.post("/usuarios", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
-  const parsed = auth.parseUsuario(req.body.dni);
+  const dni = auth.normalizeDni(req.body.dni);
   const nombre = String(req.body.nombre || "").trim();
   const password = String(req.body.password || "");
+  // Un jefe de sección solo puede dar de alta jefes de pelotón: no puede
+  // crear otro jefe de sección ni, por supuesto, un Súper Administrador.
+  // Eso es tarea exclusiva del panel del Súper Administrador.
   const role = "instructor";
 
-  if (!parsed.ok){
-    return res.status(400).json({ error: parsed.error });
+  if (!dni || !nombre || password.length < 6){
+    return res.status(400).json({ error: "DNI, nombre y una contraseña de al menos 6 caracteres son obligatorios." });
   }
-  if (!nombre || password.length < 6){
-    return res.status(400).json({ error: "Nombre y una contraseña de al menos 6 caracteres son obligatorios." });
-  }
-  const dni = parsed.value;
+  // El DNI tiene que ser único en TODO el sistema (no solo en esta
+  // sección), porque el inicio de sesión busca por DNI sin saber todavía a
+  // qué sección pertenece.
   if (db.findUserGlobal(dni)){
-    return res.status(409).json({ error: "Ya existe un usuario con ese identificador (en esta u otra sección)." });
+    return res.status(409).json({ error: "Ya existe un usuario con ese DNI (en esta u otra sección)." });
   }
 
   const user = {
@@ -233,6 +212,8 @@ router.post("/usuarios", auth.requireAuth, auth.requireRole("admin"), auth.block
     nombre: nombre,
     role: role,
     passwordHash: auth.hashPassword(password),
+    // Permisos extra (además de sanciones, siempre permitidas para
+    // cualquier jefe de pelotón): solo tienen efecto si role === "instructor".
     permisos: auth.normalizePermisos(req.body.permisos),
     createdAt: new Date().toISOString()
   };
@@ -254,6 +235,9 @@ router.patch("/usuarios/:dni/password", auth.requireAuth, auth.requireRole("admi
   res.json({ ok: true });
 });
 
+// Cambia los permisos extra (foto, ver ficha, adjuntos, ver rebajes/
+// refuerzos) de un jefe de pelotón. Dar de alta sanciones sigue siendo
+// siempre posible para cualquiera de ellos, no depende de estos permisos.
 router.patch("/usuarios/:dni/permisos", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
   const dni = auth.normalizeDni(req.params.dni);
   const user = req.db.users.find(function (u){ return u.dni === dni; });
