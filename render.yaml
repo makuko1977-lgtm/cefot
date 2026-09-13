@@ -1,21 +1,35 @@
-# Variables reales que usa el código. Render pone PORT solo.
+# Blueprint de Render (https://render.com/docs/blueprint-spec).
+# Al conectar este repositorio en Render y elegir "New > Blueprint", detecta
+# este archivo y deja el servicio casi configurado solo — solo falta rellenar
+# DATABASE_URL a mano con la cadena de conexión de tu base de datos gratuita
+# (Neon, Supabase...), como se explica en el README.
 services:
   - type: web
-    name: cefot-vxs6
+    name: cefot-bal3cia
     runtime: node
     plan: free
-    region: frankfurt
-    branch: main
-    autoDeploy: true
-    buildCommand: npm install --omit=dev
+    buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /login.html
     envVars:
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
         value: "1"
       - key: DATABASE_URL
-        sync: false
-      - key: PGSSL_NO_VERIFY
+        sync: false # se rellena a mano en el panel de Render (dato sensible)
+      # Envío de correo (botón "Enviar por email" de la copia de seguridad).
+      # Opcional: si se dejan vacías, el resto de la aplicación funciona
+      # igual, ese botón simplemente da error al usarlo. Ver .env.example
+      # para cómo generar SMTP_PASS con una cuenta de Gmail.
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_SECURE
         value: "true"
+      - key: SMTP_USER
+        sync: false # se rellena a mano en el panel de Render (dato sensible)
+      - key: SMTP_PASS
+        sync: false # se rellena a mano en el panel de Render (dato sensible)
+      - key: SMTP_FROM
+        sync: false # se rellena a mano en el panel de Render (opcional)
