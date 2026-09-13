@@ -37,9 +37,14 @@ app.use("/api/rebajes", require("./routes/rebajes"));
 app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/actividades", require("./routes/actividades"));
 app.use("/api/consultas", require("./routes/consultas"));
+app.use("/api/horasua", require("./routes/horasua"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin", require("./routes/avisos"));
 app.use("/api/superadmin", require("./routes/superadmin"));
+app.use("/api/superadmin", require("./routes/jefesEstudiosAdmin"));
 app.use("/api/capitan", require("./routes/capitan"));
+app.use("/api/estudios", require("./routes/estudios"));
+app.use("/api/sanciones", require("./routes/sancionesMedida"));
 
 // ---------------- frontend estático ----------------
 app.use(express.static(path.join(__dirname, "public")));
