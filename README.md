@@ -175,49 +175,51 @@ funciona la puesta en marcha en local del punto 3. Eso solo sirve si el
 disco donde vive esa carpeta es persistente (tu propio ordenador, un VPS,
 un servidor institucional).
 
-En un hosting gratuito tipo PaaS (Render y similares) el disco normalmente
+En un hosting gratuito tipo PaaS (Railway y similares) el disco normalmente
 **no** es persistente: se borra en cada despliegue o reinicio. Para esos
 casos la app sabe guardar en una base de datos Postgres en vez de en un
 fichero: basta con definir la variable de entorno `DATABASE_URL` (ver
-`.env.example`) con la cadena de conexión de una base de datos Postgres —
-por ejemplo una gratuita en [Neon](https://neon.com) — y, al arrancar, la
-app crea sola la tabla que necesita y empieza a guardar ahí. No hay que
-tocar nada más: el resto de la aplicación funciona exactamente igual.
+`.env.example`) con la cadena de conexión de una base de datos Postgres y,
+al arrancar, la app crea sola la tabla que necesita y empieza a guardar
+ahí. No hay que tocar nada más: el resto de la aplicación funciona
+exactamente igual.
 
-### Opción recomendada para un uso interno sin coste: Render + Neon (gratis)
+### Opción recomendada para un uso interno sin coste: Railway
 
-Es la combinación con menos mantenimiento y menos riesgo de perder datos de
-las opciones gratuitas: Render no ofrece disco persistente en su plan
-gratuito, pero Neon sí guarda los datos de verdad (su parte gratuita solo
-"suspende" el cómputo cuando no se usa, nunca borra lo guardado).
+Railway aloja el servidor Node y la base de datos Postgres en un mismo
+proyecto, con un nivel gratuito/de bajo coste que suele cubrir de sobra el
+uso de una aplicación interna como esta (a diferencia de otras
+combinaciones donde la base de datos gestionada no tiene nivel gratuito
+permanente).
 
-1. **Crea la base de datos (Neon)**: cuenta gratuita en
-   [neon.com](https://neon.com) → crea un proyecto → copia la cadena de
-   conexión que te dan (empieza por `postgresql://...`).
-2. **Sube el código a un repositorio Git** (GitHub, por ejemplo): Render
+1. **Sube el código a un repositorio Git** (GitHub, por ejemplo): Railway
    despliega a partir de un repositorio.
-3. **Crea el servicio (Render)**: cuenta gratuita en
-   [render.com](https://render.com) → "New" → "Web Service" → conecta el
-   repositorio. Si detecta el `render.yaml` incluido en este proyecto, deja
-   casi todo configurado solo (plan gratuito, comandos de instalación y
-   arranque); si no, configúralo a mano:
-   - Build command: `npm install`
-   - Start command: `npm start`
-   - Variables de entorno: `DATABASE_URL` (la de Neon), `NODE_ENV=production`,
-     `TRUST_PROXY=1`.
-4. **Primer arranque**: en los logs del servicio (pestaña "Logs" de Render)
-   aparecen el DNI y la contraseña del administrador inicial, igual que en
-   local. Entra con ellas en `https://tu-servicio.onrender.com/login.html`
-   y cámbiala enseguida desde "Usuarios".
+2. **Crea el proyecto (Railway)**: cuenta en [railway.com](https://railway.com)
+   → "New Project" → "Deploy from GitHub repo" → elige este repositorio.
+   Railway detecta que es una app Node.js sola, sin necesidad de ningún
+   archivo de configuración adicional.
+   - Build command: `npm install` (se detecta solo)
+   - Start command: `npm start` (se detecta solo, viene de `package.json`)
+3. **Añade la base de datos**: dentro del mismo proyecto, botón "Create" →
+   "Database" → "Add PostgreSQL". Railway crea la base de datos y la deja
+   lista para usar.
+4. **Conecta la app con la base de datos**: en las variables de entorno del
+   servicio (no de la base de datos), añade:
+   - `DATABASE_URL` con el valor `${{Postgres.DATABASE_URL}}` (Railway lo
+     rellena solo con la conexión real de la base de datos que acabas de
+     crear — no hay que copiar ninguna cadena a mano).
+   - `NODE_ENV=production`
+   - `TRUST_PROXY=1`
+5. **Primer arranque**: en los logs del servicio (pestaña "Deployments" →
+   selecciona el despliegue → "Logs") aparecen el DNI y la contraseña del
+   administrador inicial, igual que en local. Entra con ellas en
+   `https://tu-servicio.up.railway.app/login.html` y cámbiala enseguida
+   desde "Usuarios".
 
-Dos cosas a tener en cuenta con el plan gratuito de Render: el servicio "se
-duerme" tras 15 minutos sin visitas y tarda cerca de un minuto en
-despertarse con la primera petición (normal para un uso interno ocasional,
-molesto si se usa constantemente); y la base de datos gratuita de Neon
-incluye 0.5 GB de almacenamiento, de sobra para el roster y los partes,
-pero a vigilar si se suben muchas fotos o adjuntos por alumno con el tiempo
-— si algún día se queda corto, se puede ampliar en Neon o mover los
-adjuntos a un almacenamiento de archivos aparte; avísame cuando toque.
+A vigilar con el tiempo: el nivel gratuito/de bajo coste de Railway se mide
+por uso (horas de cómputo + almacenamiento), así que si la aplicación crece
+mucho (muchas fotos o adjuntos por alumno) conviene revisar el consumo en
+el panel de Railway de vez en cuando — avísame cuando toque y lo miramos.
 
 ### Otras opciones, si hace falta más control
 
@@ -240,8 +242,8 @@ adjuntos a un almacenamiento de archivos aparte; avísame cuando toque.
 
 En cualquiera de los casos, el enlace que compartirías con los usuarios es
 simplemente la URL de `login.html` (por ejemplo
-`https://tu-dominio.ejemplo/login.html`, o `https://tu-servicio.onrender.com/login.html`
-en Render), y cada uno entra con su DNI y la contraseña que le hayas
+`https://tu-dominio.ejemplo/login.html`, o `https://tu-servicio.up.railway.app/login.html`
+en Railway), y cada uno entra con su DNI y la contraseña que le hayas
 asignado.
 
 ## 7. Estructura del proyecto
@@ -249,7 +251,6 @@ asignado.
 ```
 server-app/
 ├── server.js              Arranque del servidor y montaje de rutas
-├── render.yaml             Plantilla de despliegue para Render (opcional)
 ├── .env.example             Variables de entorno soportadas (cópialo a .env en local)
 ├── lib/
 │   ├── db.js               Carga/guardado del almacén de datos: fichero local

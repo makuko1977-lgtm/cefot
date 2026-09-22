@@ -120,26 +120,18 @@
     });
   }
 
+  // Desactivada: publicar() sustituía TODOS los datos del servidor por los
+  // del navegador (el endpoint POST /api/admin/backup además ni siquiera
+  // existe en el servidor actual). Sustituir es justo lo contrario de lo
+  // que se pidió para el flujo de copias por email, que añade sin borrar.
+  // Se deja la función para no romper quien la llame, pero avisa y no hace
+  // ninguna petición.
   function publicar(){
-    var local = leerLocal();
-    sesionTenant().then(function (me){
-      if (!me || me.tenant.role !== "admin"){
-        alert("Solo el jefe de sección o el capitán en esa sección puede publicar.");
-        return;
-      }
-      if (!confirm("PUBLICAR en «" + (me.tenant.nombre || me.tenant.id) + "».\n\n" + resumen(local) + "\n\n¿Continuar?")) return;
-      return fetch("/api/admin/backup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ confirmacion: "RESTAURAR", copia: local })
-      }).then(function (r){ return r.json().then(function (d){ return { ok: r.ok, d: d }; }); })
-        .then(function (res){
-          if (!res.ok){ alert(res.d.error || "No se pudo publicar."); return; }
-          guardarCopiaTenant(me.tenant.id);
-          var r = res.d.restaurado || {};
-          alert("Publicado: " + r.roster + " alumnos en " + (me.tenant.nombre || "esta sección") + ".");
-        });
-    });
+    alert(
+      "Esta función está desactivada para evitar sustituir por error todos los datos del servidor.\n\n" +
+      "Para llevar datos de este navegador al servidor (o al revés) sin perder nada de lo que ya hay " +
+      "en el destino, usa el envío por correo con fusión aditiva desde el panel del jefe de sección."
+    );
   }
 
   function traer(){

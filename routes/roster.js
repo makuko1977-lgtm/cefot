@@ -32,8 +32,14 @@ function sanitizeRosterRow(row, prev){
   return out;
 }
 
+// Busca primero entre los alumnos activos y, si no está, entre las bajas —
+// así la ficha, el historial, la foto y los adjuntos de un alumno dado de
+// baja se pueden seguir consultando sin tener que reincorporarlo antes.
 function findRow(req, numero){
-  return req.db.roster.find(function (r){ return String(r.numero) === String(numero); });
+  const row = req.db.roster.find(function (r){ return String(r.numero) === String(numero); });
+  if (row) return row;
+  db.ensureRosterShape(req.db);
+  return req.db.bajas.find(function (r){ return String(r.numero) === String(numero); });
 }
 
 function contarNumerosFueraDeSeccion(rows, compania, seccion){
@@ -58,8 +64,10 @@ function rosterParaCliente(req, rows){
 }
 
 router.get("/", auth.requireAuth, auth.requireRole("admin"), function (req, res){
+  db.ensureRosterShape(req.db);
   res.json({
     roster: rosterParaCliente(req, req.db.roster),
+    bajas: rosterParaCliente(req, req.db.bajas),
     rosterUpdatedAt: req.db.rosterUpdatedAt,
     rosterUpdatedBy: req.db.rosterUpdatedBy
   });
@@ -90,6 +98,45 @@ router.post("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan,
       req.db.compania + "ª Compañía / Sección " + req.db.seccion + " — revisa que no sea el listado de otra sección.";
   }
   res.json(respuesta);
+});
+
+// Da de baja a un alumno: lo mueve de `roster` a `bajas` (no se borra nada
+// de lo suyo — ficha, historial, rebajes, sanciones, refuerzos y
+// actividades siguen intactos), y le añade la fecha de baja. Deja de
+// aparecer en el roster activo, en los buscadores y en los recuentos.
+router.patch("/:numero/baja", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  db.ensureRosterShape(req.db);
+  const idx = req.db.roster.findIndex(function (r){ return String(r.numero) === String(req.params.numero); });
+  if (idx === -1) return res.status(404).json({ error: "Alumno no encontrado en el roster activo." });
+
+  const row = req.db.roster[idx];
+  row._bajaFecha = new Date().toISOString().slice(0, 10);
+  req.db.roster.splice(idx, 1);
+  req.db.bajas.push(row);
+  db.save();
+  const out = Object.assign({}, row);
+  out.dni = auth.publicDni(req, row.dni);
+  res.json({ ok: true, row: out });
+});
+
+// Devuelve a la sección a un alumno que estaba dado de baja, con todo lo
+// que tenía registrado (nunca se borró nada suyo).
+router.patch("/:numero/reincorporar", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  db.ensureRosterShape(req.db);
+  const idx = req.db.bajas.findIndex(function (r){ return String(r.numero) === String(req.params.numero); });
+  if (idx === -1) return res.status(404).json({ error: "Alumno no encontrado en las bajas." });
+
+  const row = req.db.bajas[idx];
+  delete row._bajaFecha;
+  req.db.bajas.splice(idx, 1);
+  req.db.roster.push(row);
+  req.db.roster.sort(function (a, b){
+    return String(a.numero).localeCompare(String(b.numero), "es", { numeric: true });
+  });
+  db.save();
+  const out = Object.assign({}, row);
+  out.dni = auth.publicDni(req, row.dni);
+  res.json({ ok: true, row: out });
 });
 
 router.get("/buscar", auth.requireAuth, function (req, res){

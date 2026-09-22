@@ -11,33 +11,34 @@
   h1{font-size:20px;margin:0 0 8px;}
   .sub{color:var(--text-dim);font-size:13px;margin-bottom:22px;}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+  .panel.disabled{opacity:.7;}
   .msg{min-height:18px;margin-top:10px;font-size:13px;}
 </style>
 </head>
 <body>
   <p><a href="/admin.html">← Volver al panel</a></p>
   <h1>Copia y sincronización</h1>
-  <p class="sub">El HTML local y el servidor siguen siendo independientes. Aquí copias datos de uno a otro a petición (sustituye lo de destino). Desde <a href="/seccion3.html">seccion3.html</a> también tienes <strong>Traer del servidor</strong> y <strong>Publicar en servidor</strong>.</p>
+  <p class="sub">El HTML local (<a href="/seccion3.html">seccion3.html</a>) y el servidor siguen siendo independientes. Desde aquí puedes descargar una copia de seguridad del servidor para importarla en el HTML local: el botón «Importar copia del servidor (añadir)» de seccion3.html la añade a lo que ya tengas allí, sin sustituir nada.</p>
 
   <div class="panel">
     <h2 style="margin:0 0 10px;font-size:16px;">Exportar del servidor</h2>
-    <p class="hint">JSON que puedes importar en el HTML local (botón Copia de seguridad) o volver a cargar aquí.</p>
+    <p class="hint">JSON que puedes importar en el HTML local (botón «Importar copia del servidor (añadir)») o volver a cargar aquí.</p>
     <button class="btn primary" id="exportBtn" type="button">Descargar copia</button>
     <div class="msg" id="exportMsg"></div>
   </div>
 
-  <div class="panel">
-    <h2 style="margin:0 0 10px;font-size:16px;">Importar al servidor</h2>
-    <p class="hint">JSON del HTML local o de una exportación anterior. Escribe <strong>RESTAURAR</strong>.</p>
-    <div class="field" style="margin:10px 0;">
-      <input type="file" id="fileInput" accept=".json,application/json">
-    </div>
-    <div class="field" style="margin:10px 0;">
-      <label for="confirmInput">Confirmación</label>
-      <input type="text" id="confirmInput" placeholder="RESTAURAR" autocomplete="off">
-    </div>
-    <button class="btn primary" id="importBtn" type="button" disabled>Importar y sustituir datos</button>
-    <div class="msg" id="importMsg"></div>
+  <div class="panel disabled">
+    <h2 style="margin:0 0 10px;font-size:16px;">Importar al servidor (desactivado)</h2>
+    <p class="hint">
+      Esta función sustituiría <strong>todos</strong> los datos del servidor por los del archivo importado, sin
+      posibilidad de deshacerlo. Se ha desactivado para evitar pérdidas de datos por error.
+    </p>
+    <p class="hint">
+      Si quieres llevar datos del HTML local al servidor (o del servidor al HTML local) sin perder nada de lo que
+      ya hay en el destino, usa el envío por correo con fusión aditiva desde el panel del jefe de sección
+      («Enviar por email») y el botón «Importar copia del servidor (añadir)» de <a href="/seccion3.html">seccion3.html</a>.
+    </p>
+    <button class="btn" type="button" disabled>Importar y sustituir datos</button>
   </div>
 
 <script>
@@ -49,7 +50,7 @@ function setMsg(el, text, ok){
 fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
   if (!me){ location.href = "/login.html"; return; }
   if (!(me.tenant && me.tenant.role === "admin")){
-    document.body.innerHTML = "<p>Solo el jefe de sección puede restaurar copias.</p><p><a href='/login.html'>Volver</a></p>";
+    document.body.innerHTML = "<p>Solo el jefe de sección puede exportar copias.</p><p><a href='/login.html'>Volver</a></p>";
   }
 }).catch(function(){ location.href = "/login.html"; });
 
@@ -67,51 +68,6 @@ document.getElementById("exportBtn").addEventListener("click", function(){
     a.click();
     setMsg(msg, "Copia descargada. Válida también en el HTML local.", true);
   }).catch(function(){ setMsg(msg, "Error al exportar.", false); });
-});
-
-var parsedCopia = null;
-document.getElementById("fileInput").addEventListener("change", function(){
-  var file = this.files && this.files[0];
-  parsedCopia = null;
-  document.getElementById("importBtn").disabled = true;
-  var msg = document.getElementById("importMsg");
-  if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(){
-    try {
-      parsedCopia = JSON.parse(String(reader.result));
-    } catch (e){
-      setMsg(msg, "Ese archivo no es un JSON válido.", false);
-      return;
-    }
-    var rows = (parsedCopia.roster && parsedCopia.roster.rows) || parsedCopia.roster || [];
-    var n = Array.isArray(rows) ? rows.length : 0;
-    setMsg(msg, "Archivo leído: " + n + " alumnos, " +
-      ((parsedCopia.sanciones || []).length) + " sanciones, " +
-      ((parsedCopia.rebajes || []).length) + " rebajes, " +
-      ((parsedCopia.refuerzos || []).length) + " refuerzos.", true);
-    document.getElementById("importBtn").disabled = false;
-  };
-  reader.readAsText(file);
-});
-
-document.getElementById("importBtn").addEventListener("click", function(){
-  var msg = document.getElementById("importMsg");
-  if (!parsedCopia){ setMsg(msg, "Elige un archivo.", false); return; }
-  var conf = document.getElementById("confirmInput").value.trim();
-  setMsg(msg, "Importando…", true);
-  fetch("/api/admin/backup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ confirmacion: conf, copia: parsedCopia })
-  }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
-    .then(function(res){
-      if (!res.ok){ setMsg(msg, res.d.error || "No se pudo importar.", false); return; }
-      var r = res.d.restaurado || {};
-      setMsg(msg, "Restaurado: " + r.roster + " alumnos, " + r.sanciones + " sanciones, " +
-        r.rebajes + " rebajes, " + r.refuerzos + " refuerzos.", true);
-    })
-    .catch(function(){ setMsg(msg, "Error de conexión.", false); });
 });
 </script>
 </body>
