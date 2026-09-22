@@ -6742,6 +6742,35 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     applyRefuerzoDraft();
   });
 
+  // Punto de enganche para el aviso de partes de pelotón (seccion-avisos.js,
+  // otro <script> aparte que no tiene acceso a las variables de este): en
+  // vez de crear una sanción nueva desde el formulario, arma el borrador de
+  // refuerzo directamente con los datos que ya trae el aviso (la sanción del
+  // jefe de pelotón puede no estar sincronizada todavía en este dispositivo).
+  window.cefotGenerarRefuerzoDesdeSancion = function(aviso){
+    if (!aviso) return;
+    refuerzoDraft = {
+      expediente: aviso.expediente,
+      sancionId: aviso.sancionId,
+      alumnos: aviso.alumnos || [],
+      fecha: aviso.fecha || "",
+      lugar: aviso.lugar || "",
+      hora: aviso.hora || "",
+      profEmpleo: aviso.profEmpleo || "",
+      profNombre: aviso.profNombre || "",
+      profApellidos: aviso.profApellidos || "",
+      profDni: aviso.profDni || "",
+      tipoFalta: aviso.tipoFalta || "",
+      fundamento: aviso.fundamento || "",
+      fundamentoLetra: aviso.fundamentoLetra || "",
+      motivo: aviso.motivo || "",
+      observaciones: aviso.observaciones || ""
+    };
+    switchTab("refuerzos");
+    renderRefuerzosTab();
+    applyRefuerzoDraft();
+  };
+
   function deleteSancion(id){
     if (!confirm("¿Eliminar este expediente? Esta acción no se puede deshacer y afecta a todos los alumnos incluidos.")) return;
     sanciones = sanciones.filter(function(r){ return r.id !== id; });

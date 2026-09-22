@@ -22,7 +22,10 @@
       var bar = document.createElement("div");
       bar.id = "cefot-extras-bar";
       bar.setAttribute("style",
-        "position:sticky;top:0;z-index:99998;background:#efe8d3;" +
+        // No sticky: si el aviso de partes (también arriba) está también fijo con
+        // top:0, al hacer scroll las dos barras se pisan en el mismo sitio. Esta
+        // se queda fija en su sitio normal, justo debajo del aviso cuando lo hay.
+        "background:#efe8d3;" +
         "padding:10px 16px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;font-family:inherit;");
       var html = "";
       if (esCapitan) html += '<a href="/capitan.html" style="' + b + 'background:#2f6690;">Volver a compañía</a>';
