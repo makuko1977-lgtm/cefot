@@ -33,12 +33,14 @@ app.use(function (req, res, next){
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/roster", require("./routes/roster"));
 app.use("/api/sanciones", require("./routes/sanciones"));
+app.use("/api/sanciones", require("./routes/sancionesMedida"));
 app.use("/api/rebajes", require("./routes/rebajes"));
 app.use("/api/refuerzos", require("./routes/refuerzos"));
 app.use("/api/actividades", require("./routes/actividades"));
 app.use("/api/consultas", require("./routes/consultas"));
 app.use("/api/horasua", require("./routes/horasua"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/admin", require("./routes/avisos"));
 app.use("/api/superadmin", require("./routes/superadmin"));
 app.use("/api/superadmin", require("./routes/jefesEstudiosAdmin"));
 app.use("/api/estudios", require("./routes/estudios"));

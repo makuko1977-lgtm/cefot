@@ -155,6 +155,14 @@
         </div>
         <div class="hint error hidden" id="arrestoHint" style="grid-column:1/-1;">Indica la fecha de inicio y fin del arresto (la fecha de fin debe ser igual o posterior a la de inicio).</div>
 
+        <div class="field-row hidden" id="trabajoFields" style="grid-column:1/-1;">
+          <div class="field">
+            <label for="trabajoFechaFin">Fecha límite del trabajo</label>
+            <input type="date" id="trabajoFechaFin">
+          </div>
+        </div>
+        <div class="hint error hidden" id="trabajoHint" style="grid-column:1/-1;">Indica la fecha límite para realizar el trabajo.</div>
+
         <div class="field" style="grid-column:1/-1;">
           <label for="sanObservaciones">Observaciones (opcional)</label>
           <textarea id="sanObservaciones" rows="2"></textarea>
@@ -385,9 +393,15 @@
   arrestoFechaIni.addEventListener("change", actualizarDiasArresto);
   arrestoFechaFin.addEventListener("change", actualizarDiasArresto);
 
+  var trabajoFields = document.getElementById("trabajoFields");
+  var trabajoFechaFin = document.getElementById("trabajoFechaFin");
+  var trabajoHint = document.getElementById("trabajoHint");
+
   sanMedidaInput.addEventListener("change", function(){
     arrestoFields.classList.toggle("hidden", sanMedidaInput.value !== "Arresto");
     if (sanMedidaInput.value !== "Arresto") arrestoHint.classList.add("hidden");
+    trabajoFields.classList.toggle("hidden", sanMedidaInput.value !== "Trabajo no superior a 5 horas");
+    if (sanMedidaInput.value !== "Trabajo no superior a 5 horas") trabajoHint.classList.add("hidden");
   });
 
   // ---------------- tipo de falta / fundamento ----------------
@@ -658,6 +672,9 @@
     arrestoFields.classList.add("hidden");
     arrestoFechaIni.value = ""; arrestoFechaFin.value = ""; arrestoDias.value = "";
     arrestoHint.classList.add("hidden");
+    trabajoFields.classList.add("hidden");
+    trabajoFechaFin.value = "";
+    trabajoHint.classList.add("hidden");
     sanObservaciones.value = "";
     sanFormHint.classList.add("hidden");
     sanFormMsg.textContent = ""; sanFormMsg.className = "form-msg";
@@ -691,6 +708,14 @@
       arrestoHint.classList.add("hidden");
     }
 
+    if (sanMedidaInput.value === "Trabajo no superior a 5 horas"){
+      var trabajoOk = !!trabajoFechaFin.value;
+      trabajoHint.classList.toggle("hidden", trabajoOk);
+      if (!trabajoOk) ok = false;
+    } else {
+      trabajoHint.classList.add("hidden");
+    }
+
     sanFormHint.classList.toggle("hidden", ok);
     if (!ok){
       sanFormMsg.textContent = "Revisa los campos marcados.";
@@ -714,6 +739,7 @@
         medidaCorrectora: sanMedidaInput.value,
         arrestoFechaIni: sanMedidaInput.value === "Arresto" ? arrestoFechaIni.value : "",
         arrestoFechaFin: sanMedidaInput.value === "Arresto" ? arrestoFechaFin.value : "",
+        trabajoFechaFin: sanMedidaInput.value === "Trabajo no superior a 5 horas" ? trabajoFechaFin.value : "",
         observaciones: sanObservaciones.value.trim(),
         firmas: firmas
       };

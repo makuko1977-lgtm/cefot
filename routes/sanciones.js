@@ -3,6 +3,7 @@ const crypto = require("crypto");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
 const catalog = require("../public/shared/catalog.js");
+const avisos = require("../lib/avisos.js");
 
 const router = express.Router();
 
@@ -156,6 +157,10 @@ router.post("/", auth.requireAuth, function (req, res){
   };
 
   req.db.sanciones.unshift(record);
+  // Si quien da de alta el parte no es el jefe de sección (un jefe de
+  // pelotón), se genera un aviso para que el jefe de sección lo revise y
+  // confirme o cambie la medida correctora propuesta.
+  avisos.registrarParte(req.db, record, req.user);
   db.save();
   res.status(201).json({ ok: true, sancion: record });
 });
