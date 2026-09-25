@@ -2,7 +2,7 @@
 
 Pieza lista para la conversación **master HTML**. **No sustituye** `seccion3.html`: solo añade una pestaña.
 
-Archivo fuente: [`public/horas-ua.html`](horas-ua.html) (copia de `CEFOT2-Horas-UA.html`, ~55 KB, `file://`, sin módulos ES).
+Archivo fuente: [`public/horas-ua.html`](../public/horas-ua.html) (copia de `CEFOT2-Horas-UA.html`, ~55 KB, `file://`, sin módulos ES).
 
 ## Tres exclusiones (ya recortadas en el catálogo)
 
