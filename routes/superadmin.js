@@ -95,6 +95,7 @@ router.post("/secciones", auth.requireAuth, auth.requireSuperAdmin, function (re
   if (!dni || !nombre || password.length < 6){
     return res.status(400).json({ error: "DNI, nombre y una contraseña de al menos 6 caracteres son obligatorios." });
   }
+  if (auth.dniReservado(dni)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
   if (db.findUserGlobal(dni)){
     return res.status(409).json({ error: "Ya existe un usuario con ese DNI." });
   }
@@ -138,7 +139,9 @@ router.patch("/secciones/:id", auth.requireAuth, auth.requireSuperAdmin, functio
     const nuevoDni = auth.normalizeDni(b.dni);
     if (nuevoDni !== jefe.dni){
       const existente = db.findUserGlobal(nuevoDni);
-      if (existente){
+      if (auth.dniReservado(nuevoDni)){
+        errores.push("Ese identificador está reservado; elige otro.");
+      } else if (existente){
         errores.push("Ya existe un usuario con ese DNI (en esta u otra sección).");
       } else {
         jefe.dni = nuevoDni;
@@ -243,6 +246,7 @@ router.post("/capitanes", auth.requireAuth, auth.requireSuperAdmin, function (re
   if (!dni || !nombre || password.length < 6){
     return res.status(400).json({ error: "DNI, nombre y una contraseña de al menos 6 caracteres son obligatorios." });
   }
+  if (auth.dniReservado(dni)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
 
   if (db.findCapitanByCompania(compania)){
     return res.status(409).json({ error: "Esa compañía ya tiene un capitán asignado." });
@@ -277,7 +281,9 @@ router.patch("/capitanes/:compania", auth.requireAuth, auth.requireSuperAdmin, f
   if (b.dni != null && String(b.dni).trim()){
     const nuevoDni = auth.normalizeDni(b.dni);
     if (nuevoDni !== capitan.dni){
-      if (db.findUserGlobal(nuevoDni)){
+      if (auth.dniReservado(nuevoDni)){
+        errores.push("Ese identificador está reservado; elige otro.");
+      } else if (db.findUserGlobal(nuevoDni)){
         errores.push("Ya existe un usuario con ese DNI (en esta u otra sección).");
       } else {
         capitan.dni = nuevoDni;

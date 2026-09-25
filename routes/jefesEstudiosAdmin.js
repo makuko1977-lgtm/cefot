@@ -7,7 +7,7 @@ function publicJefe(j){
   return { dni: j.dni, nombre: j.nombre, createdAt: j.createdAt };
 }
 function requireSA(req, res, next){
-  if (req.user && (req.user.superAdmin || String(req.user.dni).toUpperCase() === "SUPERADMIN")) return next();
+  if (auth.isSuperAdminUser(req.user)) return next();
   return res.status(403).json({ error: "No tienes permiso para esta acción." });
 }
 
@@ -20,6 +20,7 @@ router.post("/jefes-estudios", auth.requireAuth, requireSA, function (req, res){
   const nombre = String((req.body && req.body.nombre) || "").trim();
   const password = String((req.body && req.body.password) || "");
   if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+  if (auth.dniReservado(parsed.value)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
   if (!nombre || password.length < 6){
     return res.status(400).json({ error: "Nombre y una contraseña de al menos 6 caracteres son obligatorios." });
   }
