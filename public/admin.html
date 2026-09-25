@@ -2342,7 +2342,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     </div>
   </div>
 
-  <footer class="info">Los datos se guardan únicamente en este navegador (almacenamiento local). Nadie más tiene acceso a ellos.</footer>
+  <footer class="info">Los datos se guardan en el servidor de la aplicación. Solo acceden los usuarios autorizados de esta sección.</footer>
 </div>
 
 <script>
@@ -6316,6 +6316,36 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     renderRefuerzosTab();
     applyRefuerzoDraft();
   });
+
+  // Punto de enganche para el aviso de partes de pelotón (shared/seccion-avisos.js,
+  // script aparte sin acceso a estas variables): el botón "Generar refuerzo"
+  // del aviso guarda la medida y llama aquí para abrir la pestaña Refuerzos
+  // con el expediente y los alumnos ya precargados. Si la sanción ya está en
+  // la lista cargada del servidor se usan sus datos; si no, los del aviso.
+  window.cefotGenerarRefuerzoDesdeSancion = function(aviso){
+    if (!aviso) return;
+    var rec = (sanciones || []).find(function(r){ return r.id === aviso.sancionId; }) || aviso;
+    refuerzoDraft = {
+      expediente: rec.expediente != null ? rec.expediente : aviso.expediente,
+      sancionId: aviso.sancionId || rec.id,
+      alumnos: rec.alumnos || aviso.alumnos || [],
+      fecha: rec.fecha || "",
+      lugar: rec.lugar || "",
+      hora: rec.hora || "",
+      profEmpleo: rec.profEmpleo || "",
+      profNombre: rec.profNombre || "",
+      profApellidos: rec.profApellidos || "",
+      profDni: rec.profDni || "",
+      tipoFalta: rec.tipoFalta || "",
+      fundamento: rec.fundamento || "",
+      fundamentoLetra: rec.fundamentoLetra || "",
+      motivo: rec.motivo || "",
+      observaciones: rec.observaciones || ""
+    };
+    switchTab("refuerzos");
+    renderRefuerzosTab();
+    applyRefuerzoDraft();
+  };
 
   function deleteSancion(id){
     if (!confirm("¿Eliminar este expediente? Esta acción no se puede deshacer y afecta a todos los alumnos incluidos.")) return;
