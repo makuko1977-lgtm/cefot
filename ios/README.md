@@ -38,7 +38,7 @@ static let defaultServerURL = "http://192.168.1.23:3000"
 3. Arriba, selecciona el target **CEFOT** → pestaña **Signing & Capabilities**.
 4. Marca **Automatically manage signing**.
 5. En **Team**, elige tu Apple ID (Xcode → Settings → Accounts → añadir Apple ID si no está).
-6. Cambia el **Bundle Identifier** si Xcode dice que está ocupado, por ejemplo `es.cefot.seccion3.tuapellido`.
+6. Cambia el **Bundle Identifier** si Xcode dice que está ocupado, por ejemplo `es.cefot.seccion.tuapellido`.
 
 ## 4. Instalar en el iPhone
 

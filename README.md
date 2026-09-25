@@ -2,7 +2,7 @@
 
 Aplicación web para la gestión de rebajes, refuerzos y sanciones de la sección,
 con acceso mediante DNI + contraseña y dos roles de usuario (administrador e
-instructor). Sustituye a la versión de un único archivo (`seccion3.html`) en
+instructor). Sustituye a la versión de un único archivo (`seccion.html`) en
 los casos en que varias personas necesiten introducir datos a la vez desde
 distintos dispositivos.
 

@@ -2,8 +2,8 @@
 
 Archivo canónico listo para GitHub y para el servidor (byte a byte el mismo):
 
-- `public/seccion3.html`
-- `public/seccion3_22_coincidencia_fechas.html`
+- `public/seccion.html`
+- `public/seccion_22_coincidencia_fechas.html`
 
 SHA-256 (16 hex): `06b5f252ed9b6bcc` · 3 146 957 bytes.
 
@@ -18,11 +18,11 @@ Es un **monofichero** (`file://`): xlsx y pdf-lib van incrustados. No depende de
 
 ## Qué tiene que hacer la conversación master
 
-1. Usar **este** `public/seccion3.html` como la página de Sección 3 (modo local y la que sirve el servidor).
+1. Usar **este** `public/seccion.html` como la página de Sección 3 (modo local y la que sirve el servidor).
 2. **No** sustituir por la versión de 786 KB.
-3. `public/index.html` (acceso servidor/local) se queda. El botón «Modo local» ya apunta a `/seccion3.html`.
+3. `public/index.html` (acceso servidor/local) se queda. El botón «Modo local» ya apunta a `/seccion.html`.
 4. No reimplantar Horas UA: ya está dentro.
 
 Prompt corto:
 
-> Sustituye `public/seccion3.html` y `public/seccion3_22_coincidencia_fechas.html` por los de este commit. Deben ser idénticos al monofichero (3 146 957 bytes). No reimplantes Horas UA. No toques `index.html` ni el modo servidor (`login.html`).
+> Sustituye `public/seccion.html` y `public/seccion_22_coincidencia_fechas.html` por los de este commit. Deben ser idénticos al monofichero (3 146 957 bytes). No reimplantes Horas UA. No toques `index.html` ni el modo servidor (`login.html`).

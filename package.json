@@ -1,5 +1,5 @@
 {
-  "name": "cefot2-seccion3-server",
+  "name": "cefot2-seccion-server",
   "version": "1.0.0",
   "description": "Gestion de personal CEFOT-2 BAL/3a CIA - servidor multiusuario",
   "main": "server.js",

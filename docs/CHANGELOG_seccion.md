@@ -1,7 +1,7 @@
-# Historial de cambios — seccion3.html
+# Historial de cambios — seccion.html
 
 Este documento recoge, en orden cronológico, las actualizaciones que se van
-haciendo sobre `seccion3.html` (la versión de un solo archivo de la app
+haciendo sobre `seccion.html` (la versión de un solo archivo de la app
 CEFOT-2 BAL/3ª CÍA). Sirve como control de cambios para poder comparar esta
 versión con la que está desplegada en el servidor y decidir qué actualizar
 allí.
@@ -1038,7 +1038,7 @@ otros 11 conjuntos siguen pasando.
 
 ## Cómo usar este documento
 
-Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí
+Cada vez que se pida un cambio nuevo sobre `seccion.html`, se añade aquí
 una entrada nueva (arriba del todo, o al final, según se prefiera) con la
 misma estructura: fecha, petición, causa (si aplica) y detalle técnico del
 cambio. Así, antes de actualizar la versión que corre en el servidor, se

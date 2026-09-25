@@ -1,6 +1,6 @@
 # Versión local (retirada)
 
-Hasta septiembre de 2026 el jefe de sección trabajaba en `seccion3.html`, que
+Hasta septiembre de 2026 el jefe de sección trabajaba en `seccion.html`, que
 guardaba los datos en el navegador (`localStorage`) y solo se sincronizaba con
 el servidor pulsando «Traer del servidor» / «Publicar en servidor».
 
@@ -14,7 +14,7 @@ Desde ahora **todos los perfiles trabajan contra el servidor**:
 | Súper Administrador | `/superadmin.html` |
 | Jefe de estudios | `/estudios.html` |
 
-`seccion3.html` y las páginas asociadas se han movido a `legado/` (ver
+`seccion.html` y las páginas asociadas se han movido a `legado/` (ver
 `legado/LEEME.md`) y el servidor ya no las publica.
 
 Para probar en local:

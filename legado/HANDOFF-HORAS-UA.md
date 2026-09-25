@@ -1,6 +1,6 @@
-# Handoff · pestaña Horas UA → `public/seccion3.html`
+# Handoff · pestaña Horas UA → `public/seccion.html`
 
-Pieza lista para la conversación **master HTML**. **No sustituye** `seccion3.html`: solo añade una pestaña.
+Pieza lista para la conversación **master HTML**. **No sustituye** `seccion.html`: solo añade una pestaña.
 
 Archivo fuente: [`public/horas-ua.html`](../public/horas-ua.html) (copia de `CEFOT2-Horas-UA.html`, ~55 KB, `file://`, sin módulos ES).
 
@@ -16,7 +16,7 @@ Totales: FFMG 212 h (80+129+3) · FFE 174 h (18+26+20+110).
 
 ## Cómo implantar
 
-1. Copiar `<style id="cefot2-horas-ua-css">` al CSS de `seccion3.html` (prefijar selectores si chocan con estilos existentes; IDs `cefot2-horas-ua-*` son estables).
+1. Copiar `<style id="cefot2-horas-ua-css">` al CSS de `seccion.html` (prefijar selectores si chocan con estilos existentes; IDs `cefot2-horas-ua-*` son estables).
 2. Añadir botón de pestaña «Horas UA» que muestre `#pestana-horas-ua` y oculte el resto, igual que cadetes / sanciones / consultas / notas.
 3. Copiar `<section id="pestana-horas-ua">` al cuerpo.
 4. Copiar los dos scripts al final, **sin** módulos ES:
@@ -34,6 +34,6 @@ Totales: FFMG 212 h (80+129+3) · FFE 174 h (18+26+20+110).
 
 ## Qué no tocar
 
-Cadetes, rebajes, sanciones, consultas y notas de `seccion3.html` quedan como están.
+Cadetes, rebajes, sanciones, consultas y notas de `seccion.html` quedan como están.
 
-Kit Windows: más adelante incrustar este HTML (o el `seccion3.html` ya fusionado) y firmar el instalador.
+Kit Windows: más adelante incrustar este HTML (o el `seccion.html` ya fusionado) y firmar el instalador.

@@ -3,8 +3,8 @@
 CEFOT-2 · BAL / 3.ª CÍA · Sección 3.
 
 Este texto sustituye, a efectos de uso, el addendum del 07/09/2026 y
-describe el monofichero `seccion3.html` /
-`seccion3_22_coincidencia_fechas.html` (idénticos, 3 146 957 bytes).
+describe el monofichero `seccion.html` /
+`seccion_22_coincidencia_fechas.html` (idénticos, 3 146 957 bytes).
 
 Se abre con doble clic en el navegador (`file://`). Los datos se guardan
 solo en ese dispositivo (`localStorage`). No hace falta internet ni
@@ -123,7 +123,7 @@ Sin cambio de procedimiento respecto al manual original:
 ## Servidor
 
 `index.html` sigue ofreciendo modo servidor (`login.html`) y modo local
-(`/seccion3.html`). La página de Sección 3 del servidor debe ser **este**
+(`/seccion.html`). La página de Sección 3 del servidor debe ser **este**
 monofichero, no la versión antigua de 786 KB.
 
 El campo de acceso del servidor se llama **Usuario** (lo asigna el súper
