@@ -41,10 +41,24 @@
   function escribirLocal(data){
     var roster = data.roster;
     if (Array.isArray(roster)){
+      // El servidor guarda cada alumno con claves en minúscula (numero,
+      // ape1...), pero seccion3.html lee cada fila por el nombre de su
+      // cabecera (NUMERO, APE1...). Se copian los campos con la clave en
+      // mayúscula, conservando el resto (foto, adjuntos...) tal cual.
+      var CAMPOS = ["NUMERO", "APE1", "APE2", "NOMBRE", "PELOTON", "SEXO", "UNIDAD", "DNI", "TELEFONO"];
+      var filas = roster.map(function (al){
+        var fila = {};
+        Object.keys(al || {}).forEach(function (k){ fila[k] = al[k]; });
+        CAMPOS.forEach(function (h){
+          var v = al ? al[h.toLowerCase()] : undefined;
+          if (v != null) fila[h] = v;
+        });
+        return fila;
+      });
       roster = {
-        headers: ["NUMERO", "APE1", "APE2", "NOMBRE", "PELOTON", "SEXO", "UNIDAD", "DNI", "TELEFONO"],
-        rows: roster,
-        meta: { origen: "servidor" }
+        headers: CAMPOS,
+        rows: filas,
+        meta: { origen: "servidor", fileName: "servidor", sheetName: "roster", loadedAt: new Date().toISOString(), count: filas.length }
       };
     }
     localStorage.setItem(BASE.roster, JSON.stringify(roster || { headers: [], rows: [] }));

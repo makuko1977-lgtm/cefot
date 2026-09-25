@@ -125,6 +125,37 @@ Con esas credenciales entra en `http://localhost:3000/login.html`, y **lo
 primero que debes hacer es cambiar esa contraseña** desde la pestaña
 "Usuarios" (botón "Cambiar contraseña").
 
+### Servidor de demostración (datos ficticios)
+
+Para enseñar o probar la aplicación sin tocar datos reales:
+
+```bash
+npm install
+npm run demo              # arranca en http://localhost:3000/login.html
+npm run demo -- --reset   # borra los datos de demo y los vuelve a generar
+```
+
+Guarda todo en `data-demo/` (excluida de Git) y **no** usa `data/` ni
+`DATABASE_URL`, aunque esté definida. La primera vez crea, a través de la
+propia API, dos secciones (3ª Cía · Secc. 3 y Secc. 1), 24 alumnos
+inventados, varios partes con distintas medidas (dos de ellos de jefes de
+pelotón, que generan avisos), un rebaje, un capitán y un jefe de estudios.
+
+Contraseña de todas las cuentas: `demo1234`
+
+| Usuario      | Perfil                                        |
+|--------------|-----------------------------------------------|
+| `SUPERADMIN` | Súper Administrador                           |
+| `JEFE33`     | Jefe de sección 3ª Cía · Secc. 3              |
+| `PELOTON1`   | Jefe de pelotón con todos los permisos extra  |
+| `PELOTON2`   | Jefe de pelotón (solo partes)                 |
+| `JEFE31`     | Jefe de sección 3ª Cía · Secc. 1 (vacía)      |
+| `CAPITAN3`   | Capitán de la 3ª Compañía                     |
+| `ESTUDIOS`   | Jefe de estudios                              |
+
+Ningún nombre, DNI ni teléfono de estos datos corresponde a una persona
+real. No expongas el servidor de demo a Internet con estas contraseñas.
+
 ## 4. Dar de alta usuarios (instructores u otros administradores)
 
 Solo un administrador puede crear usuarios, desde la pestaña **Usuarios**:
