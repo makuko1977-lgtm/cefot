@@ -6,14 +6,8 @@ servidor guarda en la base de datos y es multiusuario.
 
 Para que el servidor se comporte **igual que el HTML local**:
 
-1. Copia al repo, dentro de `public/`:
-   - `public/seccion3.html`
-   - `public/shared/xlsx.full.min.js`
-   - `public/shared/exceljs.min.js`
-   - (`public/shared/pdf-lib.min.js` ya está en el repositorio)
-
-   Alternativa de un solo archivo: `public/seccion3_completo.html`
-   (el HTML original con las librerías incrustadas).
+1. `public/seccion3.html` ya está en el repositorio y lleva las librerías
+   de Excel y PDF incrustadas: no hace falta copiar nada más.
 
 2. Arranca el servidor:
 
@@ -30,4 +24,4 @@ Para que el servidor se comporte **igual que el HTML local**:
    abrías el archivo en local.
 
 `/login.html` sigue siendo el acceso multiusuario (jefe de sección →
-`/admin.html`, instructor → `/instructor.html`).
+`/seccion3.html`, jefe de pelotón → `/instructor.html`).

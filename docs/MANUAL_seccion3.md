@@ -3,8 +3,7 @@
 CEFOT-2 · BAL / 3.ª CÍA · Sección 3.
 
 Este texto sustituye, a efectos de uso, el addendum del 07/09/2026 y
-describe el monofichero `seccion3.html` /
-`seccion3_22_coincidencia_fechas.html` (idénticos, 3 146 957 bytes).
+describe el monofichero `seccion3.html`.
 
 Se abre con doble clic en el navegador (`file://`). Los datos se guardan
 solo en ese dispositivo (`localStorage`). No hace falta internet ni

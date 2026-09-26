@@ -103,27 +103,27 @@ avísame y la incorporamos.
 ## 3. Puesta en marcha en local (para probarlo)
 
 ```bash
-cd server-app
+cd cefot
 npm install
 npm start
 ```
 
 La primera vez que arranca, si no hay ningún usuario creado, el propio
-servidor genera automáticamente una cuenta de administrador y muestra sus
-credenciales **por consola** (no en ningún archivo ni en la web):
+servidor genera automáticamente una cuenta de Súper Administrador y muestra
+sus credenciales **por consola** (no en ningún archivo ni en la web):
 
 ```
 ========================================================
- No había ningún usuario: se ha creado un admin inicial.
- DNI:        ADMIN
+ Instalación nueva: se ha creado un Súper Administrador.
+ DNI:        SUPERADMIN
  Contraseña: xxxxxxxx
- Cámbiala en cuanto entres (Admin > Usuarios).
+ Entra en /login.html, crea tu primera sección y cámbiala.
 ========================================================
 ```
 
-Con esas credenciales entra en `http://localhost:3000/login.html`, y **lo
-primero que debes hacer es cambiar esa contraseña** desde la pestaña
-"Usuarios" (botón "Cambiar contraseña").
+Con esas credenciales entra en `http://localhost:3000/login.html`, crea la
+primera sección (con su jefe de sección) y **cambia esa contraseña** desde
+el apartado "Mi contraseña".
 
 ### Servidor de demostración (datos ficticios)
 
@@ -280,22 +280,35 @@ asignado.
 ## 7. Estructura del proyecto
 
 ```
-server-app/
-├── server.js              Arranque del servidor y montaje de rutas
-├── .env.example             Variables de entorno soportadas (cópialo a .env en local)
+cefot/
+├── server.js                 Arranque del servidor y montaje de rutas
+├── package.json              Dependencias y scripts (start, seed, demo)
+├── .env.example              Variables de entorno (DATABASE_URL, TRUST_PROXY...)
+├── cefot-pasos-1-y-2.patch   Correcciones de seguridad pendientes de aplicar
 ├── lib/
-│   ├── db.js               Carga/guardado del almacén de datos: fichero local
-│   │                        (data/data.json) o Postgres si hay DATABASE_URL
-│   ├── auth.js              Autenticación (JWT en cookie), hashing de contraseñas
-│   └── seed.js              Utilidad de línea de comandos para crear un admin
-├── routes/                  Endpoints de la API (auth, roster, sanciones, rebajes, refuerzos, consultas, admin)
+│   ├── db.js                 Almacén: fichero (data/data.json) o Postgres si hay DATABASE_URL
+│   ├── auth.js               Autenticación (JWT en cookie) y contraseñas
+│   ├── avisos.js             Avisos de partes de pelotón al jefe de sección
+│   ├── estadisticas.js       Estadísticas agregadas (jefe de estudios)
+│   ├── mailer.js             Envío de la copia de seguridad por correo
+│   ├── seed.js               Crear o reparar un Súper Administrador por consola
+│   └── demo.js               Servidor de demostración con datos ficticios
+├── routes/                   Endpoints de la API (15 archivos)
 ├── public/
+│   ├── index.html            Portada (modo servidor / modo local)
 │   ├── login.html            Pantalla de acceso
-│   ├── admin.html            Aplicación completa (administrador)
-│   ├── instructor.html       Formulario reducido (instructor)
-│   └── shared/                CSS y catálogo de faltas/medidas compartidos
-└── data/
-    └── data.json              Almacén de datos en modo fichero (se crea solo al arrancar; no se usa si hay DATABASE_URL)
+│   ├── seccion3.html         Gestión completa de la sección (jefe de sección)
+│   ├── admin.html            Panel multiusuario anterior del jefe de sección
+│   ├── instructor.html       Jefe de pelotón
+│   ├── usuarios.html         Alta y permisos de jefes de pelotón
+│   ├── superadmin.html       Súper Administrador
+│   ├── capitan.html          Capitán de compañía
+│   ├── estudios.html         Jefe de estudios
+│   ├── privacidad.html       Política de privacidad
+│   └── shared/               CSS, catálogo de faltas y módulos JS comunes
+├── docs/                     Manual y registro de cambios de Sección 3
+├── ios/                      App de iPhone (envoltorio de la web)
+└── data/                     Datos en modo fichero (se crea solo; no se sube a Git)
 ```
 
 ## 8. Notas técnicas rápidas
