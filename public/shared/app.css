@@ -463,6 +463,14 @@
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
   .field-row .field.narrow{flex:0 0 110px;}
+  .field-row .field{min-width:0;}
+  /* En pantallas estrechas (móvil) los campos de la fila pasan a la línea
+     siguiente en vez de salirse por la derecha. */
+  @media (max-width:560px){
+    .field-row{flex-wrap:wrap;}
+    .field-row .field{flex:1 1 140px;}
+    .field-row .field.narrow{flex:1 1 100px;}
+  }
 
   .cadet-preview{
     display:none;

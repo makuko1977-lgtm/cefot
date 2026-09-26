@@ -14,7 +14,7 @@
     var box = document.createElement("div");
     box.id = "cefot-avisos";
     box.setAttribute("style",
-      "position:sticky;top:0;z-index:99998;background:#fcf1d6;border-bottom:1px solid #9c6a12;" +
+      "position:sticky;top:0;z-index:70;background:#fcf1d6;border-bottom:1px solid #9c6a12;" +
       "padding:12px 16px;font-size:13.5px;");
 
     var rows = avisos.map(function (a, i){

@@ -1960,11 +1960,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
       <div class="panel corner-accent">
         <h3>Nuevo usuario</h3>
-        <div class="panel-sub">Da de alta a un instructor (solo puede dar de alta sanciones) o a otro administrador. Comparte el enlace, el DNI y la contraseña con esa persona por un canal seguro.</div>
+        <div class="panel-sub">Da de alta a un jefe de pelotón (siempre puede dar de alta partes; los permisos extra se marcan abajo). Comparte la dirección de la aplicación, el usuario y la contraseña con esa persona por un canal seguro.</div>
 
         <div class="field-grid">
           <div class="field">
-            <label for="userDniInput">DNI</label>
+            <label for="userDniInput">Usuario (DNI u otro identificador)</label>
             <input type="text" id="userDniInput" autocapitalize="characters">
           </div>
           <div class="field">
@@ -1998,7 +1998,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         <div class="table-scroll">
           <table id="usuariosTable">
             <thead>
-              <tr><th>DNI</th><th>Nombre</th><th>Rol</th><th>Permisos</th><th>Alta</th><th></th></tr>
+              <tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Permisos</th><th>Alta</th><th></th></tr>
             </thead>
             <tbody id="usuariosTableBody"></tbody>
           </table>
@@ -9168,7 +9168,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var usuariosTableBody = document.getElementById("usuariosTableBody");
   var usuariosEmptyState = document.getElementById("usuariosEmptyState");
 
-  var ROL_LABEL = { admin: "Administrador", instructor: "Instructor" };
+  var ROL_LABEL = { admin: "Jefe de sección", instructor: "Jefe de pelotón" };
   var PERMISOS_LABELS = {
     fotos: "Hacer foto del alumno",
     verFicha: "Ver ficha básica",
