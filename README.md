@@ -179,6 +179,20 @@ contraseñas. Sirve como respaldo y para cargarlo en el HTML local
 (`legado/seccion3.html`) con «Importar copia del servidor (añadir)», que solo
 añade lo que falte y nunca sustituye ni borra nada (ver `legado/LEEME.md`).
 
+### Nuevo curso: borrar todo y empezar de cero (Súper Administrador)
+
+Al final del panel del Súper Administrador está **«Nuevo curso académico:
+borrar todo y empezar de cero»**. Borra todas las secciones (jefes de
+sección, jefes de pelotón, alumnos, bajas, sanciones, rebajes, refuerzos,
+actividades y horas UA), los capitanes y los jefes de estudios. **Solo se
+conservan las cuentas de Súper Administrador**, con la misma contraseña.
+
+Para evitar errores exige, por este orden: descargar la copia completa
+(`CEFOT2_copia_completa_<fecha>.json`, sin contraseñas), escribir
+«BORRAR TODO» y la contraseña del Súper Administrador, y una última
+confirmación. Queda un historial (fecha, quién y cuántos registros se
+borraron, sin datos personales). No se puede deshacer.
+
 ### Cerrar curso académico
 
 En la pestaña **Usuarios**, al final, hay un botón **"Cerrar curso…"** para

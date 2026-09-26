@@ -325,4 +325,105 @@ router.delete("/capitanes/:compania", auth.requireAuth, auth.requireSuperAdmin, 
   res.json({ ok: true });
 });
 
+// ---------------- empezar un curso nuevo: reinicio total ----------------
+// Borra TODAS las secciones (con sus jefes de sección, jefes de pelotón,
+// roster, bajas, sanciones, rebajes, refuerzos, actividades y horas UA), los
+// capitanes y los jefes de estudios. Solo se conservan las cuentas de Súper
+// Administrador, con su misma contraseña. Si algún Súper Administrador era
+// además usuario de una sección, se conserva como Súper Administrador sin
+// sección (si no, al borrar su sección se quedaría sin acceso).
+
+function recuentoTotal(){
+  const r = { secciones: 0, usuarios: 0, alumnos: 0, sanciones: 0, rebajes: 0, refuerzos: 0, capitanes: 0, jefesEstudios: 0 };
+  Object.keys(db.data.tenants).forEach(function (k){
+    const t = db.data.tenants[k];
+    r.secciones++;
+    r.usuarios += (t.users || []).length;
+    r.alumnos += (t.roster || []).length + (t.bajas || []).length;
+    r.sanciones += (t.sanciones || []).length;
+    r.rebajes += (t.rebajes || []).length;
+    r.refuerzos += (t.refuerzos || []).length;
+  });
+  r.capitanes = (db.data.capitanes || []).length;
+  r.jefesEstudios = (db.data.jefesEstudios || []).length;
+  return r;
+}
+
+router.get("/reinicio/resumen", auth.requireAuth, auth.requireSuperAdmin, function (req, res){
+  res.json({ actual: recuentoTotal(), historial: db.data.reiniciosHistorial || [] });
+});
+
+// Copia completa de TODO el sistema (sin contraseñas ni la clave de
+// sesiones). Es obligatorio descargarla antes del reinicio total. Cada
+// sección va en el mismo formato que «Exportar copia» de admin.html.
+router.get("/copia-completa", auth.requireAuth, auth.requireSuperAdmin, function (req, res){
+  const secciones = {};
+  Object.keys(db.data.tenants).forEach(function (k){
+    const t = db.data.tenants[k];
+    const snap = db.buildBackupSnapshot(t);
+    snap.usuarios = (t.users || []).map(function (u){ return { dni: u.dni, nombre: u.nombre, role: u.role }; });
+    secciones[k] = snap;
+  });
+  const copia = {
+    tipo: "cefot2_copia_completa",
+    exportedAt: new Date().toISOString(),
+    secciones: secciones,
+    capitanes: (db.data.capitanes || []).map(function (c){ return { dni: c.dni, nombre: c.nombre, compania: c.compania }; }),
+    jefesEstudios: (db.data.jefesEstudios || []).map(function (j){ return { dni: j.dni, nombre: j.nombre }; })
+  };
+  const nombre = "CEFOT2_copia_completa_" + copia.exportedAt.slice(0, 10) + ".json";
+  res.setHeader("Content-Disposition", 'attachment; filename="' + nombre + '"');
+  res.json(copia);
+});
+
+router.post("/reinicio", auth.requireAuth, auth.requireSuperAdmin, async function (req, res){
+  const CONFIRMACION = "BORRAR TODO";
+  const b = req.body || {};
+  if (String(b.confirmacion || "").trim() !== CONFIRMACION){
+    return res.status(400).json({ error: "Falta confirmar la acción escribiendo exactamente «" + CONFIRMACION + "»." });
+  }
+  const yo = db.findUserGlobal(req.user.dni);
+  if (!yo || !auth.verifyPassword(String(b.password || ""), yo.user.passwordHash)){
+    return res.status(403).json({ error: "La contraseña no es correcta. No se ha borrado nada." });
+  }
+
+  // Cuentas de Súper Administrador que se conservan (sin duplicar DNIs).
+  const conservar = [];
+  function conservarCuenta(u){
+    if (conservar.some(function (x){ return x.dni === u.dni; })) return;
+    conservar.push({ dni: u.dni, nombre: u.nombre, passwordHash: u.passwordHash, createdAt: u.createdAt || new Date().toISOString() });
+  }
+  (db.data.superAdmins || []).forEach(conservarCuenta);
+  Object.keys(db.data.tenants).forEach(function (k){
+    (db.data.tenants[k].users || []).forEach(function (u){ if (u.superAdmin === true) conservarCuenta(u); });
+  });
+
+  const antes = {
+    superAdmins: db.data.superAdmins, tenants: db.data.tenants,
+    capitanes: db.data.capitanes, jefesEstudios: db.data.jefesEstudios,
+    reiniciosHistorial: db.data.reiniciosHistorial
+  };
+  const registro = Object.assign({ fecha: new Date().toISOString(), por: { dni: req.user.dni, nombre: req.user.nombre } }, recuentoTotal());
+
+  db.data.superAdmins = conservar;
+  db.data.tenants = {};
+  db.data.capitanes = [];
+  db.data.jefesEstudios = [];
+  db.data.reiniciosHistorial = [registro].concat(antes.reiniciosHistorial || []).slice(0, 20);
+
+  try {
+    await db.saveStrict();
+  } catch (err){
+    // No se ha podido guardar: se deja todo exactamente como estaba.
+    Object.keys(antes).forEach(function (k){ db.data[k] = antes[k]; });
+    return res.status(500).json({ error: "No se ha podido guardar (fallo al escribir en la base de datos). No se ha borrado nada; vuelve a intentarlo en unos segundos." });
+  }
+
+  // La sesión de quien reinicia se renueva: si era jefe de una sección, esa
+  // sección ya no existe y ahora es Súper Administrador sin sección.
+  const nuevo = db.findUserGlobal(req.user.dni);
+  if (nuevo) auth.setAuthCookie(res, auth.issueToken(nuevo.user, null, null, true, null, false));
+  res.json({ ok: true, registro: registro });
+});
+
 module.exports = router;

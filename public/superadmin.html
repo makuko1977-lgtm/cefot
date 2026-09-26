@@ -138,6 +138,43 @@
     <div class="panel-sub">Las casillas en color ya tienen jefe de sección dado de alta; las apagadas todavía están libres. Pulsa una casilla creada para ver su resumen (solo lectura).</div>
     <div id="ciaBlocks"></div>
   </div>
+
+  <div class="panel danger-zone" id="reinicioPanel" style="margin-top:22px;">
+    <h3>Nuevo curso académico: borrar todo y empezar de cero</h3>
+    <div class="panel-sub">
+      Borra <strong>todas</strong> las secciones con sus jefes de sección y jefes de pelotón, alumnos, bajas, sanciones,
+      rebajes, refuerzos, actividades y horas UA, y también los capitanes y los jefes de estudios.
+      <strong>Solo se conserva tu cuenta de Súper Administrador</strong>, con la misma contraseña.
+      Después podrás volver a dar de alta secciones, usuarios y contraseñas. No se puede deshacer.
+    </div>
+    <div class="panel-sub" id="reinicioResumen" style="margin-top:10px;">Cargando datos actuales…</div>
+    <div class="form-actions" id="reinicioAbrirWrap" style="margin-top:10px;">
+      <button class="btn danger-ghost" id="reinicioAbrirBtn" type="button">Borrar todo para un curso nuevo…</button>
+    </div>
+    <div id="reinicioPasos" class="hidden" style="margin-top:12px;">
+      <div class="field" style="margin-bottom:12px;">
+        <label>Paso 1 · Descarga la copia completa (obligatorio)</label>
+        <div class="form-actions" style="margin:0;">
+          <button class="btn ghost" id="reinicioCopiaBtn" type="button">Descargar copia completa</button>
+          <span class="form-msg" id="reinicioCopiaMsg"></span>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="reinicioConfirmInput">Paso 2 · Escribe «BORRAR TODO» para confirmar</label>
+        <input type="text" id="reinicioConfirmInput" autocomplete="off" placeholder="BORRAR TODO">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="reinicioPassInput">Paso 3 · Tu contraseña de Súper Administrador</label>
+        <input type="password" id="reinicioPassInput" autocomplete="current-password">
+      </div>
+      <div class="form-actions">
+        <button class="btn danger-ghost" id="reinicioConfirmBtn" type="button" disabled>Borrar todo y empezar de cero</button>
+        <button class="btn ghost" id="reinicioCancelBtn" type="button">Cancelar</button>
+        <span class="form-msg" id="reinicioMsg"></span>
+      </div>
+    </div>
+    <div class="panel-sub" id="reinicioHistorial" style="margin-top:12px;"></div>
+  </div>
 </div>
 
 <div id="capitanModal" class="modal-overlay hidden">
@@ -710,6 +747,78 @@
 })();
 </script>
 <script src="/shared/superadmin-estudios.js"></script>
+<script>
+/* Nuevo curso: reinicio total (ver POST /api/superadmin/reinicio). */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(v){ return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  var copiaHecha = false;
+
+  function actualizarBoton(){
+    $("reinicioConfirmBtn").disabled = !(copiaHecha && $("reinicioConfirmInput").value.trim() === "BORRAR TODO" && $("reinicioPassInput").value);
+  }
+  function cargarResumen(){
+    fetch("/api/superadmin/reinicio/resumen").then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d) return;
+      var a = d.actual;
+      $("reinicioResumen").innerHTML = "<strong>Ahora mismo hay:</strong> " + a.secciones + " secciones · " + a.usuarios + " usuarios de sección · " +
+        a.alumnos + " alumnos · " + a.sanciones + " sanciones · " + a.rebajes + " rebajes · " + a.refuerzos + " refuerzos · " +
+        a.capitanes + " capitanes · " + a.jefesEstudios + " jefes de estudios.";
+      $("reinicioHistorial").innerHTML = (d.historial || []).length
+        ? "<strong>Reinicios anteriores:</strong><br>" + d.historial.map(function(h){
+            return esc(new Date(h.fecha).toLocaleString("es-ES")) + " — " + esc(h.por && h.por.nombre) + " (" + h.secciones + " secciones, " + h.alumnos + " alumnos, " + h.sanciones + " sanciones)";
+          }).join("<br>")
+        : "";
+    }).catch(function(){});
+  }
+
+  $("reinicioAbrirBtn").onclick = function(){
+    $("reinicioAbrirWrap").classList.add("hidden");
+    $("reinicioPasos").classList.remove("hidden");
+  };
+  $("reinicioCancelBtn").onclick = function(){
+    $("reinicioPasos").classList.add("hidden");
+    $("reinicioAbrirWrap").classList.remove("hidden");
+    $("reinicioConfirmInput").value = ""; $("reinicioPassInput").value = ""; $("reinicioMsg").textContent = "";
+    actualizarBoton();
+  };
+  $("reinicioConfirmInput").oninput = actualizarBoton;
+  $("reinicioPassInput").oninput = actualizarBoton;
+
+  $("reinicioCopiaBtn").onclick = function(){
+    var msg = $("reinicioCopiaMsg"); msg.className = "form-msg"; msg.textContent = "Descargando…";
+    var nombre = "CEFOT2_copia_completa.json";
+    fetch("/api/superadmin/copia-completa").then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      var m = /filename="?([^";]+)"?/i.exec(r.headers.get("Content-Disposition") || "");
+      if (m) nombre = m[1];
+      return r.blob();
+    }).then(function(blob){
+      var url = URL.createObjectURL(blob), a = document.createElement("a");
+      a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      copiaHecha = true; msg.className = "form-msg ok"; msg.textContent = "✓ Copia descargada: " + nombre + ". Guárdala en lugar seguro.";
+      actualizarBoton();
+    }).catch(function(){ msg.className = "form-msg error"; msg.textContent = "No se ha podido descargar la copia. No continúes."; });
+  };
+
+  $("reinicioConfirmBtn").onclick = function(){
+    if (!confirm("ÚLTIMA CONFIRMACIÓN\n\nSe borrarán TODAS las secciones, usuarios, alumnos, sanciones, rebajes, refuerzos, capitanes y jefes de estudios.\nSolo se conserva tu cuenta de Súper Administrador.\n\n¿Borrar todo ahora?")) return;
+    var btn = $("reinicioConfirmBtn"), msg = $("reinicioMsg");
+    btn.disabled = true; msg.className = "form-msg"; msg.textContent = "Borrando…";
+    fetch("/api/superadmin/reinicio", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ confirmacion: $("reinicioConfirmInput").value.trim(), password: $("reinicioPassInput").value })
+    }).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); }).then(function(res){
+      if (!res.ok){ msg.className = "form-msg error"; msg.textContent = res.d.error || "No se ha podido borrar."; actualizarBoton(); return; }
+      alert("Hecho: se han borrado todos los datos. Ya puedes dar de alta las secciones y usuarios del nuevo curso.");
+      location.reload();
+    }).catch(function(){ msg.className = "form-msg error"; msg.textContent = "Error de conexión. Recarga la página para ver si se llegó a borrar."; actualizarBoton(); });
+  };
+
+  cargarResumen();
+})();
+</script>
 
 </body>
 </html>
