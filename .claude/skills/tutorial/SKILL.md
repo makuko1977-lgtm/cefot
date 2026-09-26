@@ -1,5 +1,5 @@
 ---
-name: manual-interactivo
+name: tutorial
 description: Genera, amplía o publica el manual de usuario interactivo de CEFOT-2 (demostraciones paso a paso por roles, en las que se pulsa la zona resaltada para avanzar), con capturas reales del servidor de demostración y la misma interfaz que la aplicación. Úsala cuando se pida añadir o cambiar demostraciones, apartados, roles o el aspecto del manual interactivo.
 ---
 
@@ -39,16 +39,16 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
    misma línea contiene «lib/demo.js», pkill mata su propio shell).
 2. **Capturar**:
    ```bash
-   NODE_PATH=$(npm root -g) node .claude/skills/manual-interactivo/scripts/capturar.js manual-interactivo-build
+   NODE_PATH=$(npm root -g) node .claude/skills/tutorial/scripts/capturar.js manual-interactivo-build
    ```
    Las capturas cambian datos del servidor: vuelve a `--reset` antes de repetir.
 3. **Montar**:
    ```bash
-   python3 .claude/skills/manual-interactivo/scripts/construir.py manual-interactivo-build
+   python3 .claude/skills/tutorial/scripts/construir.py manual-interactivo-build
    ```
 4. **Comprobar** (y mirar `comprobar_pc.png`):
    ```bash
-   NODE_PATH=$(npm root -g) node .claude/skills/manual-interactivo/scripts/comprobar.js manual-interactivo-build seccion
+   NODE_PATH=$(npm root -g) node .claude/skills/tutorial/scripts/comprobar.js manual-interactivo-build seccion
    ```
 5. **Publicar** `manual-interactivo-build/manual-interactivo.html` como
    artifact (ver URL arriba). La carpeta `manual-interactivo-build/` está en
