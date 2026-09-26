@@ -1,0 +1,167 @@
+<title>Manual interactivo CEFOT-2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500;600;700&display=swap">
+<style>
+/* ---- Estilos de la aplicación (public/shared/app.css), idénticos a los del servidor ---- */
+/*APPCSS*/
+/* ---- Solo para el manual interactivo, con las mismas variables de la aplicación ---- */
+:root{color-scheme:light;}
+.manual{display:grid;grid-template-columns:290px minmax(0,1fr);gap:22px;align-items:start;}
+.tabbar{flex-wrap:wrap;}
+.lista-temas{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.grupo-tema{font-family:var(--font-mono);font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);margin:10px 2px 0;}
+.tema{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;white-space:normal;}
+.tema .status-pill{flex:0 0 auto;}
+.tema[aria-current="true"]{background:linear-gradient(135deg,var(--accent-bright),var(--accent));color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+.tema[aria-current="true"] .status-pill{background:rgba(255,255,255,.22);color:#fff;}
+.tema[disabled]{opacity:1;color:var(--text-dim);border-style:dashed;background:transparent;cursor:default;}
+.escenario{display:flex;justify-content:center;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:12px;}
+.pantalla{position:relative;display:inline-block;line-height:0;max-width:100%;overflow:hidden;border-radius:8px;}
+.pantalla img{max-width:100%;height:auto;border:1px solid var(--border-light);border-radius:8px;cursor:pointer;}
+.pantalla.movil img{max-height:72vh;width:auto;}
+.zona{position:absolute;border:3px solid var(--danger);border-radius:8px;background:rgba(255,255,255,.04);box-shadow:0 0 0 9999px rgba(32,38,27,.22);cursor:pointer;animation:latido 1.3s ease-in-out infinite;padding:0;}
+@keyframes latido{0%,100%{box-shadow:0 0 0 9999px rgba(32,38,27,.22),0 0 0 0 rgba(178,59,48,.55)}50%{box-shadow:0 0 0 9999px rgba(32,38,27,.22),0 0 0 10px rgba(178,59,48,0)}}
+.aviso-clic{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn);border-radius:8px;padding:6px 10px;font-size:13px;line-height:1.3;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.aviso-clic.ver{opacity:1;}
+.paso-num{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);}
+.explica h3{margin:4px 0 6px;}
+.explica p{margin:0;font-size:14px;line-height:1.55;max-width:75ch;}
+.progreso{height:6px;background:var(--panel-2);border:1px solid var(--border);border-radius:999px;margin-top:12px;overflow:hidden;}
+.progreso div{height:100%;background:linear-gradient(90deg,var(--accent-bright),var(--accent));width:0;transition:width .25s;}
+.controles{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;}
+.ref{margin-left:auto;}
+.bienvenida p{margin:6px 0 0;}
+@media (max-width:860px){ .manual{grid-template-columns:1fr;} .ref{margin-left:0;} }
+</style>
+
+<div class="app">
+  <div class="banner-draft"><strong>Muestra para revisar.</strong> Solo están completas dos demostraciones: «Dar de alta un parte» (jefe de pelotón) y «Poner una sanción sin parte de pelotón» (jefe de sección). El resto aparece como «Próximamente». Datos ficticios.</div>
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">MU</div>
+      <div>
+        <h1>CEFOT-2 · Manual de usuario</h1>
+        <div class="sub">Elige tu rol y sigue los pasos pulsando en la zona resaltada</div>
+      </div>
+    </div>
+    <span class="meta-note">Demostraciones interactivas</span>
+  </header>
+
+  <div class="tabbar" role="tablist" aria-label="Rol" id="roles"></div>
+
+  <div class="manual">
+    <aside class="panel corner-accent" id="indice">
+      <h3>Apartados</h3>
+      <div class="panel-sub">Elige primero tu rol en las pestañas.</div>
+    </aside>
+    <section id="visor" aria-live="polite">
+      <div class="panel corner-accent bienvenida">
+        <h3>¿Qué perfil tienes?</h3>
+        <p class="panel-sub">Elige tu rol en las pestañas de arriba. Cada rol solo ve los apartados que le corresponden: por ejemplo, el jefe de pelotón no ve las funciones del jefe de sección.</p>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+var DEMOS = /*DEMOS*/;
+var IMAGENES = /*IMAGENES*/;
+var ROLES = [
+  { id:"peloton", nombre:"Jefe de pelotón", desc:"Da de alta partes desde el móvil.", temas:[
+      { grupo:"Partes" },
+      { id:"peloton_parte", titulo:"Dar de alta un parte", ref:"Manual PDF · apartado 13" },
+      { titulo:"Parte múltiple (varios alumnos)" },
+      { grupo:"Con permiso del jefe de sección" },
+      { titulo:"Ficha y foto del alumno" },
+      { titulo:"Consultar rebajes y refuerzos" } ]},
+  { id:"seccion", nombre:"Jefe de sección", desc:"Gestión completa de su sección.", temas:[
+      { grupo:"Sanciones" },
+      { id:"seccion_sancion", titulo:"Poner una sanción (sin parte de pelotón)", ref:"Manual PDF · apartado 5" },
+      { titulo:"Revisar un parte de pelotón y ratificar la medida" },
+      { titulo:"Fijar la fecha de un arresto pendiente" },
+      { titulo:"Documento de amonestación verbal" },
+      { grupo:"Alumnos" },
+      { titulo:"Roster, ficha e historial" }, { titulo:"Rebajes" }, { titulo:"Refuerzos" },
+      { grupo:"Otras" },
+      { titulo:"Actividades" }, { titulo:"Consultas" }, { titulo:"Horas UA" },
+      { titulo:"Jefes de pelotón y permisos" }, { titulo:"Exportar copia al HTML local" } ]},
+  { id:"capitan", nombre:"Capitán de compañía", desc:"Sus secciones y los arrestos.", temas:[
+      { titulo:"Entrar en una sección y volver" }, { titulo:"Dar curso a un arresto" },
+      { titulo:"Consultar un alumno por nº de protocolo" }, { titulo:"Historial de arrestos" } ]},
+  { id:"estudios", nombre:"Jefe de estudios", desc:"Estadísticas sin datos personales.", temas:[
+      { titulo:"Consultar las estadísticas" } ]}
+];
+
+var estado = { rol:null, demo:null, paso:0, auto:null };
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/"/g, "&quot;"); }
+function recordar(){ try { localStorage.setItem("cefot-manual-rol", estado.rol || ""); } catch(e){} }
+
+function pintarRoles(){
+  $("roles").innerHTML = ROLES.map(function(r){
+    return '<button type="button" role="tab" data-rol="' + r.id + '" aria-selected="' + (estado.rol === r.id) + '" class="' + (estado.rol === r.id ? "active" : "") + '">' + r.nombre + '</button>';
+  }).join("");
+  Array.prototype.forEach.call($("roles").querySelectorAll("button"), function(b){
+    b.onclick = function(){ elegirRol(b.getAttribute("data-rol")); };
+  });
+}
+function elegirRol(id){
+  estado.rol = id; parar(); estado.demo = null; recordar(); pintarRoles();
+  var r = ROLES.filter(function(x){ return x.id === id; })[0];
+  $("indice").innerHTML = '<h3>' + r.nombre + '</h3><div class="panel-sub">' + r.desc + '</div><div class="lista-temas">' + r.temas.map(function(t){
+    if (t.grupo) return '<div class="grupo-tema">' + t.grupo + '</div>';
+    if (!t.id) return '<button class="btn tema" type="button" disabled>' + t.titulo + '<span class="status-pill finalizado">Próximamente</span></button>';
+    return '<button class="btn tema" type="button" data-demo="' + t.id + '">' + t.titulo + '<span class="status-pill vigente">' + DEMOS[t.id].pasos.length + ' pasos</span></button>';
+  }).join("") + '</div>';
+  Array.prototype.forEach.call(document.querySelectorAll(".tema[data-demo]"), function(b){
+    b.onclick = function(){ abrir(b.getAttribute("data-demo")); };
+  });
+  var primero = r.temas.filter(function(t){ return t.id; })[0];
+  if (primero) abrir(primero.id);
+  else $("visor").innerHTML = '<div class="panel corner-accent bienvenida"><h3>' + r.nombre + '</h3><p class="panel-sub">Las demostraciones de este rol están en preparación.</p></div>';
+}
+function abrir(id){
+  parar(); estado.demo = id; estado.paso = 0;
+  Array.prototype.forEach.call(document.querySelectorAll(".tema"), function(b){ b.setAttribute("aria-current", b.getAttribute("data-demo") === id ? "true" : "false"); });
+  pintar();
+}
+function refDe(id){ var t = null; ROLES.forEach(function(r){ r.temas.forEach(function(x){ if (x.id === id) t = x; }); }); return t; }
+function pintar(){
+  var d = DEMOS[estado.demo], p = d.pasos[estado.paso], total = d.pasos.length, t = refDe(estado.demo);
+  var zona = p.caja ? '<button class="zona" type="button" aria-label="Pulsa aquí: ' + esc(p.titulo) + '" style="left:' + p.caja.x + '%;top:' + p.caja.y + '%;width:' + p.caja.w + '%;height:' + p.caja.h + '%"></button>' : '';
+  $("visor").innerHTML =
+    '<div class="panel corner-accent">' +
+      '<div class="paso-num">' + t.titulo + ' · Paso ' + (estado.paso + 1) + ' de ' + total + '</div>' +
+      '<div class="escenario"><div class="pantalla' + (d.movil ? ' movil' : '') + '"><img src="' + IMAGENES[p.img] + '" alt="Pantalla: ' + esc(p.titulo) + '">' + zona + '<div class="aviso-clic" id="avisoClic">Pulsa en la zona resaltada en rojo</div></div></div>' +
+      '<div class="explica" style="margin-top:14px"><h3>' + p.titulo + '</h3><p>' + p.texto + '</p>' +
+      '<div class="progreso"><div style="width:' + ((estado.paso + 1) / total * 100) + '%"></div></div>' +
+      '<div class="controles">' +
+        '<button class="btn ghost" type="button" id="ant"' + (estado.paso === 0 ? ' disabled' : '') + '>◀ Anterior</button>' +
+        '<button class="btn primary" type="button" id="sig"' + (estado.paso === total - 1 ? ' disabled' : '') + '>Siguiente ▶</button>' +
+        '<button class="btn ghost" type="button" id="auto">' + (estado.auto ? '❚❚ Pausa' : '▶ Reproducir solo') + '</button>' +
+        '<button class="btn ghost" type="button" id="rei">↺ Empezar de nuevo</button>' +
+        (t && t.ref ? '<span class="meta-note ref">' + t.ref + '</span>' : '') +
+      '</div></div>' +
+    '</div>';
+  $("ant").onclick = function(){ parar(); ir(-1); };
+  $("sig").onclick = function(){ parar(); ir(1); };
+  $("rei").onclick = function(){ parar(); estado.paso = 0; pintar(); };
+  $("auto").onclick = function(){ if (estado.auto) parar(); else reproducir(); pintar(); };
+  var z = document.querySelector(".zona"); if (z) z.onclick = function(e){ e.stopPropagation(); parar(); ir(1); };
+  document.querySelector(".pantalla img").onclick = function(){
+    if (!p.caja){ ir(1); return; }
+    var a = $("avisoClic"); a.classList.add("ver"); setTimeout(function(){ a.classList.remove("ver"); }, 1400);
+  };
+}
+function ir(n){ var total = DEMOS[estado.demo].pasos.length, s = estado.paso + n; if (s < 0 || s >= total) return; estado.paso = s; pintar(); }
+function reproducir(){ estado.auto = setInterval(function(){ if (estado.paso >= DEMOS[estado.demo].pasos.length - 1){ parar(); pintar(); return; } ir(1); }, 4500); }
+function parar(){ if (estado.auto){ clearInterval(estado.auto); estado.auto = null; } }
+document.addEventListener("keydown", function(e){
+  if (!estado.demo) return;
+  if (e.key === "ArrowRight"){ parar(); ir(1); }
+  if (e.key === "ArrowLeft"){ parar(); ir(-1); }
+});
+pintarRoles();
+try { var r0 = localStorage.getItem("cefot-manual-rol"); if (r0) elegirRol(r0); } catch(e){}
+</script>
