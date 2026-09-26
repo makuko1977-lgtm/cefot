@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Capitan de Compania · CEFOT-2</title>
+<title>Capitán de compañía · CEFOT-2</title>
 <link rel="stylesheet" href="/shared/app.css">
 <style>
   .grid-secciones{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:6px;}
@@ -23,27 +23,27 @@
     <div class="brand">
       <div class="mark">CC</div>
       <div>
-        <h1>CEFOT-2 · Capitan de Compania</h1>
-        <div class="sub" id="companiaSub">Elige la seccion en la que quieres actuar</div>
+        <h1>CEFOT-2 · Capitán de compañía</h1>
+        <div class="sub" id="companiaSub">Elige la sección en la que quieres actuar</div>
       </div>
     </div>
     <div id="topActions" style="display:flex;gap:8px;align-items:center;"></div>
   </header>
   <div class="panel corner-accent" style="margin-bottom:22px;">
-    <h3>Mi contrasena</h3>
-    <div class="panel-sub">Cambia la contrasena de tu cuenta de capitan.</div>
+    <h3>Mi contraseña</h3>
+    <div class="panel-sub">Cambia la contraseña de tu cuenta de capitán.</div>
     <div class="field-grid">
-      <div class="field"><label for="miPasswordInput">Nueva contrasena</label><input type="text" id="miPasswordInput" placeholder="Minimo 6 caracteres"></div>
-      <div class="field"><label for="miPasswordConfirmInput">Repite la nueva contrasena</label><input type="text" id="miPasswordConfirmInput" placeholder="Repite la contrasena"></div>
+      <div class="field"><label for="miPasswordInput">Nueva contraseña</label><input type="password" id="miPasswordInput" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></div>
+      <div class="field"><label for="miPasswordConfirmInput">Repite la nueva contraseña</label><input type="password" id="miPasswordConfirmInput" autocomplete="new-password" placeholder="Repite la contraseña"></div>
     </div>
     <div class="form-actions">
-      <button class="btn primary" id="miPasswordSaveBtn" type="button">Guardar contrasena</button>
+      <button class="btn primary" id="miPasswordSaveBtn" type="button">Guardar contraseña</button>
       <span class="form-msg" id="miPasswordMsg"></span>
     </div>
   </div>
   <div class="panel corner-accent">
-    <h3>Secciones de mi compania</h3>
-    <div class="panel-sub">Entra en una seccion. Para volver aqui sin cerrar sesion usa Volver a compania.</div>
+    <h3>Secciones de mi compañía</h3>
+    <div class="panel-sub">Pulsa «Entrar» en una sección para trabajar en ella. Para volver aquí sin cerrar sesión, usa «Cambiar de sección» en el aviso de modo capitán.</div>
     <div class="grid-secciones" id="seccionesGrid"></div>
   </div>
 </div>
@@ -65,15 +65,15 @@
     var html = "";
     (secciones || []).forEach(function(s){
       if (s.existe){
-        html += '<div class="seccion-card"><div class="cia">Seccion ' + s.seccion + '</div><h4>'
-          + esc(s.nombre) + '</h4><div class="jefe">Jefe de seccion: '
+        html += '<div class="seccion-card"><div class="cia">Sección ' + s.seccion + '</div><h4>'
+          + esc(s.nombre) + '</h4><div class="jefe">Jefe de sección: '
           + esc(s.jefeSeccion ? s.jefeSeccion.nombre : "-") + '</div><div class="mini-stats"><span class="mini-stat">'
           + s.totales.alumnos + ' alumnos</span><span class="mini-stat">'
           + s.totales.sanciones + ' sanciones</span></div><div class="form-actions">'
           + '<button class="btn primary small entrar-btn" type="button" data-id="' + s.id + '">Entrar</button></div></div>';
       } else {
-        html += '<div class="seccion-card vacia"><div class="cia">Seccion ' + s.seccion
-          + '</div><h4>Sin crear</h4><div class="jefe">Todavia no tiene jefe de seccion</div></div>';
+        html += '<div class="seccion-card vacia"><div class="cia">Sección ' + s.seccion
+          + '</div><h4>Sin crear</h4><div class="jefe">Todavía no tiene jefe de sección</div></div>';
       }
     });
     grid.innerHTML = html || '<div class="empty-state">No hay secciones.</div>';
@@ -85,7 +85,7 @@
           .then(function(res){
             if (!res.ok){ btn.disabled = false; alert(res.d.error || "No se pudo entrar"); return; }
             location.href = "/admin.html";
-          }).catch(function(){ btn.disabled = false; alert("Error de conexion"); });
+          }).catch(function(){ btn.disabled = false; alert("Error de conexión"); });
       };
     });
   }
@@ -94,7 +94,7 @@
     var p = document.getElementById("miPasswordInput").value;
     var c = document.getElementById("miPasswordConfirmInput").value;
     var msg = document.getElementById("miPasswordMsg");
-    if (p.length < 6 || p !== c){ msg.textContent = "Revisa la contrasena (minimo 6 y que coincidan)."; msg.className = "form-msg error"; return; }
+    if (p.length < 6 || p !== c){ msg.textContent = "Revisa la contraseña (mínimo 6 caracteres y que coincidan)."; msg.className = "form-msg error"; return; }
     fetch("/api/capitan/mi-password", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: p }) })
       .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
       .then(function(res){ msg.textContent = res.ok ? "Guardada." : (res.d.error || "Error"); msg.className = "form-msg " + (res.ok ? "ok" : "error"); });
@@ -109,7 +109,7 @@
       return;
     }
     topActions.innerHTML = '<span class="meta-note">' + esc(me.nombre) + ' (' + esc(me.dni) + ')</span>'
-      + '<button class="btn small ghost" id="logoutBtn">Cerrar sesion</button>';
+      + '<button class="btn small ghost" id="logoutBtn">Cerrar sesión</button>';
     document.getElementById("logoutBtn").onclick = function(){
       fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
     };
@@ -117,7 +117,7 @@
       if (!r.ok) throw new Error("fail");
       return r.json();
     }).then(function(data){
-      sub.textContent = "Capitan de la " + data.compania + "a Compania — elige seccion";
+      sub.textContent = "Capitán de la " + data.compania + "ª Compañía — elige sección";
       pintar(data.secciones || []);
     }).catch(function(){
       grid.innerHTML = '<div class="empty-state">No se han podido cargar las secciones. Recarga.</div>';

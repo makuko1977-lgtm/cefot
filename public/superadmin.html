@@ -294,8 +294,8 @@
       </div>
       <div id="secDeleteConfirmWrap" class="hidden" style="margin-top:10px;">
         <div class="field" style="margin-bottom:12px;">
-          <label for="secDeleteConfirmInput">Escribe «ELIMINAR SECCION» para confirmar</label>
-          <input type="text" id="secDeleteConfirmInput" autocomplete="off" placeholder="ELIMINAR SECCION">
+          <label for="secDeleteConfirmInput">Escribe «ELIMINAR SECCIÓN» para confirmar</label>
+          <input type="text" id="secDeleteConfirmInput" autocomplete="off" placeholder="ELIMINAR SECCIÓN">
         </div>
         <div class="form-actions">
           <button class="btn danger-ghost" id="secDeleteConfirmBtn" type="button" disabled>Eliminar definitivamente</button>
@@ -508,7 +508,7 @@
   });
   secDeleteCancelBtn.addEventListener("click", resetDeleteConfirm);
   secDeleteConfirmInput.addEventListener("input", function(){
-    secDeleteConfirmBtn.disabled = secDeleteConfirmInput.value.trim() !== "ELIMINAR SECCION";
+    secDeleteConfirmBtn.disabled = ["ELIMINAR SECCIÓN", "ELIMINAR SECCION"].indexOf(secDeleteConfirmInput.value.trim().toUpperCase()) === -1;
   });
   secDeleteConfirmBtn.addEventListener("click", function(){
     if (!currentResumenId) return;

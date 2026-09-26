@@ -187,8 +187,9 @@ router.delete("/secciones/:id", auth.requireAuth, auth.requireSuperAdmin, async 
   const t = db.tenant(req.params.id);
   if (!t) return res.status(404).json({ error: "Esa sección no existe." });
 
-  const CONFIRMACION = "ELIMINAR SECCION";
-  if (String(req.body && req.body.confirmacion || "").trim() !== CONFIRMACION){
+  // Se acepta con o sin tilde, para que no bloquee a quien no la escriba.
+  const CONFIRMACION = "ELIMINAR SECCIÓN";
+  if (["ELIMINAR SECCIÓN", "ELIMINAR SECCION"].indexOf(String(req.body && req.body.confirmacion || "").trim().toUpperCase()) === -1){
     return res.status(400).json({ error: "Falta confirmar la acción escribiendo exactamente «" + CONFIRMACION + "»." });
   }
 

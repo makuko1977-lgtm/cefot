@@ -440,6 +440,7 @@
     letter-spacing:.4px;
   }
   .field input[type=text],
+  .field input[type=password],
   .field input[type=date],
   .field input[type=search],
   .field select,

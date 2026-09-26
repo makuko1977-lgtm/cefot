@@ -3064,6 +3064,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (currentUser && currentUser.capitanCompania){
       capitanBanner.classList.remove("hidden");
       capitanBannerNombre.textContent = "Actuando como " + currentUser.nombre + " (" + currentUser.dni + ").";
+      // El capitán no gestiona usuarios ni el roster (el servidor lo
+      // rechaza): no se le muestran la pestaña Usuarios ni «Cargar otra hoja».
+      var tabUsuariosCap = document.getElementById("tabBtnUsuarios");
+      if (tabUsuariosCap) tabUsuariosCap.classList.add("hidden");
     } else {
       capitanBanner.classList.add("hidden");
       capitanBannerNombre.textContent = "";
@@ -3417,9 +3421,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       (quien ? '<span class="meta-note" style="margin:0 6px 0 0;">' + escapeHtml(quien) + '</span>' : "") +
       (currentUser && currentUser.superAdmin ? '<button class="btn small ghost" id="superAdminBtnTop">Panel Súper Admin</button>' : "") +
       '<button class="btn small ghost" id="exportBackupBtn" title="Descarga un archivo con todos los datos de la sección para cargarlo en el HTML local con «Importar copia del servidor (añadir)». Allí solo se añade lo que falte: nunca sustituye ni borra nada.">Exportar copia</button>' +
-      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>' +
+      (esCapitanActuando() ? "" : '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>') +
       '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
-    document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
+    if (document.getElementById("reloadBtnTop")) document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
     if (currentUser && currentUser.superAdmin){
       document.getElementById("superAdminBtnTop").addEventListener("click", function(){
