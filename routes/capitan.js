@@ -13,6 +13,7 @@
 const express = require("express");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
+const arrestos = require("../lib/arrestos");
 
 const router = express.Router();
 
@@ -96,6 +97,142 @@ router.patch("/mi-password", auth.requireAuth, auth.requireCapitan, function (re
   capitan.passwordHash = auth.hashPassword(password);
   db.save();
   res.json({ ok: true });
+});
+
+// ---------------- arrestos para su curso administrativo ----------------
+// Las secciones creadas de la compañía del capitán, como [{ id, t }].
+function seccionesDeCompania(compania){
+  const out = [];
+  for (let seccion = 1; seccion <= 5; seccion++){
+    const id = db.tenantKey(compania, seccion);
+    const t = db.tenant(id);
+    if (t) out.push({ id: id, t: t });
+  }
+  return out;
+}
+
+function vistaArresto(id, t, s){
+  return {
+    tenantId: id,
+    seccion: t.seccion,
+    seccionNombre: t.nombre,
+    sancionId: s.id,
+    expediente: s.expediente,
+    fecha: s.fecha || "", hora: s.hora || "", lugar: s.lugar || "",
+    tipoFalta: s.tipoFalta || "", fundamento: s.fundamento || "", fundamentoLetra: s.fundamentoLetra || "",
+    fase: s.fase || "",
+    motivo: s.motivo || "", observaciones: s.observaciones || "",
+    profEmpleo: s.profEmpleo || "", profNombre: s.profNombre || "", profApellidos: s.profApellidos || "", profDni: s.profDni || "",
+    arrestoFechaIni: s.arrestoFechaIni || "", arrestoFechaFin: s.arrestoFechaFin || "",
+    arrestoDias: s.arrestoDias || "", arrestoPendiente: !!s.arrestoPendiente,
+    createdAt: s.createdAt || null,
+    createdBy: s.createdBy ? { nombre: s.createdBy.nombre, role: s.createdBy.role } : null,
+    medidaRevisadaPor: s.medidaRevisadaPor ? { nombre: s.medidaRevisadaPor.nombre, at: s.medidaRevisadaPor.at } : null,
+    capitan: s.capitan,
+    alumnos: (s.alumnos || []).map(function (a){
+      return {
+        numero: a.numero, ape1: a.ape1 || "", ape2: a.ape2 || "", nombre: a.nombre || "", peloton: a.peloton || "",
+        antecedentes: arrestos.antecedentes(t, a.numero, s)
+      };
+    })
+  };
+}
+
+// Pendientes y tramitados de toda la compañía (para la ventana de avisos y
+// para el historial filtrable del capitán).
+router.get("/arrestos", auth.requireAuth, auth.requireCapitan, function (req, res){
+  const lista = [];
+  seccionesDeCompania(req.user.capitanCompania).forEach(function (x){
+    (x.t.sanciones || []).forEach(function (s){
+      if (s.medidaCorrectora === "Arresto" && s.capitan) lista.push(vistaArresto(x.id, x.t, s));
+    });
+  });
+  lista.sort(function (a, b){ return String(b.capitan.enviadoAt || "").localeCompare(String(a.capitan.enviadoAt || "")); });
+  res.json({
+    compania: req.user.capitanCompania,
+    pendientes: lista.filter(function (a){ return a.capitan.estado === "pendiente"; }),
+    tramitados: lista.filter(function (a){ return a.capitan.estado === "tramitado"; })
+  });
+});
+
+function buscarArresto(req, res){
+  const tenantId = String(req.params.tenantId || "");
+  if (parseInt(tenantId.split("-")[0], 10) !== Number(req.user.capitanCompania)){
+    res.status(403).json({ error: "Esa sección no pertenece a tu compañía." });
+    return null;
+  }
+  const t = db.tenant(tenantId);
+  const s = t && (t.sanciones || []).find(function (x){ return x.id === req.params.sancionId; });
+  if (!s || s.medidaCorrectora !== "Arresto" || !s.capitan){
+    res.status(404).json({ error: "No se encuentra ese arresto." });
+    return null;
+  }
+  return { t: t, s: s };
+}
+
+router.post("/arrestos/:tenantId/:sancionId/tramitar", auth.requireAuth, auth.requireCapitan, function (req, res){
+  const x = buscarArresto(req, res); if (!x) return;
+  x.s.capitan.estado = "tramitado";
+  x.s.capitan.tramitadoAt = new Date().toISOString();
+  x.s.capitan.tramitadoPor = { dni: req.user.dni, nombre: req.user.nombre };
+  db.save();
+  res.json({ ok: true, capitan: x.s.capitan });
+});
+
+router.post("/arrestos/:tenantId/:sancionId/reabrir", auth.requireAuth, auth.requireCapitan, function (req, res){
+  const x = buscarArresto(req, res); if (!x) return;
+  x.s.capitan.estado = "pendiente";
+  delete x.s.capitan.tramitadoAt;
+  delete x.s.capitan.tramitadoPor;
+  db.save();
+  res.json({ ok: true, capitan: x.s.capitan });
+});
+
+// Consulta de un alumno por su número de protocolo en cualquier sección de
+// la compañía: datos básicos, antecedentes y su historial completo (el mismo
+// que ve su jefe de sección: rebajes, sanciones y refuerzos).
+router.get("/alumno/:numero", auth.requireAuth, auth.requireCapitan, function (req, res){
+  const num = String(req.params.numero || "").trim();
+  if (!num) return res.status(400).json({ error: "Indica el número de protocolo." });
+  const encontrados = [];
+  seccionesDeCompania(req.user.capitanCompania).forEach(function (x){
+    const t = x.t;
+    let al = (t.roster || []).find(function (a){ return String(a.numero) === num; });
+    let baja = false;
+    if (!al){ al = (t.bajas || []).find(function (a){ return String(a.numero) === num; }); baja = !!al; }
+    const sanciones = (t.sanciones || []).filter(function (s){
+      return (s.alumnos || []).some(function (a){ return String(a.numero) === num; });
+    });
+    if (!al && !sanciones.length) return;
+    if (!al){
+      const a0 = sanciones[0].alumnos.find(function (a){ return String(a.numero) === num; });
+      al = { numero: num, ape1: a0.ape1, ape2: a0.ape2, nombre: a0.nombre, peloton: a0.peloton };
+    }
+    const ordenar = function (a, b){ return String(b.fecha || b.fechaInicio || "").localeCompare(String(a.fecha || a.fechaInicio || "")); };
+    encontrados.push({
+      tenantId: x.id, seccion: t.seccion, seccionNombre: t.nombre, baja: baja,
+      alumno: { numero: al.numero, ape1: al.ape1 || "", ape2: al.ape2 || "", nombre: al.nombre || "", peloton: al.peloton || "", unidad: al.unidad || "" },
+      antecedentes: arrestos.antecedentes(t, num, null),
+      historial: {
+        sanciones: sanciones.slice().sort(ordenar).map(function (s){
+          return {
+            expediente: s.expediente, fecha: s.fecha, hora: s.hora, lugar: s.lugar, tipoFalta: s.tipoFalta,
+            fundamento: s.fundamento, fundamentoLetra: s.fundamentoLetra, motivo: s.motivo, observaciones: s.observaciones,
+            profEmpleo: s.profEmpleo, profNombre: s.profNombre, profApellidos: s.profApellidos,
+            medidaCorrectora: s.medidaCorrectora, arrestoFechaIni: s.arrestoFechaIni, arrestoFechaFin: s.arrestoFechaFin,
+            arrestoDias: s.arrestoDias, arrestoPendiente: !!s.arrestoPendiente, trabajoFechaFin: s.trabajoFechaFin,
+            numAlumnos: (s.alumnos || []).length, capitan: s.capitan || null
+          };
+        }),
+        rebajes: (t.rebajes || []).filter(function (r){ return String(r.numero) === num; }).sort(ordenar)
+          .map(function (r){ return { fechaInicio: r.fechaInicio, fechaFin: r.fechaFin, total: !!r.total, categorias: r.categorias || {} }; }),
+        refuerzos: (t.refuerzos || []).filter(function (r){ return (r.alumnos || []).some(function (a){ return String(a.numero) === num; }); }).sort(ordenar)
+          .map(function (r){ return { fechaInicio: r.fechaInicio, fechaFin: r.fechaFin, tipo: r.tipo, horaInicio: r.horaInicio, duracion: r.duracion, origen: r.origen, expediente: r.expediente, motivo: r.motivo }; })
+      }
+    });
+  });
+  if (!encontrados.length) return res.status(404).json({ error: "No hay ningún alumno con el número " + num + " en las secciones de tu compañía." });
+  res.json({ resultados: encontrados });
 });
 
 module.exports = router;

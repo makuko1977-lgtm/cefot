@@ -16,10 +16,17 @@ router.get("/avisos", auth.requireAuth, auth.requireRole("admin"), function (req
   });
 });
 
+// Los partes con arresto no se retiran aquí: tienen que validarse con
+// «Guardar medida», que es lo que los envía al capitán.
 router.post("/avisos/leer", auth.requireAuth, auth.requireRole("admin"), function (req, res){
-  lista(req).forEach(function (a){ a.leido = true; });
+  let quedan = 0;
+  lista(req).forEach(function (a){
+    if (a.leido) return;
+    if (a.medida === "Arresto"){ quedan++; return; }
+    a.leido = true;
+  });
   db.save();
-  res.json({ ok: true });
+  res.json({ ok: true, quedanArrestos: quedan });
 });
 
 module.exports = router;

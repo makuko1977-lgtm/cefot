@@ -3068,6 +3068,18 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       // rechaza): no se le muestran la pestaña Usuarios ni «Cargar otra hoja».
       var tabUsuariosCap = document.getElementById("tabBtnUsuarios");
       if (tabUsuariosCap) tabUsuariosCap.classList.add("hidden");
+      // Recordatorio de arrestos pendientes de dar curso administrativo.
+      fetch("/api/capitan/arrestos").then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        var n = d && d.pendientes ? d.pendientes.length : 0;
+        var prev = document.getElementById("capitanArrestosAviso");
+        if (prev) prev.remove();
+        if (!n) return;
+        var aviso = document.createElement("strong");
+        aviso.id = "capitanArrestosAviso";
+        aviso.style.cssText = "display:block;color:#8a5a00;margin-top:4px;";
+        aviso.textContent = "Tienes " + n + (n === 1 ? " arresto pendiente" : " arrestos pendientes") + " de dar curso administrativo: pulsa «Volver a compañía».";
+        capitanBannerNombre.parentNode.appendChild(aviso);
+      }).catch(function(){});
     } else {
       capitanBanner.classList.add("hidden");
       capitanBannerNombre.textContent = "";
@@ -6473,6 +6485,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             '<input type="date" class="arr-fecha-fin" title="Fecha fin arresto">' +
             '<button type="button" class="btn small ghost arr-guardar-btn">Fijar fecha</button>' +
           '</div>';
+      }
+      // Arrestos enviados al capitán para su curso administrativo.
+      if (r.medidaCorrectora === "Arresto" && r.capitan){
+        medidaCell += '<div style="margin-top:4px">' + (r.capitan.estado === "tramitado"
+          ? '<span class="status-pill vigente" title="Tramitado el ' + escapeHtml(formatDateDisplay(String(r.capitan.tramitadoAt || "").slice(0,10))) + '">Tramitado por el capitán</span>'
+          : '<span class="status-pill programado">Enviado al capitán</span>') + '</div>';
       }
       if (esTrabajo(r)){
         // El estado "hecho" es de este alumno concreto, no de todo el

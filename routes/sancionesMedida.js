@@ -2,6 +2,7 @@ const express = require("express");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
 const catalog = require("../public/shared/catalog.js");
+const arrestos = require("../lib/arrestos.js");
 const router = express.Router();
 
 router.patch("/:id/medida", auth.requireAuth, auth.requireRole("admin"), function (req, res){
@@ -54,6 +55,9 @@ router.patch("/:id/medida", auth.requireAuth, auth.requireRole("admin"), functio
   }
 
   record.medidaRevisadaPor = { dni: req.user.dni, nombre: req.user.nombre, at: new Date().toISOString() };
+  // Validada por el jefe de sección: si la medida final es «Arresto», pasa
+  // al capitán; si deja de serlo y aún no estaba tramitada, se le retira.
+  arrestos.actualizarEnvio(record, req.user);
   const avisos = req.db.avisos || [];
   avisos.forEach(function (a){
     if (a.sancionId === record.id){

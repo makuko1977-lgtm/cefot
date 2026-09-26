@@ -15,6 +15,37 @@
   .seccion-card .mini-stats{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
   .seccion-card .mini-stat{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);background:var(--panel-2);border-radius:6px;padding:2px 6px;}
   .seccion-card .form-actions{margin-top:12px;}
+  /* ---- arrestos para dar curso administrativo (mismo estilo que los avisos del jefe de sección) ---- */
+  #cap-arrestos{position:sticky;top:0;z-index:70;background:#fcf1d6;border-bottom:1px solid #9c6a12;padding:12px 16px;font-size:13.5px;}
+  .arr-row{margin:8px 0;padding:8px 0;border-top:1px solid #e2d3a8;}
+  .arr-linea{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .arr-txt{flex:1;min-width:240px;}
+  .dim{color:#5c6752;}
+  .arr-detalle{display:none;margin:8px 0 2px;background:#fffaf0;border:1px solid #e2d3a8;border-radius:8px;padding:10px 12px;}
+  .arr-detalle.abierto{display:block;}
+  .ficha-dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 12px;margin:0 0 8px;font-size:13px;}
+  .ficha-dl dt{color:#5c6752;} .ficha-dl dd{margin:0;}
+  .tabla{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;}
+  .tabla th,.tabla td{border:1px solid #e2d3a8;padding:4px 6px;text-align:left;vertical-align:top;}
+  .tabla th{background:#f6ecd2;}
+  .tabla-wrap{overflow-x:auto;}
+  .pill{display:inline-block;font-size:11.5px;font-weight:600;border-radius:999px;padding:1px 8px;margin:1px 2px;white-space:nowrap;}
+  .pill.rojo{background:#f8e0dc;color:#a33a2c;border:1px solid #e6b3aa;}
+  .pill.ambar{background:#fcf1d6;color:#8a5a00;border:1px solid #e2c77f;}
+  .pill.verde{background:#e3f0e4;color:#2e6b3f;border:1px solid #a9cdb0;}
+  .pill.gris{background:#eceee6;color:#5c6752;border:1px solid #d5d8cc;}
+  .filtros-hist{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:10px 0;}
+  .filtros-hist .field{flex:1 1 150px;margin:0;}
+  .alumno-card{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;background:var(--panel);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,26,15,.5);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:80;overflow-y:auto;}
+  .modal-overlay.hidden{display:none;}
+  .modal-card{background:#fff;border-radius:14px;max-width:820px;width:100%;padding:18px 20px;}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+  .modal-header h3{margin:0;}
+  .modal-close{border:none;background:none;font-size:22px;cursor:pointer;}
+  .hist-sec h4{margin:14px 0 6px;}
+  .hist-item{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:6px 0;font-size:13px;}
+  .hist-item .r1{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:4px;}
 </style>
 </head>
 <body>
@@ -45,6 +76,34 @@
     <h3>Secciones de mi compañía</h3>
     <div class="panel-sub">Pulsa «Entrar» en una sección para trabajar en ella. Para volver aquí sin cerrar sesión, pulsa «Volver a compañía» en el aviso de modo capitán.</div>
     <div class="grid-secciones" id="seccionesGrid"></div>
+  </div>
+  <div class="panel corner-accent" style="margin-top:22px;">
+    <h3>Consultar alumno por nº de protocolo</h3>
+    <div class="panel-sub">Muestra si el alumno ha sido sancionado otras veces y su historial completo en su sección (el mismo que ve su jefe de sección).</div>
+    <div class="filtros-hist">
+      <div class="field"><label for="consNumero">Nº de protocolo</label><input type="text" id="consNumero" placeholder="Ej.: 33018" autocomplete="off"></div>
+      <button class="btn primary" id="consBuscarBtn" type="button">Buscar</button>
+    </div>
+    <div id="consResultado"></div>
+  </div>
+  <div class="panel corner-accent" style="margin-top:22px;">
+    <h3>Historial de arrestos</h3>
+    <div class="panel-sub">Todos los arrestos que te han llegado, pendientes y tramitados. Filtra para comprobarlos.</div>
+    <div class="filtros-hist">
+      <div class="field"><label for="hSeccion">Sección</label><select id="hSeccion"><option value="">Todas</option></select></div>
+      <div class="field"><label for="hEstado">Estado</label><select id="hEstado"><option value="">Todos</option><option value="pendiente">Pendientes</option><option value="tramitado">Tramitados</option></select></div>
+      <div class="field"><label for="hDesde">Fecha del parte desde</label><input type="date" id="hDesde"></div>
+      <div class="field"><label for="hHasta">hasta</label><input type="date" id="hHasta"></div>
+      <div class="field" style="flex:2 1 220px"><label for="hTexto">Buscar</label><input type="search" id="hTexto" placeholder="Alumno, nº de protocolo, expediente o motivo"></div>
+    </div>
+    <div class="tabla-wrap"><table class="tabla" id="hTabla"></table></div>
+    <div class="dim" id="hResumen" style="font-size:12.5px;margin-top:6px;"></div>
+  </div>
+  <div class="modal-overlay hidden" id="histModal">
+    <div class="modal-card">
+      <div class="modal-header"><h3 id="histTitulo">Historial del alumno</h3><button class="modal-close" id="histCerrar" type="button" aria-label="Cerrar">&times;</button></div>
+      <div id="histCuerpo"></div>
+    </div>
   </div>
 </div>
 <script>
@@ -123,6 +182,213 @@
       grid.innerHTML = '<div class="empty-state">No se han podido cargar las secciones. Recarga.</div>';
     });
   }).catch(function(){ location.href = "/login.html"; });
+})();
+</script>
+<script>
+/* ---- Arrestos que llegan al capitán: ventana, consulta por alumno e historial ---- */
+(function(){
+  function esc(v){ return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  function f(iso){ if (!iso) return "—"; var p = String(iso).slice(0,10).split("-"); return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : iso; }
+  function fh(iso){ return iso ? new Date(iso).toLocaleDateString("es-ES") : "—"; }
+  function ord(n){ return n + ((n === 1 || n === 3) ? ".er" : ".º"); }
+  function nombreAl(a){ return [a.ape1, a.ape2].filter(Boolean).join(" ") + (a.nombre ? ", " + a.nombre : ""); }
+  function tipo(t){ return t === "GRAVE" ? "Grave" : t === "LEVE" ? "Leve" : (t || "—"); }
+  function arrestoTxt(a){
+    if (a.arrestoPendiente || !a.arrestoFechaIni) return "<b>Arresto con fecha pendiente</b>";
+    return "Arresto del " + f(a.arrestoFechaIni) + " al " + f(a.arrestoFechaFin) + (a.arrestoDias ? " (" + a.arrestoDias + " días)" : "");
+  }
+  function medidaTxt(s){
+    if (s.medidaCorrectora === "Arresto") return arrestoTxt(s).replace(/<[^>]+>/g, "");
+    if (s.medidaCorrectora === "Trabajo no superior a 5 horas" && s.trabajoFechaFin) return s.medidaCorrectora + " (límite " + f(s.trabajoFechaFin) + ")";
+    return s.medidaCorrectora || "Sin medida";
+  }
+  function pillsAntecedentes(ant){
+    var h = "";
+    if (ant.ordenArresto && ant.ordenArresto > 1) h += '<span class="pill rojo">' + ord(ant.ordenArresto) + ' arresto</span>';
+    if (ant.sanciones > 0) h += '<span class="pill ' + (ant.sanciones >= 3 ? "rojo" : "ambar") + '">' + ant.sanciones + (ant.sanciones === 1 ? " sanción anterior" : " sanciones anteriores") + '</span>';
+    return h || '<span class="pill gris">Sin antecedentes</span>';
+  }
+  function origenTxt(a){
+    var c = a.capitan || {};
+    var por = c.enviadoPor && c.enviadoPor.nombre ? c.enviadoPor.nombre : "—";
+    var txt = "Enviado por " + esc(por) + " el " + fh(c.enviadoAt);
+    if (a.createdBy && a.createdBy.role === "instructor") txt += ", validando el parte de " + esc(a.createdBy.nombre);
+    return txt;
+  }
+  function detalleHtml(a){
+    return '<dl class="ficha-dl">' +
+      '<dt>Sección</dt><dd>' + esc(a.seccionNombre) + '</dd>' +
+      '<dt>Día, hora y lugar</dt><dd>' + f(a.fecha) + (a.hora ? " · " + esc(a.hora) : "") + (a.lugar ? " · " + esc(a.lugar) : "") + '</dd>' +
+      '<dt>Tipo y fundamento</dt><dd>' + tipo(a.tipoFalta) + (a.fundamentoLetra ? " (" + esc(a.fundamentoLetra) + ")" : "") + " — " + esc(a.fundamento) + '</dd>' +
+      '<dt>Motivo</dt><dd>' + esc(a.motivo) + '</dd>' +
+      '<dt>Profesor que da el parte</dt><dd>' + esc([a.profEmpleo, a.profNombre, a.profApellidos].filter(Boolean).join(" ") || "—") + '</dd>' +
+      '<dt>Arresto</dt><dd>' + arrestoTxt(a) + '</dd>' +
+      (a.observaciones ? '<dt>Observaciones</dt><dd>' + esc(a.observaciones) + '</dd>' : "") +
+      '</dl>' +
+      '<div class="tabla-wrap"><table class="tabla"><tr><th>Nº</th><th>Alumno</th><th>Pelotón</th><th>Antecedentes en su sección</th><th></th><th>Documento</th></tr>' +
+      a.alumnos.map(function(al){
+        return '<tr><td>' + esc(al.numero) + '</td><td>' + esc(nombreAl(al)) + '</td><td>' + esc(al.peloton || "—") + '</td><td>' + pillsAntecedentes(al.antecedentes) + '</td>' +
+          '<td><button class="btn small ghost ver-hist" type="button" data-numero="' + esc(al.numero) + '" data-tenant="' + esc(a.tenantId) + '">Historial</button></td>' +
+          '<td><button class="btn small ghost" type="button" disabled title="Se activará cuando se incorporen las plantillas">Imprimir</button></td></tr>';
+      }).join("") + '</table></div>' +
+      '<p class="dim" style="font-size:12px;margin:6px 0 0">Plantillas de documentos: pendientes de incorporar. Los datos comunes se rellenarán una sola vez para todos los alumnos y se imprimirá un documento por alumno.</p>';
+  }
+
+  var datos = { pendientes: [], tramitados: [] };
+
+  function pintarVentana(){
+    var viejo = document.getElementById("cap-arrestos"); if (viejo) viejo.remove();
+    var pend = datos.pendientes;
+    if (!pend.length) return;
+    var totalAl = pend.reduce(function(n, a){ return n + a.alumnos.length; }, 0);
+    var box = document.createElement("div"); box.id = "cap-arrestos";
+    box.innerHTML = '<strong>Arrestos para dar curso administrativo</strong> <span class="dim">(' + pend.length + (pend.length === 1 ? " expediente" : " expedientes") + ' · ' + totalAl + (totalAl === 1 ? " alumno" : " alumnos") + ')</span>' +
+      pend.map(function(a, i){
+        var reinc = a.alumnos.filter(function(al){ return al.antecedentes.ordenArresto > 1 || al.antecedentes.sanciones > 0; }).length;
+        var quien = a.alumnos.length === 1 ? esc(nombreAl(a.alumnos[0])) + " (Nº " + esc(a.alumnos[0].numero) + ")" : "<b>" + a.alumnos.length + " alumnos</b>";
+        return '<div class="arr-row"><div class="arr-linea"><div class="arr-txt"><strong>Exp. ' + esc(a.expediente) + ' · Sección ' + esc(a.seccion) + '</strong> · ' + quien + ' · Falta ' + tipo(a.tipoFalta).toLowerCase() + (a.fundamentoLetra ? " (" + esc(a.fundamentoLetra) + ")" : "") +
+          (reinc ? ' <span class="pill rojo">⚠ ' + reinc + (reinc === 1 ? " alumno con antecedentes" : " alumnos con antecedentes") + '</span>' : "") +
+          '<br><span class="dim">' + esc(a.motivo) + ' · ' + arrestoTxt(a) + ' · ' + origenTxt(a) + '</span></div>' +
+          '<button class="btn small ghost ver-datos" type="button" data-i="' + i + '">Ver datos</button>' +
+          '<button class="btn small ghost" type="button" disabled title="Se activará cuando se incorporen las plantillas">Rellenar documento' + (a.alumnos.length > 1 ? "s (" + a.alumnos.length + ")" : "") + '</button>' +
+          '<button class="btn small primary tramitar" type="button" data-i="' + i + '">Marcar como tramitado</button></div>' +
+          '<div class="arr-detalle" data-det="' + i + '">' + detalleHtml(a) + '</div></div>';
+      }).join("");
+    document.body.insertBefore(box, document.body.firstChild);
+    box.querySelectorAll(".ver-datos").forEach(function(b){
+      b.onclick = function(){ var d = box.querySelector('[data-det="' + b.getAttribute("data-i") + '"]'); d.classList.toggle("abierto"); b.textContent = d.classList.contains("abierto") ? "Ocultar datos" : "Ver datos"; };
+    });
+    box.querySelectorAll(".tramitar").forEach(function(b){
+      b.onclick = function(){
+        var a = pend[b.getAttribute("data-i")];
+        if (!confirm("¿Marcar como tramitado el expediente " + a.expediente + " (Sección " + a.seccion + ")?\n\nPasará al historial de arrestos. Podrás devolverlo a pendientes si te equivocas.")) return;
+        b.disabled = true;
+        cambiarEstado(a, "tramitar").catch(function(){ b.disabled = false; alert("No se ha podido guardar. Comprueba la conexión."); });
+      };
+    });
+    enganchaHistorial(box);
+  }
+
+  function cambiarEstado(a, accion){
+    return fetch("/api/capitan/arrestos/" + encodeURIComponent(a.tenantId) + "/" + encodeURIComponent(a.sancionId) + "/" + accion, { method: "POST" })
+      .then(function(r){ if (!r.ok) throw new Error(); return cargar(); });
+  }
+
+  // ---------------- historial filtrable ----------------
+  function pintarHistorial(){
+    var todos = datos.pendientes.concat(datos.tramitados);
+    var sec = document.getElementById("hSeccion").value, est = document.getElementById("hEstado").value;
+    var desde = document.getElementById("hDesde").value, hasta = document.getElementById("hHasta").value;
+    var q = document.getElementById("hTexto").value.trim().toLowerCase();
+    var filas = todos.filter(function(a){
+      if (sec && String(a.seccion) !== sec) return false;
+      if (est && a.capitan.estado !== est) return false;
+      if (desde && String(a.fecha) < desde) return false;
+      if (hasta && String(a.fecha) > hasta) return false;
+      if (q){
+        var txt = [a.expediente, a.motivo, a.seccionNombre].concat(a.alumnos.map(function(al){ return al.numero + " " + nombreAl(al); })).join(" ").toLowerCase();
+        if (txt.indexOf(q) === -1) return false;
+      }
+      return true;
+    }).sort(function(x, y){ return String(y.fecha).localeCompare(String(x.fecha)); });
+    var t = document.getElementById("hTabla");
+    t.innerHTML = '<tr><th>Exp.</th><th>Sección</th><th>Fecha</th><th>Alumnos</th><th>Motivo</th><th>Arresto</th><th>Estado</th><th></th></tr>' +
+      (filas.length ? filas.map(function(a){
+        var est = a.capitan.estado === "tramitado"
+          ? '<span class="pill verde">Tramitado</span><div class="dim" style="font-size:11.5px">' + fh(a.capitan.tramitadoAt) + '</div>'
+          : '<span class="pill ambar">Pendiente</span>';
+        return '<tr><td>' + esc(a.expediente) + '</td><td>' + esc(a.seccion) + 'ª</td><td>' + f(a.fecha) + '</td><td>' +
+          a.alumnos.map(function(al){ return esc(al.numero) + " · " + esc(nombreAl(al)) + (al.antecedentes.ordenArresto > 1 ? ' <span class="pill rojo">' + ord(al.antecedentes.ordenArresto) + '</span>' : "") +
+            ' <button class="btn small ghost ver-hist" type="button" data-numero="' + esc(al.numero) + '" data-tenant="' + esc(a.tenantId) + '" style="padding:0 6px">Historial</button>'; }).join("<br>") +
+          '</td><td>' + esc(a.motivo) + '</td><td>' + arrestoTxt(a) + '</td><td>' + est + '</td><td>' +
+          (a.capitan.estado === "tramitado" ? '<button class="btn small ghost reabrir" type="button" data-t="' + esc(a.tenantId) + '" data-s="' + esc(a.sancionId) + '">Devolver a pendientes</button>' : "") + '</td></tr>';
+      }).join("") : '<tr><td colspan="8" class="dim" style="text-align:center">No hay arrestos con estos filtros.</td></tr>');
+    document.getElementById("hResumen").textContent = filas.length + " de " + todos.length + " expedientes · " +
+      datos.pendientes.length + " pendientes · " + datos.tramitados.length + " tramitados";
+    t.querySelectorAll(".reabrir").forEach(function(b){
+      b.onclick = function(){
+        var a = todos.filter(function(x){ return x.tenantId === b.getAttribute("data-t") && x.sancionId === b.getAttribute("data-s"); })[0];
+        if (a && confirm("¿Devolver el expediente " + a.expediente + " a pendientes?")) cambiarEstado(a, "reabrir");
+      };
+    });
+    enganchaHistorial(t);
+  }
+  ["hSeccion","hEstado","hDesde","hHasta"].forEach(function(id){ document.getElementById(id).onchange = pintarHistorial; });
+  document.getElementById("hTexto").oninput = pintarHistorial;
+
+  // ---------------- consulta por nº de protocolo e historial ----------------
+  function pedirAlumno(numero){
+    return fetch("/api/capitan/alumno/" + encodeURIComponent(numero)).then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); });
+  }
+  function historialHtml(res){
+    var h = res.historial;
+    var html = '<div class="dim" style="margin-bottom:6px">' + esc(res.seccionNombre) + (res.baja ? ' · <b>dado de baja</b>' : "") + (res.alumno.peloton ? " · Pelotón " + esc(res.alumno.peloton) : "") + '</div>' +
+      '<div>' + (res.antecedentes.sanciones ? '<span class="pill ' + (res.antecedentes.sanciones >= 3 ? "rojo" : "ambar") + '">' + res.antecedentes.sanciones + (res.antecedentes.sanciones === 1 ? " sanción" : " sanciones") + '</span>' : '<span class="pill gris">Sin sanciones</span>') +
+        (res.antecedentes.arrestos ? '<span class="pill rojo">' + res.antecedentes.arrestos + (res.antecedentes.arrestos === 1 ? " arresto" : " arrestos") + '</span>' : "") + '</div>';
+    html += '<div class="hist-sec"><h4>Sanciones (' + h.sanciones.length + ')</h4>' + (h.sanciones.length ? h.sanciones.map(function(s){
+      var cap = s.capitan ? (s.capitan.estado === "tramitado" ? '<span class="pill verde">Tramitado por el capitán</span>' : '<span class="pill ambar">Pendiente del capitán</span>') : "";
+      return '<div class="hist-item"><div class="r1"><strong>Exp. Nº ' + esc(s.expediente) + ' · ' + f(s.fecha) + '</strong><span><span class="pill ' + (s.tipoFalta === "GRAVE" ? "rojo" : "gris") + '">' + tipo(s.tipoFalta) + '</span>' +
+        (s.numAlumnos > 1 ? '<span class="pill gris">Expediente compartido (' + s.numAlumnos + ' alumnos)</span>' : "") + cap + '</span></div>' +
+        '<dl class="ficha-dl"><dt>Motivo</dt><dd>' + esc(s.motivo || "—") + '</dd><dt>Fundamento</dt><dd>' + esc((s.fundamentoLetra ? s.fundamentoLetra + ") " : "") + (s.fundamento || "—")) + '</dd>' +
+        '<dt>Lugar / hora</dt><dd>' + esc([s.lugar, s.hora].filter(Boolean).join(" · ") || "—") + '</dd>' +
+        '<dt>Mando</dt><dd>' + esc([s.profEmpleo, [s.profNombre, s.profApellidos].filter(Boolean).join(" ")].filter(Boolean).join(" · ") || "—") + '</dd>' +
+        '<dt>Medida correctora</dt><dd>' + esc(medidaTxt(s)) + '</dd>' + (s.observaciones ? '<dt>Observaciones</dt><dd>' + esc(s.observaciones) + '</dd>' : "") + '</dl></div>';
+    }).join("") : '<div class="dim">Sin sanciones registradas.</div>') + '</div>';
+    html += '<div class="hist-sec"><h4>Rebajes (' + h.rebajes.length + ')</h4>' + (h.rebajes.length ? h.rebajes.map(function(r){
+      return '<div class="hist-item"><strong>' + f(r.fechaInicio) + ' a ' + f(r.fechaFin) + '</strong>' + (r.total ? ' <span class="pill rojo">Rebaje total/clase</span>' : "") + '</div>';
+    }).join("") : '<div class="dim">Sin rebajes registrados.</div>') + '</div>';
+    html += '<div class="hist-sec"><h4>Refuerzos (' + h.refuerzos.length + ')</h4>' + (h.refuerzos.length ? h.refuerzos.map(function(r){
+      return '<div class="hist-item"><strong>' + f(r.fechaInicio) + ' a ' + f(r.fechaFin) + '</strong> · ' + esc(r.tipo || "—") + (r.expediente ? ' · Exp. Nº ' + esc(r.expediente) : "") + '</div>';
+    }).join("") : '<div class="dim">Sin refuerzos registrados.</div>') + '</div>';
+    return html;
+  }
+  function abrirHistorial(numero, tenantId){
+    var modal = document.getElementById("histModal"), cuerpo = document.getElementById("histCuerpo");
+    cuerpo.innerHTML = '<div class="dim">Cargando…</div>'; modal.classList.remove("hidden");
+    pedirAlumno(numero).then(function(r){
+      if (!r.ok){ cuerpo.innerHTML = '<div class="form-msg error">' + esc(r.d.error || "No se ha podido cargar.") + '</div>'; return; }
+      var res = r.d.resultados.filter(function(x){ return !tenantId || x.tenantId === tenantId; })[0] || r.d.resultados[0];
+      document.getElementById("histTitulo").textContent = "Historial · " + nombreAl(res.alumno) + " (Nº " + res.alumno.numero + ")";
+      cuerpo.innerHTML = historialHtml(res);
+    });
+  }
+  function enganchaHistorial(raiz){
+    raiz.querySelectorAll(".ver-hist").forEach(function(b){ b.onclick = function(){ abrirHistorial(b.getAttribute("data-numero"), b.getAttribute("data-tenant")); }; });
+  }
+  document.getElementById("histCerrar").onclick = function(){ document.getElementById("histModal").classList.add("hidden"); };
+  document.getElementById("histModal").onclick = function(e){ if (e.target.id === "histModal") e.target.classList.add("hidden"); };
+
+  function buscarAlumno(){
+    var n = document.getElementById("consNumero").value.trim(), out = document.getElementById("consResultado");
+    if (!n){ out.innerHTML = ""; return; }
+    out.innerHTML = '<div class="dim">Buscando…</div>';
+    pedirAlumno(n).then(function(r){
+      if (!r.ok){ out.innerHTML = '<div class="form-msg error">' + esc(r.d.error || "No encontrado.") + '</div>'; return; }
+      out.innerHTML = r.d.resultados.map(function(res){
+        var ant = res.antecedentes;
+        return '<div class="alumno-card"><strong>' + esc(nombreAl(res.alumno)) + '</strong> · Nº ' + esc(res.alumno.numero) + ' · ' + esc(res.seccionNombre) + (res.baja ? " · dado de baja" : "") +
+          '<div style="margin:6px 0">' + (ant.sanciones ? '<span class="pill ' + (ant.sanciones >= 3 ? "rojo" : "ambar") + '">' + ant.sanciones + (ant.sanciones === 1 ? " sanción" : " sanciones") + '</span>' : '<span class="pill gris">Sin sanciones</span>') +
+          (ant.arrestos ? '<span class="pill rojo">' + ant.arrestos + (ant.arrestos === 1 ? " arresto" : " arrestos") + '</span>' : "") + '</div>' +
+          '<button class="btn small primary ver-hist" type="button" data-numero="' + esc(res.alumno.numero) + '" data-tenant="' + esc(res.tenantId) + '">Ver historial</button></div>';
+      }).join("");
+      enganchaHistorial(out);
+    });
+  }
+  document.getElementById("consBuscarBtn").onclick = buscarAlumno;
+  document.getElementById("consNumero").onkeydown = function(e){ if (e.key === "Enter") buscarAlumno(); };
+
+  function cargar(){
+    return fetch("/api/capitan/arrestos").then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+      if (!d) return;
+      datos = d;
+      var sel = document.getElementById("hSeccion"), actual = sel.value, secs = {};
+      d.pendientes.concat(d.tramitados).forEach(function(a){ secs[a.seccion] = a.seccionNombre; });
+      sel.innerHTML = '<option value="">Todas</option>' + Object.keys(secs).sort().map(function(k){ return '<option value="' + k + '">' + esc(secs[k]) + '</option>'; }).join("");
+      sel.value = actual;
+      pintarVentana(); pintarHistorial();
+    });
+  }
+  cargar();
 })();
 </script>
 </body>

@@ -4,6 +4,7 @@ const db = require("../lib/db");
 const auth = require("../lib/auth");
 const catalog = require("../public/shared/catalog.js");
 const avisos = require("../lib/avisos.js");
+const arrestos = require("../lib/arrestos.js");
 
 const router = express.Router();
 
@@ -161,6 +162,10 @@ router.post("/", auth.requireAuth, function (req, res){
   // pelotón), se genera un aviso para que el jefe de sección lo revise y
   // confirme o cambie la medida correctora propuesta.
   avisos.registrarParte(req.db, record, req.user);
+  // Un arresto puesto por el jefe de sección (o por el capitán dentro de la
+  // sección) pasa directamente al capitán; el de un jefe de pelotón, cuando
+  // el jefe de sección lo valide (ver routes/sancionesMedida.js).
+  if (req.user.role === "admin") arrestos.actualizarEnvio(record, req.user);
   db.save();
   res.status(201).json({ ok: true, sancion: record });
 });

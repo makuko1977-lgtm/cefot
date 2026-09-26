@@ -37,6 +37,8 @@
         "<button type='button' class='btn small primary cefot-guardar-medida' data-idx='" + i + "'>Guardar medida</button>" +
         "<button type='button' class='btn small cefot-generar-refuerzo' data-idx='" + i + "' style='display:none;background:#2f6690;color:#fff;'>Generar refuerzo &rarr;</button>" +
         "</div>" +
+        "<div class='cefot-nota-capitan' data-idx='" + i + "' style='display:none;color:#8a5a00;font-size:12.5px;margin-top:4px;'>" +
+        "Al guardar con «Arresto» se enviará al capitán de la compañía para su curso administrativo.</div>" +
         "<div class='cefot-extra cefot-extra-arresto' data-idx='" + i + "' style='display:none;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px;padding-left:4px;'>" +
         "<label style='display:flex;flex-direction:column;font-size:12px;color:#5c6752;'>Inicio arresto" +
         "<input type='date' class='cefot-arresto-ini' value='" + escapeHtml(a.arrestoFechaIni || "") + "'></label>" +
@@ -72,6 +74,8 @@
       arrestoBox.style.display = medida === "Arresto" ? "flex" : "none";
       trabajoBox.style.display = medida === "Trabajo no superior a 5 horas" ? "flex" : "none";
       refuerzoBtn.style.display = medida === "Refuerzo" ? "" : "none";
+      var notaCap = box.querySelector(".cefot-nota-capitan[data-idx='" + idx + "']");
+      if (notaCap) notaCap.style.display = medida === "Arresto" ? "" : "none";
     }
 
     avisos.forEach(function (a, i){ actualizarVisibilidad(i); });
@@ -152,8 +156,21 @@
       };
     });
 
+    // «Marcar todos como vistos» no retira los partes con arresto: hay que
+    // validarlos con «Guardar medida», que es lo que los envía al capitán.
     document.getElementById("cefotAvisosOk").onclick = function (){
-      fetch("/api/admin/avisos/leer", { method: "POST" }).then(function (){ box.remove(); });
+      fetch("/api/admin/avisos/leer", { method: "POST" }).then(function (){
+        var quedan = 0;
+        avisos.forEach(function (a, i){
+          var fila = box.querySelector(".cefot-aviso-row[data-idx='" + i + "']");
+          if (a.medida === "Arresto" && fila){ quedan++; return; }
+          if (fila) fila.remove();
+        });
+        if (!quedan){ box.remove(); return; }
+        var okBtn = document.getElementById("cefotAvisosOk");
+        okBtn.insertAdjacentHTML("afterend", " <span style='color:#8a5a00;font-size:12.5px;'>Los partes con arresto se quedan hasta validarlos con «Guardar medida».</span>");
+        okBtn.remove();
+      });
     };
   }).catch(function (){});
 })();
