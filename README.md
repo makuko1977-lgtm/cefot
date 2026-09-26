@@ -2,7 +2,7 @@
 
 Aplicación web para la gestión de rebajes, refuerzos y sanciones de la sección,
 con acceso mediante DNI + contraseña y dos roles de usuario (administrador e
-instructor). Sustituye a la versión de un único archivo (`seccion3.html`) en
+instructor). Sustituye a la versión de un único archivo (`legado/seccion3.html`) en
 los casos en que varias personas necesiten introducir datos a la vez desde
 distintos dispositivos.
 
@@ -284,7 +284,6 @@ cefot/
 ├── server.js                 Arranque del servidor y montaje de rutas
 ├── package.json              Dependencias y scripts (start, seed, demo, test)
 ├── .env.example              Variables de entorno (DATABASE_URL, TRUST_PROXY...)
-├── cefot-pasos-1-y-2.patch   Parte 1 ya aplicada; parte 2 (pantalla del jefe de sección) sin aplicar
 ├── lib/
 │   ├── db.js                 Almacén: fichero (data/data.json) o Postgres si hay DATABASE_URL
 │   ├── auth.js               Autenticación (JWT en cookie) y contraseñas
@@ -298,15 +297,14 @@ cefot/
 ├── public/
 │   ├── index.html            Portada (modo servidor / modo local)
 │   ├── login.html            Pantalla de acceso
-│   ├── seccion3.html         Gestión completa de la sección (jefe de sección)
-│   ├── admin.html            Panel multiusuario anterior del jefe de sección
+│   ├── admin.html            Gestión completa de la sección (jefe de sección)
 │   ├── instructor.html       Jefe de pelotón
-│   ├── usuarios.html         Alta y permisos de jefes de pelotón
 │   ├── superadmin.html       Súper Administrador
 │   ├── capitan.html          Capitán de compañía
 │   ├── estudios.html         Jefe de estudios
 │   ├── privacidad.html       Política de privacidad
 │   └── shared/               CSS, catálogo de faltas y módulos JS comunes
+├── legado/                   HTML en modo local (seccion3.html); no se publica
 ├── docs/                     Manual y registro de cambios de Sección 3
 ├── ios/                      App de iPhone (envoltorio de la web)
 └── data/                     Datos en modo fichero (se crea solo; no se sube a Git)

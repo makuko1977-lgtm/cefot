@@ -1,27 +1,29 @@
-# Usar el repositorio como el HTML local
+# Servidor y HTML local
 
-La página `seccion3.html` (la de Sección 3 que abres en el navegador) guarda
-los datos **en este dispositivo** (`localStorage`). El panel `admin.html` del
-servidor guarda en la base de datos y es multiusuario.
+Todos los perfiles trabajan **contra el servidor**:
 
-Para que el servidor se comporte **igual que el HTML local**:
+| Perfil | Pantalla tras iniciar sesión |
+|---|---|
+| Jefe de sección | `/admin.html` |
+| Jefe de pelotón | `/instructor.html` |
+| Capitán de compañía | `/capitan.html` → al entrar en una sección, `/admin.html` |
+| Súper Administrador | `/superadmin.html` |
+| Jefe de estudios | `/estudios.html` |
 
-1. `public/seccion3.html` ya está en el repositorio y lleva las librerías
-   de Excel y PDF incrustadas: no hace falta copiar nada más.
+El HTML local (`legado/seccion3.html`) ya no lo publica el servidor. Se abre
+con doble clic desde el disco y guarda los datos solo en ese navegador.
 
-2. Arranca el servidor:
+Para pasar datos del servidor al HTML local (por ejemplo, mientras el
+servidor no sea accesible desde la intranet) se descarga la copia de
+seguridad en `admin.html` y se carga en el HTML local con
+**«Importar copia del servidor (añadir)…»**. La importación solo añade lo
+que falta y nunca sustituye ni borra nada. Detalles en `legado/LEEME.md`.
 
-   ```bash
-   npm install
-   npm start
-   ```
+Para probar en local:
 
-3. Abre `http://localhost:3000/seccion3.html`
-
-   Ahí tienes el mismo programa: roster, rebajes, sanciones, refuerzos,
-   actividades, consultas, cuestionario de notas, copia de seguridad,
-   fotos y PDFs. Los datos se recuerdan en ese navegador, como cuando
-   abrías el archivo en local.
-
-`/login.html` sigue siendo el acceso multiusuario (jefe de sección →
-`/seccion3.html`, jefe de pelotón → `/instructor.html`).
+```bash
+npm install
+npm start          # http://localhost:3000/login.html
+npm run demo       # igual, con datos ficticios
+npm test           # pruebas automáticas
+```

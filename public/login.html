@@ -39,8 +39,9 @@
 </div>
 <script>
 function destinoTrasLogin(me){
-  if (me.tenant && me.tenant.role === "admin") return "/seccion3.html";
-  if (me.role === "admin") return "/seccion3.html";
+  // El jefe de sección trabaja en admin.html, que guarda en el servidor.
+  if (me.tenant && me.tenant.role === "admin") return "/admin.html";
+  if (me.role === "admin") return "/admin.html";
   if (me.superAdmin) return "/superadmin.html";
   if (me.jefeEstudios) return "/estudios.html";
   if (me.capitanCompania) return "/capitan.html";

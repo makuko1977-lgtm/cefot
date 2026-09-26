@@ -84,7 +84,7 @@
           .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, d: d }; }); })
           .then(function(res){
             if (!res.ok){ btn.disabled = false; alert(res.d.error || "No se pudo entrar"); return; }
-            location.href = "/seccion3.html";
+            location.href = "/admin.html";
           }).catch(function(){ btn.disabled = false; alert("Error de conexion"); });
       };
     });
@@ -104,7 +104,7 @@
     if (!me){ location.href = "/login.html"; return; }
     if (!me.capitanCompania){
       if (me.superAdmin) location.href = "/superadmin.html";
-      else if (me.tenant && me.tenant.role === "admin") location.href = "/seccion3.html";
+      else if (me.tenant && me.tenant.role === "admin") location.href = "/admin.html";
       else location.href = "/instructor.html";
       return;
     }

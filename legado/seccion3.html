@@ -1400,8 +1400,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="hint" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border);">
         ¿Ya tenías datos cargados en otro ordenador o navegador? Los datos se guardan solo en el dispositivo donde
         se cargaron — este archivo no los lleva consigo. Si exportaste una copia de seguridad (botón "Copia de
-        seguridad") desde ese otro dispositivo, impórtala aquí para recuperar todo tal cual estaba, sin tener que
-        volver a subir la hoja de cálculo.
+        seguridad") desde ese otro dispositivo, impórtala aquí para recuperar todo, sin tener que volver a subir la hoja de
+        cálculo. Solo se AÑADE lo que falte: nunca sustituye ni borra lo que ya tienes cargado.
       </div>
       <div class="upload-actions" style="margin-top:8px;">
         <button class="btn ghost" id="uploadImportBackupBtn" type="button">Importar copia de seguridad…</button>
@@ -3710,40 +3710,117 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alert("Ese archivo no parece ser una copia de seguridad de SECCIÓN 3.");
         return;
       }
-      var resumen = "Roster: " + ((data.roster.rows && data.roster.rows.length) || 0) + " alumnos\n" +
-        "Bajas: " + ((data.roster.bajas && data.roster.bajas.length) || 0) + "\n" +
-        "Rebajes: " + ((data.rebajes && data.rebajes.length) || 0) + "\n" +
-        "Sanciones: " + ((data.sanciones && data.sanciones.length) || 0) + "\n" +
-        "Refuerzos: " + ((data.refuerzos && data.refuerzos.length) || 0) + "\n" +
-        "Actividades: " + ((data.actividades && data.actividades.length) || 0) +
-        (data.fases ? "\nFechas del ciclo: sí" : "") +
+      // Importación ADITIVA (igual que la del servidor): nunca sustituye ni
+      // borra lo que ya hay en este navegador. Solo añade lo que falta:
+      // alumnos y bajas por número, el resto por "id"; las fechas del ciclo
+      // solo se rellenan si aquí están vacías.
+      var bkHeaders = Array.isArray(data.roster.headers) ? data.roster.headers : [];
+      var bkRows = Array.isArray(data.roster.rows) ? data.roster.rows : [];
+      var bkBajas = Array.isArray(data.roster.bajas) ? data.roster.bajas : [];
+      var bkNumKey = resolveRosterKeys(bkHeaders).numero || null;
+      var rosterLocalVacio = !(state.rows && state.rows.length) && !(state.bajas && state.bajas.length);
+
+      var numerosLocales = {};
+      var kNumLocal = (state.keys && state.keys.numero) || null;
+      if (kNumLocal){
+        (state.rows || []).forEach(function(r){ var v = getVal(r, kNumLocal).trim(); if (v) numerosLocales[v] = true; });
+        (state.bajas || []).forEach(function(r){ var v = getVal(r, kNumLocal).trim(); if (v) numerosLocales[v] = true; });
+      }
+      function filtrarNuevosAlumnos(lista){
+        var nuevos = [], omitidos = 0;
+        lista.forEach(function(r){
+          var num = (bkNumKey && r && r[bkNumKey] != null) ? String(r[bkNumKey]).trim() : "";
+          if (!num){ return; }
+          if (numerosLocales[num]){ omitidos++; return; }
+          numerosLocales[num] = true;
+          nuevos.push(r);
+        });
+        return { nuevos: nuevos, omitidos: omitidos };
+      }
+      var mRows = rosterLocalVacio ? { nuevos: bkRows, omitidos: 0 } : filtrarNuevosAlumnos(bkRows);
+      var mBajas = rosterLocalVacio ? { nuevos: bkBajas, omitidos: 0 } : filtrarNuevosAlumnos(bkBajas);
+      var mSanc = mergeListaPorId(sanciones, data.sanciones || []);
+      var mReb = mergeListaPorId(rebajes, data.rebajes || []);
+      var mRef = mergeListaPorId(refuerzos, data.refuerzos || []);
+      var mAct = mergeListaPorId(actividades, data.actividades || []);
+      var omitidosTotal = mRows.omitidos + mBajas.omitidos + mSanc.omitidos + mReb.omitidos + mRef.omitidos + mAct.omitidos;
+
+      var resumen =
+        "Alumnos nuevos: " + mRows.nuevos.length + " (ya existían y se omiten: " + mRows.omitidos + ")\n" +
+        "Bajas nuevas: " + mBajas.nuevos.length + " (ya existían y se omiten: " + mBajas.omitidos + ")\n" +
+        "Rebajes nuevos: " + mReb.nuevos.length + " (ya existían y se omiten: " + mReb.omitidos + ")\n" +
+        "Sanciones nuevas: " + mSanc.nuevos.length + " (ya existían y se omiten: " + mSanc.omitidos + ")\n" +
+        "Refuerzos nuevos: " + mRef.nuevos.length + " (ya existían y se omiten: " + mRef.omitidos + ")\n" +
+        "Actividades nuevas: " + mAct.nuevos.length + " (ya existían y se omiten: " + mAct.omitidos + ")" +
         (data.exportadoEl ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportadoEl).slice(0,10))) : "");
       var ok = confirm(
         "Vas a importar esta copia de seguridad:\n\n" + resumen +
-        "\n\nEsto SUSTITUIRÁ todos los datos que tienes ahora mismo en este navegador " +
-        "(roster, rebajes, sanciones, refuerzos y actividades). Esta acción no se puede deshacer.\n\n¿Continuar?"
+        "\n\nEsto AÑADE los registros de arriba que todavía no existen en este navegador. " +
+        "NO sustituye ni borra nada de lo que ya tienes aquí (los " + omitidosTotal + " registros que ya existían se dejan tal cual).\n\n¿Continuar?"
       );
       if (!ok) return;
 
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.roster));
-        localStorage.setItem(REBAJES_KEY, JSON.stringify(data.rebajes || []));
-        localStorage.setItem(SANCIONES_KEY, JSON.stringify(data.sanciones || []));
-        localStorage.setItem(REFUERZOS_KEY, JSON.stringify(data.refuerzos || []));
-        localStorage.setItem(ACTIVIDADES_KEY, JSON.stringify(data.actividades || []));
-        if (data.fases) localStorage.setItem(FASES_KEY, JSON.stringify(data.fases));
-        if (data.expedienteCounter != null){
-          localStorage.setItem(EXPEDIENTE_COUNTER_KEY, String(data.expedienteCounter));
+        if (rosterLocalVacio){
+          // Roster vacío: se adopta el de la copia tal cual (no hay nada que perder).
+          state.headers = bkHeaders.slice();
+          state.rows = mRows.nuevos.slice();
+          state.bajas = mBajas.nuevos.slice();
+          if (data.roster.meta) state.meta = data.roster.meta;
+        } else {
+          // Alinea cada fila con las cabeceras locales; las columnas que aquí
+          // no existan se añaden al final.
+          var adaptar = function(r){
+            var row = {};
+            state.headers.forEach(function(h){ row[h] = ""; });
+            Object.keys(r || {}).forEach(function(h){
+              if (h === "_bajaFecha"){ row._bajaFecha = r[h]; return; }
+              var local = findKey(state.headers, [h]);
+              if (!local){ state.headers.push(h); local = h; }
+              row[local] = r[h];
+            });
+            return row;
+          };
+          mRows.nuevos.forEach(function(r){ state.rows.push(adaptar(r)); });
+          state.bajas = state.bajas || [];
+          mBajas.nuevos.forEach(function(r){ state.bajas.push(adaptar(r)); });
         }
-        // La copia importada ya refleja el estado guardado por quien la
-        // exportó: se cuenta como "copia reciente" para no mostrar el
-        // aviso de recordatorio inmediatamente después de importar.
+        state.columns = resolveColumns(state.headers);
+        state.keys = resolveRosterKeys(state.headers);
+        persist();
+
+        rebajes = rebajes.concat(mReb.nuevos); persistRebajes();
+        sanciones = sanciones.concat(mSanc.nuevos); persistSanciones();
+        refuerzos = refuerzos.concat(mRef.nuevos); persistRefuerzos();
+        actividades = actividades.concat(mAct.nuevos); persistActividades();
+
+        // Fechas del ciclo: solo se rellenan las que aquí están vacías.
+        if (data.fases){
+          ["FFMG", "FFE"].forEach(function(f){
+            if (!data.fases[f]) return;
+            ["ini", "fin"].forEach(function(k){
+              if (!fasesCiclo[f][k] && data.fases[f][k]) fasesCiclo[f][k] = data.fases[f][k];
+            });
+          });
+          localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo));
+        }
+
+        // El contador de expedientes nunca retrocede: queda por delante del
+        // mayor entre el local, el de la copia y los expedientes ya fusionados.
+        var maxExp = Math.max(parseInt(localStorage.getItem(EXPEDIENTE_COUNTER_KEY), 10) || 0, parseInt(data.expedienteCounter, 10) || 0);
+        sanciones.concat(refuerzos).forEach(function(r){
+          var n = parseInt(r && r.expediente, 10);
+          if (!isNaN(n) && n > maxExp) maxExp = n;
+        });
+        localStorage.setItem(EXPEDIENTE_COUNTER_KEY, String(maxExp));
         localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
       } catch(err){
         alert("No se pudo importar la copia de seguridad: " + (err && err.message ? err.message : err));
         return;
       }
-      alert("Copia importada correctamente. La página se va a recargar.");
+      alert("Copia importada: se han añadido " +
+        (mRows.nuevos.length + mBajas.nuevos.length + mReb.nuevos.length + mSanc.nuevos.length + mRef.nuevos.length + mAct.nuevos.length) +
+        " registros y se han dejado intactos los " + omitidosTotal + " que ya existían. La página se va a recargar.");
       location.reload();
     };
     reader.onerror = function(){
@@ -3886,6 +3963,23 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         horasUaNuevas.push(key);
       });
 
+      // Aviso de números de expediente repetidos: el servidor y este
+      // dispositivo numeran cada uno por su cuenta, así que una sanción nueva
+      // del servidor puede traer un nº de expediente que aquí ya usa OTRO
+      // parte. No se toca ninguno de los dos; solo se avisa para revisarlo.
+      var expLocales = {};
+      (sanciones || []).forEach(function(r){ if (r && r.expediente != null) expLocales[String(r.expediente)] = true; });
+      var expRepetidos = [];
+      mSanciones.nuevos.forEach(function(r){
+        var e = r && r.expediente != null ? String(r.expediente) : "";
+        if (e && expLocales[e] && expRepetidos.indexOf(e) === -1) expRepetidos.push(e);
+      });
+      expRepetidos.sort(function(a, b){ return Number(a) - Number(b); });
+      var avisoExp = expRepetidos.length
+        ? ("\n\n⚠ ATENCIÓN: " + expRepetidos.length + " sanción(es) del servidor traen un nº de expediente que aquí ya usa otro parte distinto: " +
+           expRepetidos.join(", ") + ". Se añadirán igualmente (no se borra ninguno), pero quedarán dos partes con el mismo número. Revísalos después en la pestaña Sanciones.")
+        : "";
+
       var totalOmitidos = omitidosRoster + omitidasBajas + mSanciones.omitidos + mRebajes.omitidos + mRefuerzos.omitidos + mActividades.omitidos + horasUaOmitidas;
 
       var resumen =
@@ -3896,7 +3990,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "Refuerzos nuevos: " + mRefuerzos.nuevos.length + " (ya existían y se omiten: " + mRefuerzos.omitidos + ")\n" +
         "Actividades nuevas: " + mActividades.nuevos.length + " (ya existían y se omiten: " + mActividades.omitidos + ")\n" +
         "Fechas de Horas UA nuevas: " + horasUaNuevas.length + " (ya existían y se omiten: " + horasUaOmitidas + ")" +
-        (data.exportedAt ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportedAt).slice(0,10))) : "");
+        (data.exportedAt ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportedAt).slice(0,10))) : "") +
+        avisoExp;
 
       var ok = confirm(
         "Vas a importar esta copia de seguridad del SERVIDOR:\n\n" + resumen +
@@ -3957,8 +4052,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "- Refuerzos: " + mRefuerzos.nuevos.length + "\n" +
         "- Actividades: " + mActividades.nuevos.length + "\n" +
         "- Fechas de Horas UA: " + horasUaNuevas.length + "\n\n" +
-        "Se han omitido " + totalOmitidos + " registros que ya existían en este dispositivo.\n\n" +
-        "La página se va a recargar."
+        "Se han omitido " + totalOmitidos + " registros que ya existían en este dispositivo." +
+        (expRepetidos.length ? ("\n\n⚠ Expedientes con número repetido para revisar: " + expRepetidos.join(", ")) : "") +
+        "\n\nLa página se va a recargar."
       );
       location.reload();
     };
