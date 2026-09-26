@@ -139,6 +139,45 @@
     <div id="ciaBlocks"></div>
   </div>
 
+  <div class="panel corner-accent" id="informePanel" style="margin-top:22px;">
+    <h3>Imprimir datos para comprobar</h3>
+    <div class="panel-sub">
+      Genera una hoja lista para imprimir (o guardar en PDF) con las cuentas de acceso y los datos de las secciones.
+      Los usuarios que sean un DNI o NIE salen <strong>codificados</strong> (solo los 3 últimos caracteres) por si se pierde el papel.
+      Las contraseñas <strong>no se imprimen</strong>: el sistema no las guarda legibles; si alguien la olvida, se le asigna una nueva.
+    </div>
+    <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px;">
+      <div class="field">
+        <label for="informeCia">Compañía</label>
+        <select id="informeCia">
+          <option value="">Todas</option><option value="1">1ª Compañía</option><option value="2">2ª Compañía</option>
+          <option value="3">3ª Compañía</option><option value="4">4ª Compañía</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="informeSec">Sección</label>
+        <select id="informeSec">
+          <option value="">Todas</option><option value="1">Sección 1</option><option value="2">Sección 2</option>
+          <option value="3">Sección 3</option><option value="4">Sección 4</option><option value="5">Sección 5</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 16px;margin-top:12px;font-size:14px;">
+      <label><input type="checkbox" id="informeUsuarios" checked> Jefes de sección y jefes de pelotón</label>
+      <label><input type="checkbox" id="informePermisos" checked> Permisos de cada jefe de pelotón</label>
+      <label><input type="checkbox" id="informeCifras" checked> Cifras de cada sección</label>
+      <label><input type="checkbox" id="informeCapitanes" checked> Capitanes de compañía</label>
+      <label><input type="checkbox" id="informeEstudios" checked> Jefes de estudios</label>
+      <label><input type="checkbox" id="informeSA"> Súper Administradores</label>
+      <label><input type="checkbox" id="informeAlumnos"> Listado de alumnos (sin DNI ni teléfono)</label>
+      <label><input type="checkbox" id="informeCodificarTodos"> Codificar también los usuarios que no son DNI</label>
+    </div>
+    <div class="form-actions" style="margin-top:12px;">
+      <button class="btn primary" id="informeBtn" type="button">Vista previa e imprimir</button>
+      <span class="form-msg" id="informeMsg"></span>
+    </div>
+  </div>
+
   <div class="panel danger-zone" id="reinicioPanel" style="margin-top:22px;">
     <h3>Nuevo curso académico: borrar todo y empezar de cero</h3>
     <div class="panel-sub">
@@ -747,6 +786,109 @@
 })();
 </script>
 <script src="/shared/superadmin-estudios.js"></script>
+<script>
+/* Informe imprimible para comprobar datos (ver GET /api/superadmin/informe). */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function esc(v){ return String(v == null ? "" : v).replace(/[&<>"']/g, function(c){ return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]; }); }
+  function fecha(iso){ return iso ? new Date(iso).toLocaleDateString("es-ES") : "—"; }
+  var NOMBRES_PERMISOS = { fotos: "Fotos", verFicha: "Ver ficha", adjuntos: "Adjuntos", verRebajesRefuerzos: "Rebajes/refuerzos" };
+
+  function construir(d, o){
+    var h = [];
+    var filtro = (d.filtros.compania ? d.filtros.compania + "ª Compañía" : "Todas las compañías") +
+      (d.filtros.seccion ? " · Sección " + d.filtros.seccion : "");
+    h.push('<header><h1>CEFOT-2 · Datos de comprobación</h1><div class="meta">' + esc(filtro) +
+      ' · Generado el ' + esc(new Date(d.generado).toLocaleString("es-ES")) + ' por ' + esc(d.por) + '</div>' +
+      '<div class="aviso">Documento con datos personales: custodiar y destruir cuando deje de ser necesario. ' +
+      'Los usuarios que son DNI/NIE aparecen codificados' + (d.filtros.codificarTodos ? ' (y también el resto)' : '') + '. ' +
+      'Las contraseñas no figuran: el sistema no las guarda legibles; si alguien la olvida, se le asigna una nueva.</div></header>');
+
+    if (o.sa && d.superAdmins.length){
+      h.push('<h2>Súper Administradores</h2><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Alta</th></tr></thead><tbody>' +
+        d.superAdmins.map(function(u){ return '<tr><td>' + esc(u.nombre) + '</td><td class="mono">' + esc(u.usuario) + '</td><td>' + fecha(u.alta) + '</td></tr>'; }).join("") + '</tbody></table>');
+    }
+    if (o.estudios && d.jefesEstudios.length){
+      h.push('<h2>Jefes de estudios</h2><table><thead><tr><th>Nombre</th><th>Usuario</th><th>Alta</th></tr></thead><tbody>' +
+        d.jefesEstudios.map(function(u){ return '<tr><td>' + esc(u.nombre) + '</td><td class="mono">' + esc(u.usuario) + '</td><td>' + fecha(u.alta) + '</td></tr>'; }).join("") + '</tbody></table>');
+    }
+    if (o.capitanes){
+      h.push('<h2>Capitanes de compañía</h2>' + (d.capitanes.length
+        ? '<table><thead><tr><th>Compañía</th><th>Nombre</th><th>Usuario</th><th>Alta</th></tr></thead><tbody>' +
+          d.capitanes.map(function(c){ return '<tr><td>' + c.compania + 'ª</td><td>' + esc(c.nombre) + '</td><td class="mono">' + esc(c.usuario) + '</td><td>' + fecha(c.alta) + '</td></tr>'; }).join("") + '</tbody></table>'
+        : '<p class="vacio">Ningún capitán dado de alta.</p>'));
+    }
+
+    if (!d.secciones.length){
+      h.push('<h2>Secciones</h2><p class="vacio">No hay secciones con estos filtros.</p>');
+    }
+    var ciaActual = null;
+    d.secciones.forEach(function(sec){
+      if (sec.compania !== ciaActual){ ciaActual = sec.compania; h.push('<h2 class="cia">' + sec.compania + 'ª Compañía</h2>'); }
+      h.push('<section><h3>' + esc(sec.nombre) + ' <span class="id">(' + esc(sec.id) + ')</span></h3>');
+      if (o.cifras){
+        var c = sec.cifras;
+        h.push('<div class="cifras">Alumnos: <b>' + c.alumnos + '</b> · Bajas: <b>' + c.bajas + '</b> · Sanciones: <b>' + c.sanciones +
+          '</b> · Rebajes: <b>' + c.rebajes + '</b> · Refuerzos: <b>' + c.refuerzos + '</b> · Actividades: <b>' + c.actividades + '</b></div>');
+      }
+      if (o.usuarios){
+        var jefes = sec.usuarios.filter(function(u){ return u.rol === "Jefe de sección"; });
+        var pel = sec.usuarios.filter(function(u){ return u.rol === "Jefe de pelotón"; });
+        h.push('<table><thead><tr><th>Cargo</th><th>Nombre</th><th>Usuario</th>' + (o.permisos ? '<th>Permisos extra</th>' : '') + '<th>Alta</th></tr></thead><tbody>' +
+          jefes.concat(pel).map(function(u){
+            var perm = u.permisos ? Object.keys(NOMBRES_PERMISOS).filter(function(k){ return u.permisos[k]; }).map(function(k){ return NOMBRES_PERMISOS[k]; }).join(", ") : "";
+            return '<tr><td>' + esc(u.rol) + (u.superAdmin ? ' <span class="sa">+ Súper Admin</span>' : '') + '</td><td>' + esc(u.nombre) + '</td><td class="mono">' + esc(u.usuario) + '</td>' +
+              (o.permisos ? '<td>' + (u.permisos ? esc(perm || "Solo partes") : "—") + '</td>' : '') + '<td>' + fecha(u.alta) + '</td></tr>';
+          }).join("") + '</tbody></table>' +
+          '<div class="total">' + jefes.length + ' jefe(s) de sección · ' + pel.length + ' jefe(s) de pelotón</div>');
+      }
+      if (o.alumnos && sec.alumnos){
+        h.push('<h4>Alumnos (' + sec.alumnos.length + ')</h4>' + (sec.alumnos.length
+          ? '<table class="compacta"><thead><tr><th>Número</th><th>Apellidos</th><th>Nombre</th><th>Pelotón</th></tr></thead><tbody>' +
+            sec.alumnos.map(function(a){ return '<tr><td class="mono">' + esc(a.numero) + '</td><td>' + esc([a.ape1, a.ape2].filter(Boolean).join(" ")) + '</td><td>' + esc(a.nombre) + '</td><td>' + esc(a.peloton) + '</td></tr>'; }).join("") + '</tbody></table>'
+          : '<p class="vacio">Sin alumnos.</p>'));
+      }
+      h.push('</section>');
+    });
+
+    var css = '@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font:11pt/1.4 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#111;margin:0;padding:16px}' +
+      'h1{font-size:16pt;margin:0 0 4px}h2{font-size:13pt;margin:18px 0 6px;border-bottom:2px solid #333;padding-bottom:2px}h2.cia{margin-top:24px}' +
+      'h3{font-size:11.5pt;margin:12px 0 4px}h4{font-size:10.5pt;margin:8px 0 4px}.id{color:#666;font-weight:400}' +
+      '.meta{color:#444;font-size:10pt}.aviso{margin-top:8px;padding:6px 8px;border:1px solid #999;font-size:9pt;background:#f4f4f4}' +
+      'table{width:100%;border-collapse:collapse;margin:4px 0;font-size:10pt}th,td{border:1px solid #bbb;padding:3px 6px;text-align:left;vertical-align:top}' +
+      'th{background:#eee;font-size:9pt}table.compacta{font-size:9pt}.mono{font-family:ui-monospace,Consolas,monospace}' +
+      '.cifras,.total{font-size:9.5pt;color:#333;margin:2px 0 4px}.vacio{color:#666;font-style:italic}.sa{font-size:8.5pt;color:#555}' +
+      'section{break-inside:avoid-page}thead{display:table-header-group}tr{break-inside:avoid}' +
+      '.barra{position:sticky;top:0;background:#fff;padding:8px 0 10px;margin-bottom:8px;border-bottom:1px solid #ddd;display:flex;gap:8px}' +
+      '.barra button{font:inherit;padding:6px 14px;cursor:pointer}@media print{.barra{display:none}body{padding:0}}';
+    return '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>CEFOT-2 · Datos de comprobación</title><style>' + css + '</style></head><body>' +
+      '<div class="barra"><button onclick="window.print()">Imprimir / Guardar PDF</button><button onclick="window.close()">Cerrar</button></div>' +
+      h.join("") + '</body></html>';
+  }
+
+  $("informeBtn").onclick = function(){
+    var msg = $("informeMsg"); msg.className = "form-msg"; msg.textContent = "Preparando…";
+    var o = {
+      usuarios: $("informeUsuarios").checked, permisos: $("informePermisos").checked, cifras: $("informeCifras").checked,
+      capitanes: $("informeCapitanes").checked, estudios: $("informeEstudios").checked, sa: $("informeSA").checked,
+      alumnos: $("informeAlumnos").checked
+    };
+    // La ventana se abre ANTES de pedir los datos para que el navegador no la bloquee.
+    var w = window.open("", "_blank");
+    if (!w){ msg.className = "form-msg error"; msg.textContent = "El navegador ha bloqueado la ventana. Permite las ventanas emergentes para esta página."; return; }
+    w.document.write("<p style='font-family:system-ui;padding:16px'>Preparando el informe…</p>");
+    var qs = "compania=" + encodeURIComponent($("informeCia").value) + "&seccion=" + encodeURIComponent($("informeSec").value) +
+      "&alumnos=" + (o.alumnos ? "1" : "0") + "&codificarTodos=" + ($("informeCodificarTodos").checked ? "1" : "0");
+    fetch("/api/superadmin/informe?" + qs).then(function(r){ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }).then(function(d){
+      w.document.open(); w.document.write(construir(d, o)); w.document.close();
+      msg.className = "form-msg ok"; msg.textContent = "Informe abierto en una ventana nueva.";
+      setTimeout(function(){ try { w.focus(); w.print(); } catch(e){} }, 400);
+    }).catch(function(){
+      w.close(); msg.className = "form-msg error"; msg.textContent = "No se ha podido generar el informe. Vuelve a intentarlo.";
+    });
+  };
+})();
+</script>
 <script>
 /* Nuevo curso: reinicio total (ver POST /api/superadmin/reinicio). */
 (function(){

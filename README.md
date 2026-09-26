@@ -179,6 +179,21 @@ contraseñas. Sirve como respaldo y para cargarlo en el HTML local
 (`legado/seccion3.html`) con «Importar copia del servidor (añadir)», que solo
 añade lo que falte y nunca sustituye ni borra nada (ver `legado/LEEME.md`).
 
+### Imprimir datos para comprobar (Súper Administrador)
+
+En el panel del Súper Administrador, **«Imprimir datos para comprobar»** abre
+una hoja lista para imprimir o guardar en PDF. Se elige la compañía y/o
+sección y qué incluir: jefes de sección y de pelotón (con sus permisos),
+cifras de cada sección, capitanes, jefes de estudios, Súper Administradores
+y, opcionalmente, el listado de alumnos (número, apellidos, nombre y
+pelotón; sin DNI ni teléfono).
+
+Los usuarios que son un DNI o NIE salen siempre **codificados** (solo los 3
+últimos caracteres), y hay una opción para codificar también el resto. Las
+contraseñas no aparecen: el sistema solo guarda su huella cifrada, no la
+contraseña, así que no se pueden imprimir; si alguien la olvida, se le
+asigna una nueva.
+
 ### Nuevo curso: borrar todo y empezar de cero (Súper Administrador)
 
 Al final del panel del Súper Administrador está **«Nuevo curso académico:

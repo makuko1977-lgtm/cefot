@@ -426,4 +426,71 @@ router.post("/reinicio", auth.requireAuth, auth.requireSuperAdmin, async functio
   res.json({ ok: true, registro: registro });
 });
 
+// ---------------- informe imprimible para comprobar datos ----------------
+// Devuelve, filtrado por compañía y/o sección, las cuentas de acceso (jefes
+// de sección, jefes de pelotón con sus permisos, capitanes, jefes de
+// estudios y Súper Administradores), las cifras de cada sección y, si se
+// pide, el listado de alumnos (sin DNI ni teléfono). Los usuarios que son un
+// DNI/NIE salen SIEMPRE codificados desde el servidor (solo los 3 últimos
+// caracteres), por si se pierde el papel; con ?codificarTodos=1 se codifican
+// también los demás. Las contraseñas no se incluyen: el sistema no las
+// guarda legibles (solo su huella cifrada), así que no existen para imprimir.
+
+function pareceDni(v){
+  const s = auth.normalizeDni(v);
+  return /^[0-9]{7,8}[A-Z]?$/.test(s) || /^[XYZ][0-9]{7}[A-Z]$/.test(s);
+}
+
+router.get("/informe", auth.requireAuth, auth.requireSuperAdmin, function (req, res){
+  const q = req.query || {};
+  const cia = parseInt(q.compania, 10) || null;
+  const sec = parseInt(q.seccion, 10) || null;
+  const codificarTodos = q.codificarTodos === "1";
+  const conAlumnos = q.alumnos === "1";
+  function usuario(dni){ return (codificarTodos || pareceDni(dni)) ? auth.maskDni(dni) : auth.normalizeDni(dni); }
+
+  const secciones = Object.keys(db.data.tenants).map(function (k){ return { id: k, t: db.data.tenants[k] }; })
+    .filter(function (x){ return (!cia || Number(x.t.compania) === cia) && (!sec || Number(x.t.seccion) === sec); })
+    .sort(function (a, b){ return (a.t.compania - b.t.compania) || (a.t.seccion - b.t.seccion); })
+    .map(function (x){
+      const t = x.t;
+      const usuarios = (t.users || []).map(function (u){
+        return {
+          usuario: usuario(u.dni), nombre: u.nombre,
+          rol: u.role === "admin" ? "Jefe de sección" : "Jefe de pelotón",
+          superAdmin: u.superAdmin === true,
+          permisos: u.role === "instructor" ? auth.normalizePermisos(u.permisos) : null,
+          alta: u.createdAt || null
+        };
+      }).sort(function (a, b){ return (a.rol === b.rol ? 0 : (a.rol === "Jefe de sección" ? -1 : 1)) || String(a.nombre).localeCompare(String(b.nombre), "es"); });
+      const out = {
+        id: x.id, compania: t.compania, seccion: t.seccion, nombre: t.nombre,
+        usuarios: usuarios,
+        cifras: {
+          alumnos: (t.roster || []).length, bajas: (t.bajas || []).length,
+          sanciones: (t.sanciones || []).length, rebajes: (t.rebajes || []).length,
+          refuerzos: (t.refuerzos || []).length, actividades: (t.actividades || []).length
+        }
+      };
+      if (conAlumnos){
+        out.alumnos = (t.roster || []).map(function (a){
+          return { numero: a.numero, ape1: a.ape1, ape2: a.ape2, nombre: a.nombre, peloton: a.peloton };
+        }).sort(function (a, b){ return String(a.numero).localeCompare(String(b.numero), "es", { numeric: true }); });
+      }
+      return out;
+    });
+
+  res.json({
+    generado: new Date().toISOString(),
+    por: req.user.nombre,
+    filtros: { compania: cia, seccion: sec, codificarTodos: codificarTodos, alumnos: conAlumnos },
+    secciones: secciones,
+    capitanes: (db.data.capitanes || []).filter(function (c){ return !cia || Number(c.compania) === cia; })
+      .sort(function (a, b){ return a.compania - b.compania; })
+      .map(function (c){ return { usuario: usuario(c.dni), nombre: c.nombre, compania: c.compania, alta: c.createdAt || null }; }),
+    jefesEstudios: (db.data.jefesEstudios || []).map(function (j){ return { usuario: usuario(j.dni), nombre: j.nombre, alta: j.createdAt || null }; }),
+    superAdmins: (db.data.superAdmins || []).map(function (u){ return { usuario: usuario(u.dni), nombre: u.nombre, alta: u.createdAt || null }; })
+  });
+});
+
 module.exports = router;
