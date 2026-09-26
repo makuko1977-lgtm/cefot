@@ -179,6 +179,21 @@ contraseñas. Sirve como respaldo y para cargarlo en el HTML local
 (`legado/seccion3.html`) con «Importar copia del servidor (añadir)», que solo
 añade lo que falte y nunca sustituye ni borra nada (ver `legado/LEEME.md`).
 
+### Arrestos al capitán de compañía
+
+Una sanción con medida **Arresto** llega al capitán de su compañía al
+guardarla el jefe de sección (o el capitán dentro de la sección) o, si la
+pone un jefe de pelotón, cuando el jefe de sección la ratifica con
+«Guardar medida». El capitán la ve en su pantalla principal, en la ventana
+**«Arrestos para dar curso administrativo»**, con los datos del parte, los
+alumnos y sus antecedentes (qué número de arresto es y sanciones
+anteriores). Desde ahí consulta el historial del alumno, puede buscar
+cualquier alumno por su nº de protocolo, filtra su historial de arrestos y
+los marca como tramitados. El jefe de sección ve en su listado «Enviado al
+capitán» o «Tramitado por el capitán». El estado se guarda en la propia
+sanción: nada se duplica. Los documentos se rellenarán cuando se incorporen
+las plantillas.
+
 ### Imprimir datos para comprobar (Súper Administrador)
 
 En el panel del Súper Administrador, **«Imprimir datos para comprobar»** abre

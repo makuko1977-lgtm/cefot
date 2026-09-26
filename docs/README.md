@@ -1,6 +1,6 @@
 # Documentación de Sección 3
 
-- **[Manual de usuario (PDF)](Manual_usuario_CEFOT2.pdf)** — jefe de sección, jefe de pelotón, capitán de compañía y jefe de estudios; índice con enlaces (26/09/2026)
+- **[Manual de usuario (PDF)](Manual_usuario_CEFOT2.pdf)** — jefe de sección, jefe de pelotón, capitán de compañía (incluidos los arrestos) y jefe de estudios; índice con enlaces (26/09/2026)
 
 - [CHANGELOG](CHANGELOG_seccion3.md) — actualizado 09/09/2026
 - [Manual](MANUAL_seccion3.md) — actualizado 09/09/2026
