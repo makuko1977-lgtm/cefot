@@ -20,9 +20,10 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
 
 | Archivo | Qué hace |
 |---|---|
-| `capturar.js` | Recorre el servidor de demostración con Playwright y guarda, para cada paso, la captura (JPEG) y el recuadro del elemento a pulsar. Escribe `demos.json`. |
+| `capturar.js` | Recorre el servidor de demostración con Playwright y guarda, para cada paso, la captura (JPEG) y el recuadro del elemento a pulsar. Escribe `demos.json`. Con `SOLO=demo1,demo2` graba solo esas y conserva las demás. |
+| `revisar.js` | Hoja de revisión: una imagen por demo con todos los pasos, la zona roja y el texto (`revision_<demo>.png`). |
 | `plantilla.html` | La página del manual. Marcas: `/*APPCSS*/`, `/*DEMOS*/`, `/*IMAGENES*/`. Contiene la lista `ROLES` (roles → grupos → apartados). |
-| `construir.py` | Sustituye las marcas: mete `public/shared/app.css` (estilos del servidor), `demos.json` y las imágenes como data: URI. |
+| `construir.py` | Sustituye las marcas: mete `public/shared/app.css` (estilos del servidor), `demos.json` y las imágenes como data: URI, convertidas a **WebP calidad 75** si está Pillow (`pip install pillow`; `WEBP_CALIDAD=0` deja los JPEG). |
 | `comprobar.js` | Abre el HTML en tema oscuro a 1280 y 400 px: comprueba errores JS y desbordamiento lateral y deja capturas. |
 
 ## Procedimiento
@@ -41,7 +42,11 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
    ```bash
    NODE_PATH=$(npm root -g) node .claude/skills/manual-interactivo/scripts/capturar.js manual-interactivo-build
    ```
-   Las capturas cambian datos del servidor: vuelve a `--reset` antes de repetir.
+   Las capturas cambian datos del servidor y unas demos preparan datos para
+   otras (el orden de la lista `DEMOS` importa): para una grabación completa,
+   `--reset` antes. Para repetir una sola: `SOLO=nombre` (revisa antes que
+   los datos que necesita siguen ahí). Revisar:
+   `node .claude/skills/manual-interactivo/scripts/revisar.js manual-interactivo-build [demo]`.
 3. **Montar**:
    ```bash
    python3 .claude/skills/manual-interactivo/scripts/construir.py manual-interactivo-build
@@ -56,17 +61,18 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
 
 ## Añadir una demostración
 
-1. En `capturar.js`, un bloque nuevo:
+1. En `capturar.js`, un bloque nuevo (utilidades: `entrar`, `sinAvisos`,
+   `verDesde`, `arriba`, `api`; `recursos.foto` y `recursos.pdf` son una foto y
+   un PDF ficticios para subir):
    ```js
    {
-     const { p, ctx, paso, firmar } = await grabadora('capitan_arresto', false); // true = móvil 390x780
-     await p.goto(BASE + '/login.html'); ...
+   demo('capitan_arresto', false, async ({ p, paso, firmar, recursos })=>{   // true = móvil 390x780
+     await entrar(p, 'CAPITAN3');                  // o paso a paso si la demo enseña el login
      await paso('#selectorAPulsar', 'Título corto', 'Explicación con <b>negritas</b>.', {margen:6});
      await p.click('#selectorAPulsar');           // la acción real, DESPUÉS de capturar
      ...
      await paso(null, 'Fin', '¡Hecho! ...');      // último paso sin zona
-     await ctx.close();
-   }
+   });
    ```
    `paso()` captura la pantalla **antes** de la acción; la zona es el
    elemento que el usuario debe pulsar. `firmar(canvas)` dibuja una firma.
@@ -98,7 +104,8 @@ Pistas del DOM ya conocidas:
 - Fuentes Google: Public Sans, Space Grotesk, JetBrains Mono.
 - El rol elegido se recuerda en `localStorage` (siempre dentro de try/catch).
 - Debe verse bien en móvil (400 px) y en tema oscuro, sin scroll lateral.
-- Límite del artifact: 16 MB (con 2 demos ocupa ~3,6 MB; JPEG calidad 72).
+- Límite del artifact: 16 MB. Con las 21 demos (192 capturas) ocupa 23,4 MB en
+  JPEG y **12,0 MB en WebP 75** (lo que se publica).
 
 ## Normas
 
@@ -112,12 +119,19 @@ Pistas del DOM ya conocidas:
 
 ## Estado y pendientes
 
-Hechas: `peloton_parte` (16 pasos, móvil) y `seccion_sancion` (16 pasos, PC).
-Pendientes (en `ROLES` como «Próximamente»): parte múltiple, ficha y foto,
-rebajes/refuerzos del pelotón; revisar y ratificar un parte, fijar fecha de
-arresto pendiente, amonestación verbal, roster, rebajes, refuerzos,
-actividades, consultas, horas UA, jefes de pelotón y permisos, exportar copia
-(jefe de sección); entrar en sección y volver, dar curso a un arresto,
-consulta por protocolo, historial de arrestos (capitán); estadísticas (jefe
-de estudios). Los botones «Rellenar documentos/Imprimir» del capitán siguen
-desactivados hasta que el usuario entregue las plantillas de arresto.
+Hechas las 21 demostraciones (ninguna «Próximamente»), en este orden de grabación:
+`peloton_parte`, `peloton_multiple`, `peloton_ficha`, `seccion_revisar`,
+`seccion_sancion` (arresto al 33018, su 3.er arresto), `seccion_fijar_fecha`
+(el arresto pendiente del 33007 ratificado en `seccion_revisar`),
+`seccion_amonestacion` (parte del 33012 de `peloton_parte`), `seccion_roster`,
+`seccion_rebajes`, `seccion_refuerzos`, `seccion_actividades`, `seccion_consultas`,
+`seccion_horasua`, `seccion_usuarios`, `seccion_exportar` (importa la copia en
+`legado/seccion3.html`), `capitan_entrar`, `capitan_arresto`, `capitan_protocolo`,
+`capitan_historial`, `estudios_estadisticas`, `peloton_rebref`.
+
+Detalles: en las demos del capitán la ventana `#cap-arrestos` se deja en su
+sitio (`position:static`) al desplazarse, porque al ser fija tapa la pantalla.
+El cuadro de confirmación de la importación local es un `confirm()` del
+navegador (no sale en la captura): su texto real se copia en la explicación.
+Los botones «Rellenar documentos/Imprimir» del capitán siguen desactivados
+hasta que el usuario entregue las plantillas de arresto.

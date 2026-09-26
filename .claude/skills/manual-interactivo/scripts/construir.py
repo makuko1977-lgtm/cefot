@@ -6,8 +6,24 @@ Uso:  python3 construir.py <carpeta_capturas> [salida.html]
 - Inserta public/shared/app.css (los estilos del servidor) en /*APPCSS*/.
 - Inserta demos.json en /*DEMOS*/.
 - Inserta cada imagen de los pasos como data: URI en /*IMAGENES*/.
+  Si está Pillow (pip install pillow), las convierte a WebP (calidad
+  WEBP_CALIDAD, por defecto 75): ocupan ~50 % menos que el JPEG original.
+  Sin Pillow se insertan los JPEG tal cual.
 """
-import base64, json, os, sys
+import base64, io, json, os, sys
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+CALIDAD = int(os.environ.get("WEBP_CALIDAD", "75"))
+
+def data_uri(ruta):
+    if Image is not None and CALIDAD > 0:
+        b = io.BytesIO()
+        Image.open(ruta).save(b, "WEBP", quality=CALIDAD, method=6)
+        return "data:image/webp;base64," + base64.b64encode(b.getvalue()).decode()
+    tipo = "image/png" if ruta.endswith(".png") else "image/jpeg"
+    return "data:%s;base64,%s" % (tipo, base64.b64encode(open(ruta, "rb").read()).decode())
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(AQUI, "..", "..", "..", ".."))
@@ -26,9 +42,7 @@ def main():
     imagenes = {}
     for d in demos.values():
         for p in d["pasos"]:
-            ruta = os.path.join(capturas, p["img"])
-            tipo = "image/png" if ruta.endswith(".png") else "image/jpeg"
-            imagenes[p["img"]] = "data:%s;base64,%s" % (tipo, base64.b64encode(open(ruta, "rb").read()).decode())
+            imagenes[p["img"]] = data_uri(os.path.join(capturas, p["img"]))
     for marca in ("/*APPCSS*/", "/*DEMOS*/", "/*IMAGENES*/"):
         if marca not in plantilla:
             sys.exit("Falta la marca %s en plantilla.html" % marca)
@@ -37,7 +51,8 @@ def main():
                      .replace("/*IMAGENES*/", json.dumps(imagenes)))
     open(salida, "w", encoding="utf-8").write(html)
     mb = os.path.getsize(salida) / 1e6
-    print("Escrito %s (%.1f MB, %d demos, %d imágenes)" % (salida, mb, len(demos), len(imagenes)))
+    formato = ("WebP calidad %d" % CALIDAD) if (Image is not None and CALIDAD > 0) else "JPEG original"
+    print("Escrito %s (%.1f MB, %d demos, %d imágenes, %s)" % (salida, mb, len(demos), len(imagenes), formato))
     if mb > 15:
         print("AVISO: supera ~15 MB; un artifact admite 16 MB como máximo. Baja la calidad JPEG o divide el manual.")
 
