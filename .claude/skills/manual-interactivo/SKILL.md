@@ -133,5 +133,11 @@ Detalles: en las demos del capitán la ventana `#cap-arrestos` se deja en su
 sitio (`position:static`) al desplazarse, porque al ser fija tapa la pantalla.
 El cuadro de confirmación de la importación local es un `confirm()` del
 navegador (no sale en la captura): su texto real se copia en la explicación.
-Los botones «Rellenar documentos/Imprimir» del capitán siguen desactivados
-hasta que el usuario entregue las plantillas de arresto.
+Versión completa publicada (sin la franja «Muestra para revisar»; la cabecera
+indica «datos ficticios»).
+
+**Pendiente:** «Rellenar e imprimir los documentos del arresto» (capitán)
+figura como «Próximamente» en el grupo «Pendiente de las plantillas». Los
+botones «Rellenar documentos/Imprimir» del capitán siguen desactivados hasta
+que el usuario entregue las plantillas de arresto; cuando existan, grabar la
+demo (`capitan_documentos`), darle `id` y `ref` en `ROLES` y republicar.
