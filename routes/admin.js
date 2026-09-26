@@ -196,6 +196,7 @@ router.post("/usuarios", auth.requireAuth, auth.requireRole("admin"), auth.block
   // crear otro jefe de sección ni, por supuesto, un Súper Administrador.
   // Eso es tarea exclusiva del panel del Súper Administrador.
   const role = "instructor";
+  if (auth.dniReservado(dni)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
 
   if (!dni || !nombre || password.length < 6){
     return res.status(400).json({ error: "DNI, nombre y una contraseña de al menos 6 caracteres son obligatorios." });

@@ -35,6 +35,7 @@ router.post("/jefes", auth.requireAuth, auth.requireSuperAdmin, function (req, r
   const nombre = String((req.body && req.body.nombre) || "").trim();
   const password = String((req.body && req.body.password) || "");
   if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+  if (auth.dniReservado(parsed.value)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
   if (!nombre || password.length < 6){
     return res.status(400).json({ error: "Nombre y una contraseña de al menos 6 caracteres son obligatorios." });
   }
@@ -68,6 +69,7 @@ router.patch("/jefes/:dni", auth.requireAuth, auth.requireSuperAdmin, function (
   if (b.dni && auth.normalizeDni(b.dni) !== jefe.dni){
     const parsed = auth.parseUsuario(b.dni);
     if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+    if (auth.dniReservado(parsed.value)) return res.status(400).json({ error: "Ese identificador está reservado; elige otro." });
     if (db.findUserGlobal(parsed.value)){
       return res.status(409).json({ error: "Ya existe un usuario con ese identificador." });
     }

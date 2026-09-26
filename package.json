@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node lib/seed.js",
-    "demo": "node lib/demo.js"
+    "demo": "node lib/demo.js",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

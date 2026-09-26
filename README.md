@@ -282,9 +282,9 @@ asignado.
 ```
 cefot/
 ├── server.js                 Arranque del servidor y montaje de rutas
-├── package.json              Dependencias y scripts (start, seed, demo)
+├── package.json              Dependencias y scripts (start, seed, demo, test)
 ├── .env.example              Variables de entorno (DATABASE_URL, TRUST_PROXY...)
-├── cefot-pasos-1-y-2.patch   Correcciones de seguridad pendientes de aplicar
+├── cefot-pasos-1-y-2.patch   Parte 1 ya aplicada; parte 2 (pantalla del jefe de sección) sin aplicar
 ├── lib/
 │   ├── db.js                 Almacén: fichero (data/data.json) o Postgres si hay DATABASE_URL
 │   ├── auth.js               Autenticación (JWT en cookie) y contraseñas
@@ -294,6 +294,7 @@ cefot/
 │   ├── seed.js               Crear o reparar un Súper Administrador por consola
 │   └── demo.js               Servidor de demostración con datos ficticios
 ├── routes/                   Endpoints de la API (15 archivos)
+├── tests/                    Pruebas automáticas de seguridad (npm test)
 ├── public/
 │   ├── index.html            Portada (modo servidor / modo local)
 │   ├── login.html            Pantalla de acceso
