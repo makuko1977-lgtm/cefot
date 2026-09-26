@@ -191,7 +191,8 @@ Para evitar errores exige, por este orden: descargar la copia completa
 (`CEFOT2_copia_completa_<fecha>.json`, sin contraseñas), escribir
 «BORRAR TODO» y la contraseña del Súper Administrador, y una última
 confirmación. Queda un historial (fecha, quién y cuántos registros se
-borraron, sin datos personales). No se puede deshacer.
+borraron, sin datos personales). No se puede deshacer. La copia completa se
+puede cargar en el HTML local eligiendo la sección (solo añade).
 
 ### Cerrar curso académico
 

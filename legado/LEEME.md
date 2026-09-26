@@ -19,6 +19,11 @@ La importación **solo añade** lo que todavía no existe en el HTML local
 identificador interno). **Nunca sustituye ni borra** nada. Se puede importar
 la misma copia varias veces sin duplicar registros.
 
+También se puede cargar, con el mismo botón, la **copia completa** que descarga
+el Súper Administrador antes de borrar todo para un curso nuevo
+(`CEFOT2_copia_completa_<fecha>.json`): el HTML local pregunta qué sección
+importar (propone la suya) y la añade igual, sin sustituir nada.
+
 Avisos:
 
 - Si una sanción del servidor trae un **número de expediente** que en local ya

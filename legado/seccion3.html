@@ -1407,7 +1407,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button class="btn ghost" id="uploadImportBackupBtn" type="button">Importar copia de seguridad…</button>
       </div>
       <div class="hint" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border);">
-        ¿Has exportado una copia desde el servidor (botón «Exportar copia»)? Impórtala aquí: se AÑADE lo que aún no
+        ¿Has exportado una copia desde el servidor (botón «Exportar copia», o la copia completa del Súper
+        Administrador, de la que eliges la sección)? Impórtala aquí: se AÑADE lo que aún no
         tengas en este dispositivo (alumnos, bajas, rebajes, sanciones, refuerzos, actividades y fechas de
         Horas UA). Nunca sustituye ni borra lo que ya tienes cargado.
       </div>
@@ -3708,7 +3709,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
       // Si es una copia exportada desde el SERVIDOR, se pasa a su
       // importación (también aditiva) en vez de rechazarla.
-      if (data && typeof data.exportedAt === "string" && Array.isArray(data.roster)){
+      if (data && ((typeof data.exportedAt === "string" && Array.isArray(data.roster)) || data.tipo === "cefot2_copia_completa")){
         try {
           var dt = new DataTransfer();
           dt.items.add(file);
@@ -3914,6 +3915,36 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       } catch(err){
         alert("Ese archivo no es una copia de seguridad válida (no es JSON).");
         return;
+      }
+
+      // Copia COMPLETA del Súper Administrador (todas las secciones en un
+      // solo archivo): se pregunta qué sección importar y se sigue igual que
+      // con la copia de una sección (solo añade, nunca sustituye).
+      if (data && data.tipo === "cefot2_copia_completa" && data.secciones && typeof data.secciones === "object"){
+        var idsSecciones = Object.keys(data.secciones).sort();
+        if (!idsSecciones.length){
+          alert("Esta copia completa no contiene ninguna sección.");
+          return;
+        }
+        var propia = currentSeccionInfo ? (currentSeccionInfo.company + "-" + currentSeccionInfo.section) : "";
+        var porDefecto = Math.max(0, idsSecciones.indexOf(propia)) + 1;
+        var lista = idsSecciones.map(function(id, i){
+          var sec = data.secciones[id] || {};
+          var nombreSec = (sec.seccion && sec.seccion.nombre) || id;
+          return (i + 1) + ") " + nombreSec + " — " + ((sec.roster || []).length) + " alumnos, " + ((sec.sanciones || []).length) + " sanciones";
+        }).join("\n");
+        var respuesta = prompt(
+          "Esta es una COPIA COMPLETA con " + idsSecciones.length + " sección(es).\n" +
+          "Escribe el número de la sección que quieres importar en este HTML:\n\n" + lista,
+          String(porDefecto)
+        );
+        if (respuesta === null) return;
+        var idx = parseInt(respuesta, 10) - 1;
+        if (isNaN(idx) || idx < 0 || idx >= idsSecciones.length){
+          alert("Número no válido. No se ha importado nada.");
+          return;
+        }
+        data = data.secciones[idsSecciones[idx]];
       }
 
       var esFormatoServidor = !!data && typeof data.exportedAt === "string" && Array.isArray(data.roster);
