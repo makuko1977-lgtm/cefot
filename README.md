@@ -172,10 +172,12 @@ corresponde según su rol.
 
 ## 5. Copia de seguridad
 
-Desde Admin puedes descargar en cualquier momento un archivo JSON con todo
-el contenido actual (roster, sanciones, rebajes, refuerzos) desde
-`GET /api/admin/backup`. Consérvalo periódicamente como respaldo; no incluye
-contraseñas.
+En `admin.html`, el botón **«Exportar copia»** descarga en cualquier momento
+un archivo JSON con todo el contenido de la sección (roster, bajas,
+sanciones, rebajes, refuerzos, actividades y horas UA). No incluye
+contraseñas. Sirve como respaldo y para cargarlo en el HTML local
+(`legado/seccion3.html`) con «Importar copia del servidor (añadir)», que solo
+añade lo que falte y nunca sustituye ni borra nada (ver `legado/LEEME.md`).
 
 ### Cerrar curso académico
 
@@ -289,7 +291,6 @@ cefot/
 │   ├── auth.js               Autenticación (JWT en cookie) y contraseñas
 │   ├── avisos.js             Avisos de partes de pelotón al jefe de sección
 │   ├── estadisticas.js       Estadísticas agregadas (jefe de estudios)
-│   ├── mailer.js             Envío de la copia de seguridad por correo
 │   ├── seed.js               Crear o reparar un Súper Administrador por consola
 │   └── demo.js               Servidor de demostración con datos ficticios
 ├── routes/                   Endpoints de la API (15 archivos)

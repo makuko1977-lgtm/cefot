@@ -1,17 +1,8 @@
 const express = require("express");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
-const mailer = require("../lib/mailer");
 
 const router = express.Router();
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAX_CONTACTOS = 15;
-const MAX_ENVIOS_HISTORIAL = 20;
-
-function normalizarEmail(raw){
-  return String(raw || "").trim().toLowerCase();
-}
 
 function publicUser(u){
   return {
@@ -23,104 +14,16 @@ function publicUser(u){
   };
 }
 
-// Copia de seguridad de solo lectura: descarga todo el contenido actual de
-// ESTA sección (roster, bajas, sanciones, rebajes, refuerzos, actividades y
-// horas UA) en un único JSON. No incluye contraseñas.
+// Exportar copia: descarga todo el contenido actual de ESTA sección
+// (roster, bajas, sanciones, rebajes, refuerzos, actividades y horas UA) en
+// un único JSON, listo para cargarlo en el HTML local con «Importar copia
+// del servidor (añadir)», que solo añade lo que falte. No incluye contraseñas.
 router.get("/backup", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   const snapshot = db.buildBackupSnapshot(req.db);
-  res.setHeader("Content-Disposition", "attachment; filename=cefot2_copia_seguridad.json");
+  const fecha = snapshot.exportedAt.slice(0, 10);
+  const nombre = "CEFOT2_copia_" + req.db.compania + "-" + req.db.seccion + "_" + fecha + ".json";
+  res.setHeader("Content-Disposition", 'attachment; filename="' + nombre + '"');
   res.json(snapshot);
-});
-
-// ---------------- copia de seguridad por email ----------------
-
-// Direcciones guardadas ("filtro") para no tener que volver a teclearlas
-// cada vez que se envía la copia de seguridad, más el historial reciente de
-// envíos (para trazabilidad: son datos personales de los alumnos).
-router.get("/backup-contactos", auth.requireAuth, auth.requireRole("admin"), function (req, res){
-  db.ensureBackupShape(req.db);
-  res.json({ contactos: req.db.backupContactos, envios: req.db.backupEnvios });
-});
-
-router.post("/backup-contactos", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
-  db.ensureBackupShape(req.db);
-  const email = normalizarEmail(req.body && req.body.email);
-  if (!EMAIL_RE.test(email)){
-    return res.status(400).json({ error: "Dirección de correo no válida." });
-  }
-  const yaExiste = req.db.backupContactos.some(function (c){ return c.email === email; });
-  if (!yaExiste){
-    if (req.db.backupContactos.length >= MAX_CONTACTOS){
-      return res.status(400).json({ error: "Ya hay " + MAX_CONTACTOS + " direcciones guardadas; elimina alguna antes de añadir otra." });
-    }
-    req.db.backupContactos.push({ email: email, addedAt: new Date().toISOString() });
-    db.save();
-  }
-  res.status(201).json({ ok: true, contactos: req.db.backupContactos });
-});
-
-router.delete("/backup-contactos/:email", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
-  db.ensureBackupShape(req.db);
-  const email = normalizarEmail(decodeURIComponent(req.params.email));
-  const before = req.db.backupContactos.length;
-  req.db.backupContactos = req.db.backupContactos.filter(function (c){ return c.email !== email; });
-  if (req.db.backupContactos.length !== before) db.save();
-  res.json({ ok: true, contactos: req.db.backupContactos });
-});
-
-// Genera la copia de seguridad ampliada y la envía por correo a UNA
-// dirección. Si `guardarContacto` es verdadero (o si es la única vez que se
-// usa esa dirección) se guarda además como contacto para próximos envíos.
-router.post("/backup/enviar", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, async function (req, res){
-  db.ensureBackupShape(req.db);
-  const email = normalizarEmail(req.body && req.body.email);
-  if (!EMAIL_RE.test(email)){
-    return res.status(400).json({ error: "Dirección de correo no válida." });
-  }
-  const guardarContacto = !!(req.body && req.body.guardarContacto);
-
-  const snapshot = db.buildBackupSnapshot(req.db);
-  const nombreSeccion = req.db.nombre || ("Sección " + req.db.seccion);
-  const fechaLegible = new Date().toLocaleString("es-ES");
-
-  try {
-    await mailer.enviarCopiaSeguridad({
-      to: email,
-      remitenteNombre: "CEFOT-2 · " + nombreSeccion,
-      asunto: "Copia de seguridad — " + nombreSeccion + " (" + fechaLegible + ")",
-      textoPlano:
-        "Copia de seguridad de " + nombreSeccion + ", generada el " + fechaLegible + ".\n\n" +
-        "Contiene: roster (" + snapshot.roster.length + " alumnos activos, " + snapshot.bajas.length + " de baja), " +
-        snapshot.sanciones.length + " sanciones, " + snapshot.rebajes.length + " rebajes, " +
-        snapshot.refuerzos.length + " refuerzos y " + snapshot.actividades.length + " actividades.\n\n" +
-        "Este correo contiene datos personales de los alumnos: consérvalo únicamente en un dispositivo de confianza.\n\n" +
-        "Enviado por " + req.user.nombre + " (" + req.user.dni + ") desde la aplicación CEFOT-2.",
-      adjuntoNombre: "cefot2_copia_seguridad_" + req.db.compania + "-" + req.db.seccion + ".json",
-      adjuntoJson: snapshot
-    });
-  } catch (err){
-    const mensaje = err && err.code === "SMTP_NOT_CONFIGURED"
-      ? err.message
-      : "No se ha podido enviar el correo. Comprueba la dirección y vuelve a intentarlo en unos minutos.";
-    return res.status(502).json({ error: mensaje });
-  }
-
-  const envio = {
-    fecha: new Date().toISOString(),
-    email: email,
-    enviadoPor: { dni: req.user.dni, nombre: req.user.nombre }
-  };
-  req.db.backupEnvios.unshift(envio);
-  req.db.backupEnvios = req.db.backupEnvios.slice(0, MAX_ENVIOS_HISTORIAL);
-
-  if (guardarContacto && !req.db.backupContactos.some(function (c){ return c.email === email; })){
-    if (req.db.backupContactos.length < MAX_CONTACTOS){
-      req.db.backupContactos.push({ email: email, addedAt: new Date().toISOString() });
-    }
-  }
-  db.save();
-
-  res.json({ ok: true, envio: envio, contactos: req.db.backupContactos, envios: req.db.backupEnvios });
 });
 
 // Resumen para la pantalla de "Cerrar curso": cuántos registros hay ahora

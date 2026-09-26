@@ -2300,48 +2300,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     </div>
   </div>
 
-  <!-- ---------- ENVIAR COPIA DE SEGURIDAD POR EMAIL (modal) ---------- -->
-  <div id="enviarBackupModal" class="modal-overlay hidden">
-    <div class="modal-card" style="max-width:520px;">
-      <div class="modal-header">
-        <h3>Enviar copia de seguridad por correo</h3>
-        <button type="button" class="modal-close" id="enviarBackupCloseBtn">&times;</button>
-      </div>
-
-      <div class="panel-sub" style="margin-bottom:16px;">
-        Se enviará una copia completa de los datos actuales de la sección (roster, bajas, sanciones, rebajes, refuerzos, actividades y horas UA) como archivo adjunto. Envíala solo a direcciones de confianza: el archivo contiene datos personales de los alumnos.
-      </div>
-
-      <div class="field" style="margin-bottom:10px;">
-        <label for="enviarBackupSelect">Destinatario</label>
-        <select id="enviarBackupSelect"></select>
-      </div>
-      <div id="enviarBackupContactosWrap" class="hidden" style="margin-bottom:12px;"></div>
-
-      <div id="enviarBackupNuevoWrap" class="hidden">
-        <div class="field" style="margin-bottom:10px;">
-          <label for="enviarBackupNuevoEmail">Dirección de correo</label>
-          <input type="email" id="enviarBackupNuevoEmail" autocomplete="off" placeholder="nombre@correo.com">
-        </div>
-        <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;font-size:13px;">
-          <input type="checkbox" id="enviarBackupRecordar" checked>
-          <span>Recordar esta dirección para próximos envíos</span>
-        </label>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn primary" id="enviarBackupEnviarBtn" type="button">Enviar copia</button>
-        <button class="btn ghost" id="enviarBackupCancelarBtn" type="button">Cancelar</button>
-      </div>
-      <div class="form-msg" id="enviarBackupMsg" style="margin-top:8px;"></div>
-
-      <hr style="border:none; border-top:1px solid var(--border); margin:18px 0;">
-
-      <div style="margin-bottom:8px;"><strong>Envíos recientes</strong></div>
-      <div id="enviarBackupHistorial" class="hint"></div>
-    </div>
-  </div>
-
   <footer class="info">Los datos se guardan en el servidor de la aplicación. Solo acceden los usuarios autorizados de esta sección.</footer>
 </div>
 
@@ -3458,13 +3416,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     topActions.innerHTML =
       (quien ? '<span class="meta-note" style="margin:0 6px 0 0;">' + escapeHtml(quien) + '</span>' : "") +
       (currentUser && currentUser.superAdmin ? '<button class="btn small ghost" id="superAdminBtnTop">Panel Súper Admin</button>' : "") +
-      '<button class="btn small ghost" id="exportBackupBtn">Copia de seguridad</button>' +
-      '<button class="btn small ghost" id="enviarBackupEmailBtn">Enviar por email</button>' +
+      '<button class="btn small ghost" id="exportBackupBtn" title="Descarga un archivo con todos los datos de la sección para cargarlo en el HTML local con «Importar copia del servidor (añadir)». Allí solo se añade lo que falte: nunca sustituye ni borra nada.">Exportar copia</button>' +
       '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>' +
       '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
     document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
-    document.getElementById("enviarBackupEmailBtn").addEventListener("click", abrirEnviarBackupModal);
     if (currentUser && currentUser.superAdmin){
       document.getElementById("superAdminBtnTop").addEventListener("click", function(){
         location.href = "/superadmin.html";
@@ -3487,181 +3443,42 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
   }
 
-  // ---------------- copia de seguridad (solo lectura) ----------------
-  // Ahora los datos viven en el servidor (compartidos por todos los
-  // usuarios). Este botón descarga una foto fija de todo lo que hay en
-  // este momento (roster, rebajes, sanciones, refuerzos) como archivo
-  // .json, a modo de respaldo. No hay importación desde el navegador:
-  // el servidor es la única fuente de datos.
+  // ---------------- exportar copia ----------------
+  // Descarga una foto fija de todos los datos de la sección (roster, bajas,
+  // sanciones, rebajes, refuerzos, actividades y horas UA) como archivo
+  // .json. Está pensada para cargarla en el HTML local con «Importar copia
+  // del servidor (añadir)», que solo añade lo que falte y nunca sustituye ni
+  // borra nada de lo que ya haya allí. No hay importación desde aquí: el
+  // servidor es la única fuente de datos.
   function exportBackup(){
-    window.location.href = "/api/admin/backup";
-  }
-
-  // ---------------- enviar copia de seguridad por email ----------------
-  // Complementa a exportBackup(): en vez de descargar el JSON al navegador,
-  // pide al servidor que genere la copia y la envíe por correo (routes/admin.js).
-  // Las direcciones guardadas y el historial de envíos son compartidos por
-  // toda la sección (viven en el servidor, no en este navegador).
-  var ENVIAR_BACKUP_NUEVO_VALUE = "__nuevo__";
-  var enviarBackupModal = document.getElementById("enviarBackupModal");
-  var enviarBackupCloseBtn = document.getElementById("enviarBackupCloseBtn");
-  var enviarBackupSelect = document.getElementById("enviarBackupSelect");
-  var enviarBackupContactosWrap = document.getElementById("enviarBackupContactosWrap");
-  var enviarBackupNuevoWrap = document.getElementById("enviarBackupNuevoWrap");
-  var enviarBackupNuevoEmail = document.getElementById("enviarBackupNuevoEmail");
-  var enviarBackupRecordar = document.getElementById("enviarBackupRecordar");
-  var enviarBackupEnviarBtn = document.getElementById("enviarBackupEnviarBtn");
-  var enviarBackupCancelarBtn = document.getElementById("enviarBackupCancelarBtn");
-  var enviarBackupMsg = document.getElementById("enviarBackupMsg");
-  var enviarBackupHistorial = document.getElementById("enviarBackupHistorial");
-  var ENVIAR_BACKUP_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  var enviarBackupContactosCache = [];
-
-  function enviarBackupModoNuevo(){
-    return enviarBackupSelect.value === ENVIAR_BACKUP_NUEVO_VALUE || !enviarBackupContactosCache.length;
-  }
-
-  function actualizarEnviarBackupModoNuevo(){
-    enviarBackupNuevoWrap.classList.toggle("hidden", !enviarBackupModoNuevo());
-  }
-
-  function renderEnviarBackupContactosList(){
-    var contactos = enviarBackupContactosCache;
-    if (!contactos.length){
-      enviarBackupContactosWrap.classList.add("hidden");
-      enviarBackupContactosWrap.innerHTML = "";
-      return;
-    }
-    enviarBackupContactosWrap.classList.remove("hidden");
-    enviarBackupContactosWrap.innerHTML = '<div class="hint" style="margin-bottom:4px;">Contactos guardados:</div>' +
-      contactos.map(function(c){
-        return '<span style="display:inline-flex;align-items:center;gap:4px;margin:0 8px 6px 0;font-size:12px;">' +
-          escapeHtml(c.email) +
-          ' <button type="button" class="btn small ghost enviarBackupEliminarContacto" data-email="' + escapeHtml(c.email) + '" title="Eliminar esta dirección" style="padding:0 6px;line-height:1.6;">&times;</button></span>';
-      }).join("");
-    Array.prototype.forEach.call(enviarBackupContactosWrap.querySelectorAll(".enviarBackupEliminarContacto"), function(btn){
-      btn.addEventListener("click", function(){
-        var email = btn.getAttribute("data-email");
-        btn.disabled = true;
-        fetch("/api/admin/backup-contactos/" + encodeURIComponent(email), { method: "DELETE" })
-          .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
-          .then(function(res){
-            if (!res.ok){
-              enviarBackupMsg.textContent = (res.data && res.data.error) || "No se ha podido eliminar el contacto.";
-              enviarBackupMsg.className = "form-msg error";
-              btn.disabled = false;
-              return;
-            }
-            enviarBackupContactosCache = res.data.contactos || [];
-            renderEnviarBackupSelect();
-          }).catch(function(){
-            enviarBackupMsg.textContent = "Error de conexión con el servidor.";
-            enviarBackupMsg.className = "form-msg error";
-            btn.disabled = false;
-          });
-      });
-    });
-  }
-
-  function renderEnviarBackupSelect(){
-    var contactos = enviarBackupContactosCache;
-    var html = contactos.map(function(c){
-      return '<option value="' + escapeHtml(c.email) + '">' + escapeHtml(c.email) + '</option>';
-    }).join("");
-    html += '<option value="' + ENVIAR_BACKUP_NUEVO_VALUE + '">+ Añadir nueva dirección</option>';
-    enviarBackupSelect.innerHTML = html;
-    enviarBackupSelect.disabled = false;
-    if (!contactos.length) enviarBackupSelect.value = ENVIAR_BACKUP_NUEVO_VALUE;
-    renderEnviarBackupContactosList();
-    actualizarEnviarBackupModoNuevo();
-  }
-
-  function renderEnviarBackupHistorial(envios){
-    if (!envios || !envios.length){
-      enviarBackupHistorial.textContent = "Todavía no se ha enviado ninguna copia por email.";
-      return;
-    }
-    enviarBackupHistorial.innerHTML = envios.map(function(e){
-      var quien = (e.enviadoPor && e.enviadoPor.nombre) || "";
-      return '<div style="margin-bottom:4px;">' + escapeHtml(formatFechaHora(e.fecha)) + " — " + escapeHtml(e.email) +
-        (quien ? " · enviado por " + escapeHtml(quien) : "") + "</div>";
-    }).join("");
-  }
-
-  function cargarEnviarBackupContactos(){
-    enviarBackupSelect.innerHTML = '<option value="">Cargando…</option>';
-    enviarBackupSelect.disabled = true;
-    enviarBackupContactosWrap.classList.add("hidden");
-    enviarBackupHistorial.textContent = "Cargando…";
-    fetch("/api/admin/backup-contactos").then(function(r){ return r.json(); }).then(function(data){
-      enviarBackupContactosCache = data.contactos || [];
-      renderEnviarBackupSelect();
-      renderEnviarBackupHistorial(data.envios || []);
+    var btn = document.getElementById("exportBackupBtn");
+    if (btn){ btn.disabled = true; btn.textContent = "Exportando…"; }
+    var nombre = "CEFOT2_copia_servidor.json";
+    fetch("/api/admin/backup").then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      var m = /filename="?([^";]+)"?/i.exec(r.headers.get("Content-Disposition") || "");
+      if (m) nombre = m[1];
+      return r.blob();
+    }).then(function(blob){
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = nombre;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+      if (btn){ btn.textContent = "✓ Copia exportada"; }
     }).catch(function(){
-      enviarBackupContactosCache = [];
-      renderEnviarBackupSelect();
-      enviarBackupHistorial.textContent = "No se ha podido cargar el historial de envíos.";
-      enviarBackupMsg.textContent = "No se han podido cargar los contactos guardados.";
-      enviarBackupMsg.className = "form-msg error";
+      alert("No se ha podido exportar la copia. Comprueba la conexión y vuelve a intentarlo.");
+      if (btn){ btn.textContent = "Exportar copia"; }
+    }).finally(function(){
+      if (btn){
+        btn.disabled = false;
+        setTimeout(function(){ btn.textContent = "Exportar copia"; }, 3000);
+      }
     });
   }
-
-  function abrirEnviarBackupModal(){
-    enviarBackupMsg.textContent = "";
-    enviarBackupMsg.className = "form-msg";
-    enviarBackupNuevoEmail.value = "";
-    enviarBackupRecordar.checked = true;
-    enviarBackupEnviarBtn.disabled = false;
-    enviarBackupModal.classList.remove("hidden");
-    cargarEnviarBackupContactos();
-  }
-
-  function cerrarEnviarBackupModal(){
-    enviarBackupModal.classList.add("hidden");
-  }
-
-  enviarBackupSelect.addEventListener("change", actualizarEnviarBackupModoNuevo);
-  enviarBackupCloseBtn.addEventListener("click", cerrarEnviarBackupModal);
-  enviarBackupCancelarBtn.addEventListener("click", cerrarEnviarBackupModal);
-
-  enviarBackupEnviarBtn.addEventListener("click", function(){
-    var esNuevo = enviarBackupModoNuevo();
-    var email = esNuevo ? enviarBackupNuevoEmail.value.trim() : enviarBackupSelect.value;
-    var guardarContacto = esNuevo ? !!enviarBackupRecordar.checked : false;
-
-    if (!ENVIAR_BACKUP_EMAIL_RE.test(email)){
-      enviarBackupMsg.textContent = "Escribe una dirección de correo válida antes de enviar.";
-      enviarBackupMsg.className = "form-msg error";
-      return;
-    }
-
-    enviarBackupEnviarBtn.disabled = true;
-    enviarBackupMsg.textContent = "Enviando…";
-    enviarBackupMsg.className = "form-msg";
-    fetch("/api/admin/backup/enviar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email, guardarContacto: guardarContacto })
-    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
-      .then(function(res){
-        if (!res.ok){
-          enviarBackupMsg.textContent = (res.data && res.data.error) || "No se ha podido enviar la copia de seguridad.";
-          enviarBackupMsg.className = "form-msg error";
-          return;
-        }
-        var envio = res.data.envio || {};
-        enviarBackupMsg.textContent = "Copia enviada a " + envio.email + " el " + formatFechaHora(envio.fecha) + ".";
-        enviarBackupMsg.className = "form-msg ok";
-        enviarBackupContactosCache = res.data.contactos || enviarBackupContactosCache;
-        renderEnviarBackupSelect();
-        renderEnviarBackupHistorial(res.data.envios || []);
-      }).catch(function(){
-        enviarBackupMsg.textContent = "Error de conexión con el servidor. Comprueba antes de reintentarlo si el envío llegó a realizarse.";
-        enviarBackupMsg.className = "form-msg error";
-      }).finally(function(){
-        enviarBackupEnviarBtn.disabled = false;
-      });
-  });
 
   function switchTab(tab){
     tabBtnRoster.classList.toggle("active", tab === "roster");

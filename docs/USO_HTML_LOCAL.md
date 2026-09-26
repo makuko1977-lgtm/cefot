@@ -14,8 +14,8 @@ El HTML local (`legado/seccion3.html`) ya no lo publica el servidor. Se abre
 con doble clic desde el disco y guarda los datos solo en ese navegador.
 
 Para pasar datos del servidor al HTML local (por ejemplo, mientras el
-servidor no sea accesible desde la intranet) se descarga la copia de
-seguridad en `admin.html` y se carga en el HTML local con
+servidor no sea accesible desde la intranet) se pulsa «Exportar copia» en
+`admin.html` y el archivo se carga en el HTML local con
 **«Importar copia del servidor (añadir)…»**. La importación solo añade lo
 que falta y nunca sustituye ni borra nada. Detalles en `legado/LEEME.md`.
 

@@ -1407,7 +1407,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <button class="btn ghost" id="uploadImportBackupBtn" type="button">Importar copia de seguridad…</button>
       </div>
       <div class="hint" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border);">
-        ¿Te han enviado por correo una copia de seguridad del servidor? Impórtala aquí: se AÑADE lo que aún no
+        ¿Has exportado una copia desde el servidor (botón «Exportar copia»)? Impórtala aquí: se AÑADE lo que aún no
         tengas en este dispositivo (alumnos, bajas, rebajes, sanciones, refuerzos, actividades y fechas de
         Horas UA). Nunca sustituye ni borra lo que ya tienes cargado.
       </div>
@@ -3706,6 +3706,19 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alert("Ese archivo no es una copia de seguridad válida (no es JSON).");
         return;
       }
+      // Si es una copia exportada desde el SERVIDOR, se pasa a su
+      // importación (también aditiva) en vez de rechazarla.
+      if (data && typeof data.exportedAt === "string" && Array.isArray(data.roster)){
+        try {
+          var dt = new DataTransfer();
+          dt.items.add(file);
+          serverBackupFileInput.files = dt.files;
+          serverBackupFileInput.dispatchEvent(new Event("change"));
+        } catch(err){
+          alert("Este archivo es una copia exportada del servidor. Cárgala con el botón «Importar copia del servidor (añadir)».");
+        }
+        return;
+      }
       if (!data || data.tipo !== "seccion3_backup" || !data.roster){
         alert("Ese archivo no parece ser una copia de seguridad de SECCIÓN 3.");
         return;
@@ -3830,9 +3843,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   });
 
   // ---------------- importación ADITIVA de copia del servidor ----------------
-  // A diferencia de "Importar copia" (arriba), este botón está pensado para
-  // el correo con la copia de seguridad que envía el jefe de sección desde
-  // el servidor (formato distinto: exportedAt + roster como Array; el
+  // Este botón está pensado para la copia que exporta el jefe de sección
+  // desde el servidor (botón «Exportar copia» de admin.html) (formato distinto: exportedAt + roster como Array; el
   // roster es un objeto {headers,rows,bajas,meta}). Nunca sobrescribe ni
   // borra nada de lo que ya hay en este dispositivo: solo añade lo que no
   // exista todavía (alumnos/bajas por "numero", el resto por "id"; Horas UA

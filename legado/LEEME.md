@@ -9,7 +9,8 @@ servidor ya no la publica; en el servidor el jefe de sección trabaja en
 
 Mientras el servidor no sea accesible desde la intranet:
 
-1. En el servidor (`admin.html`) descarga la **copia de seguridad**.
+1. En el servidor (`admin.html`) pulsa **«Exportar copia»**. Se descarga un
+   archivo `CEFOT2_copia_<compañía>-<sección>_<fecha>.json`.
 2. En el HTML local pulsa **«Importar copia del servidor (añadir)…»** y elige
    ese archivo.
 
@@ -28,7 +29,8 @@ Avisos:
   mano en local.
 
 «Importar copia de seguridad…» (copias propias del HTML local) también
-funciona solo añadiendo.
+funciona solo añadiendo, y si se le da por error un archivo exportado del
+servidor, lo pasa automáticamente a la importación del servidor.
 
 Antes de sustituir el archivo `seccion3.html` del ordenador del trabajo por
 una versión nueva, haz una copia de seguridad desde el HTML actual.
