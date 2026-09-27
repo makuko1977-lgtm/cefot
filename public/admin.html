@@ -187,6 +187,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     cursor:pointer;
     transition:border-color .15s ease, background .15s ease, transform .05s ease;
   }
+  a.btn{text-decoration:none;display:inline-block;}
   .btn:hover{border-color:var(--accent);background:#e6ecdc;}
   .btn:active{transform:translateY(1px);}
   .btn.primary{
@@ -3434,6 +3435,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       (currentUser && currentUser.superAdmin ? '<button class="btn small ghost" id="superAdminBtnTop">Panel Súper Admin</button>' : "") +
       '<button class="btn small ghost" id="exportBackupBtn" title="Descarga un archivo con todos los datos de la sección para cargarlo en el HTML local con «Importar copia del servidor (añadir)». Allí solo se añade lo que falte: nunca sustituye ni borra nada.">Exportar copia</button>' +
       (esCapitanActuando() ? "" : '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>') +
+      '<a class="btn small ghost" href="/manual.html?rol=' + (esCapitanActuando() ? "capitan" : "seccion") + '" target="_blank" rel="noopener" title="Manual de usuario interactivo (se abre en otra pestaña)">Manual</a>' +
       '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
     if (document.getElementById("reloadBtnTop")) document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);

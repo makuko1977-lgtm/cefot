@@ -132,6 +132,7 @@
     cursor:pointer;
     transition:border-color .15s ease, background .15s ease, transform .05s ease;
   }
+  a.btn{text-decoration:none;display:inline-block;}
   .btn:hover{border-color:var(--accent);background:#e6ecdc;}
   .btn:active{transform:translateY(1px);}
   .btn.primary{

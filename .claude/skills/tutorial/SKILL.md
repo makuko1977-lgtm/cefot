@@ -10,9 +10,14 @@ demo: el usuario elige su **rol** (pestañas), un **apartado** del índice y
 avanza pulsando la **zona roja parpadeante** de cada captura (o «Siguiente»).
 Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
 
-- Publicado como artifact privado: https://claude.ai/artifact/M8xkm4bptpGFGTZbVPcchy
-  (para actualizarlo desde otra conversación: `Artifact` con `action: "read"`
-  sobre esa URL y después `publish` con `url` = esa URL; sin `icon`).
+- **Dirección oficial: https://cefot.up.railway.app/manual.html** (dentro de la
+  aplicación, en `public/manual.html` + imágenes en `public/manual/`). Railway
+  lo despliega al subir a `main`. Admite `?rol=peloton|seccion|capitan|estudios`
+  para abrir directamente un rol; cada pantalla de la aplicación tiene un botón
+  «Manual» que lo abre con su rol, y el login un enlace.
+- Copia antigua como artifact privado: https://claude.ai/artifact/M8xkm4bptpGFGTZbVPcchy
+  (solo si el usuario lo pide; para actualizarla: `Artifact` `read` sobre esa
+  URL y `publish` con `url`, sin `icon`).
 - Se basa en el manual PDF `docs/Manual_usuario_CEFOT2.pdf`: cada apartado
   indica su referencia («Manual PDF · apartado N»).
 
@@ -22,7 +27,7 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
 |---|---|
 | `capturar.js` | Recorre el servidor de demostración con Playwright y guarda, para cada paso, la captura (JPEG) y el recuadro del elemento a pulsar. Escribe `demos.json`. |
 | `plantilla.html` | La página del manual. Marcas: `/*APPCSS*/`, `/*DEMOS*/`, `/*IMAGENES*/`. Contiene la lista `ROLES` (roles → grupos → apartados). |
-| `construir.py` | Sustituye las marcas: mete `public/shared/app.css` (estilos del servidor), `demos.json` y las imágenes como data: URI. |
+| `construir.py` | `--app`: escribe `public/manual.html` (enlaza `/shared/app.css`) y copia las imágenes a `public/manual/` (borra las que sobren). Sin `--app`: un único HTML autocontenido para artifact. |
 | `comprobar.js` | Abre el HTML en tema oscuro a 1280 y 400 px: comprueba errores JS y desbordamiento lateral y deja capturas. |
 
 ## Procedimiento
@@ -42,17 +47,20 @@ Cada rol solo ve sus apartados. Todo es de datos **ficticios**.
    NODE_PATH=$(npm root -g) node .claude/skills/tutorial/scripts/capturar.js manual-interactivo-build
    ```
    Las capturas cambian datos del servidor: vuelve a `--reset` antes de repetir.
-3. **Montar**:
+3. **Montar** (versión de la aplicación):
    ```bash
-   python3 .claude/skills/tutorial/scripts/construir.py manual-interactivo-build
+   python3 .claude/skills/tutorial/scripts/construir.py manual-interactivo-build --app
    ```
-4. **Comprobar** (y mirar `comprobar_pc.png`):
+   Comprobar en `http://localhost:3000/manual.html` y, en cada rol, que el
+   botón «Manual» abre su rol. Después `npm test`, commit y push a la rama de
+   trabajo y a `main` (el usuario lo tiene autorizado; Railway despliega solo).
+4. **Comprobar la versión artifact** (solo si se monta sin `--app`; mirar `comprobar_pc.png`):
    ```bash
    NODE_PATH=$(npm root -g) node .claude/skills/tutorial/scripts/comprobar.js manual-interactivo-build seccion
    ```
-5. **Publicar** `manual-interactivo-build/manual-interactivo.html` como
-   artifact (ver URL arriba). La carpeta `manual-interactivo-build/` está en
-   `.gitignore`: no se sube al repositorio.
+5. Para la versión artifact: montar sin `--app` y usar `comprobar.js`.
+   La carpeta `manual-interactivo-build/` está en `.gitignore`; lo que sí se
+   sube es `public/manual.html` y `public/manual/*.jpg`.
 
 ## Añadir una demostración
 
@@ -102,7 +110,7 @@ Pistas del DOM ya conocidas:
 
 ## Normas
 
-- Solo datos **ficticios** (nombres, DNI, hechos marcados «ficticio»).
+- Solo datos **ficticios** (nombres, DNI, hechos marcados «ficticio»): `/manual.html` es público, no pide sesión.
 - Textos en español correcto: tildes y **ñ** (compañía, sección, pelotón).
 - Chromium en español para fechas dd/mm/aaaa: ya lo hace `capturar.js`
   (`--lang=es-ES`, `LANG/LC_ALL=es_ES.UTF-8`, `locale:'es-ES'`).
