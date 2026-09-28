@@ -626,11 +626,79 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      necesita todo el ancho para que quepan los meses de la fase. */
   #historialCard{max-width:760px;}
   #historialCard.ancho{max-width:1360px;}
+  .notas-intentos{display:block;font-size:10.5px;color:var(--text-dim);margin-top:2px;white-space:nowrap;}
+  /* ================= HOJA DE SEGUIMIENTO ================= */
+  .seg-sel{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+  .seg-sel th{background:var(--panel-2);text-align:left;padding:8px 9px;font-size:10.5px;
+    letter-spacing:.6px;text-transform:uppercase;color:var(--text-dim);
+    border-bottom:1px solid var(--border-light);}
+  .seg-sel td{padding:8px 9px;border-bottom:1px solid #eceee2;vertical-align:top;}
+  .seg-sel tr.off{opacity:.45;}
+  .seg-sel textarea{width:100%;font-family:inherit;font-size:12.5px;line-height:1.35;
+    padding:6px 8px;border-radius:8px;border:1px solid var(--border-light);
+    background:var(--panel-2);color:var(--text);resize:vertical;}
+  .seg-exp{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .seg-aviso{font-size:12px;background:var(--warn-soft);border:1px solid #e8d3a0;color:#6b4a0c;
+    border-radius:8px;padding:8px 11px;margin-top:12px;}
+  /* --- el documento, con el formato del archivo original --- */
+  .seg-papel{background:#8b8f80;padding:14px;border-radius:10px;margin-top:12px;}
+  .seg-hoja{background:#fff;border:1px solid #bbb;padding:20px 24px 22px;
+    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;}
+  .seg-hoja:last-child{margin-bottom:0;}
+  .seg-h1{display:flex;justify-content:space-between;font-weight:700;font-size:13px;}
+  .seg-h1 span{text-decoration:underline;}
+  .seg-tit{text-align:center;font-weight:700;font-size:13px;text-decoration:underline;margin:4px 0 10px;}
+  .seg-tit i{font-weight:400;font-style:normal;text-decoration:none;}
+  .seg-prot{display:flex;justify-content:flex-end;align-items:center;gap:8px;font-weight:700;font-size:12.5px;}
+  .seg-prot .caja{border:1px solid #000;min-width:120px;text-align:center;padding:2px 8px;}
+  .seg-cab{display:flex;gap:10px;margin-top:10px;}
+  .seg-cab-izq{flex:1;min-width:0;}
+  .seg-lin{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:12.5px;}
+  .seg-lin b{min-width:148px;font-size:12.5px;}
+  .seg-lin .caja{border:1px solid #000;padding:3px 7px;flex:1;min-height:22px;}
+  .seg-lin .caja.corta{flex:0 0 140px;}
+  .seg-centro{text-align:center;font-weight:700;font-size:12.5px;}
+  .seg-foto{width:104px;height:104px;border:1px solid #000;display:flex;align-items:center;
+    justify-content:center;font-weight:700;font-size:12px;flex:none;overflow:hidden;}
+  .seg-foto img{width:100%;height:100%;object-fit:cover;}
+  .seg-hoja table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px;}
+  .seg-hoja th{border:1px solid #000;background:#ccc;font-weight:700;padding:5px 4px;
+    text-align:center;font-size:11px;}
+  .seg-hoja td{border:1px solid #000;padding:4px 6px;vertical-align:top;}
+  .seg-hoja td.f{text-align:center;white-space:nowrap;width:72px;}
+  .seg-hoja td.m{text-align:center;width:205px;}
+  .seg-hoja td.fir{width:86px;}
+  .seg-pie{margin-top:8px;text-align:right;font-size:10px;color:#555;}
+  @media print{
+    body.print-seg header.top, body.print-seg #appShell, body.print-seg footer.info,
+    body.print-seg #fichaModal, body.print-seg #cuestModal, body.print-seg #historialModal{display:none !important;}
+    body.print-seg.seg-desde-consulta #appShell{display:block !important;}
+    body.print-seg.seg-desde-consulta #appShell > *:not(#consultasPanel){display:none !important;}
+    body.print-seg.seg-desde-consulta #consultasPanel > *:not(#segWrap){display:none !important;}
+    body.print-seg.seg-desde-historial #historialModal{
+      display:block !important;position:static;background:#fff;padding:0;}
+    body.print-seg.seg-desde-historial #historialModal .modal-card{box-shadow:none;max-width:none;max-height:none;}
+    body.print-seg.seg-desde-historial .hist-tabs,
+    body.print-seg.seg-desde-historial .alu-lateral,
+    body.print-seg.seg-desde-historial .modal-close{display:none !important;}
+    body.print-seg{background:#fff;}
+    body.print-seg #segWrap{display:block !important;}
+    body.print-seg .seg-sel, body.print-seg .seg-aviso, body.print-seg .seg-acciones,
+    body.print-seg .seg-cabecera-form, body.print-seg .chips{display:none !important;}
+    body.print-seg .seg-papel{background:#fff;padding:0;}
+    body.print-seg .seg-hoja{border:0;padding:0;margin:0;page-break-after:always;}
+    body.print-seg .seg-hoja:last-child{page-break-after:auto;}
+    @page{size:landscape;margin:12mm;}
+  }
+
   /* ---- Fechas del ciclo (pestaña Actividades) ---- */
   .fases-box{border:1px solid var(--border-light);border-radius:12px;background:var(--panel-2);
     padding:13px 15px;margin-top:4px;}
   .fases-box h4{margin:0 0 3px;font-family:var(--font-display);font-size:14px;}
   .fases-sub{color:var(--text-dim);font-size:12.5px;}
+  .fases-ciclo{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  .fases-ciclo input{max-width:130px;font-family:inherit;font-size:13px;padding:7px 10px;
+    border-radius:8px;border:1px solid var(--border-light);background:var(--panel);color:var(--text);}
   .fases-grid{display:grid;grid-template-columns:104px minmax(120px,1fr) minmax(120px,1fr) 110px;
     gap:9px 13px;align-items:center;margin-top:12px;}
   .fases-lbl{font-size:10.5px;letter-spacing:.7px;text-transform:uppercase;color:var(--text-dim);font-weight:700;}
@@ -980,6 +1048,58 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     cursor:pointer;
   }
   .fill-badge:hover{filter:brightness(0.95);}
+  /* Documento del ANEXO desactualizado porque se quitó a un alumno después
+     de generarlo: la chapa verde "RELLENADO" pasa a roja "REGENERAR". */
+  .desde-sanciones{
+    display:inline-flex;align-items:center;
+    font-size:11px;font-weight:700;letter-spacing:.2px;
+    color:var(--text-dim);background:var(--panel-2);
+    border:1px dashed var(--border);border-radius:999px;
+    padding:3px 9px;white-space:nowrap;cursor:help;
+  }
+  .fill-badge.obsoleto{
+    background:var(--danger-soft);
+    color:var(--danger);
+    box-shadow:inset 0 0 0 1px var(--danger);
+  }
+  .tab-alerta{
+    display:inline-grid;
+    place-items:center;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    margin-left:7px;
+    border-radius:999px;
+    background:var(--danger);
+    color:#fff;
+    font-family:var(--font-mono);
+    font-size:11px;
+    font-weight:800;
+    line-height:1;
+    vertical-align:middle;
+  }
+  .doc-aviso{
+    border:1px solid var(--warn);
+    background:var(--warn-soft);
+    border-radius:12px;
+    padding:13px 15px;
+    margin-bottom:14px;
+  }
+  .doc-aviso-tit{font-weight:800;font-size:15px;color:#7a5410;margin-bottom:3px;}
+  .doc-aviso-sub{font-size:12.5px;color:#7a6a45;margin-bottom:11px;line-height:1.5;}
+  .doc-aviso-linea{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--panel);border:1px solid #e6d6ae;border-radius:9px;
+    padding:9px 11px;margin-bottom:7px;
+  }
+  .doc-aviso-linea:last-child{margin-bottom:0;}
+  .doc-aviso-exp{
+    font-family:var(--font-mono);font-size:12px;font-weight:800;
+    background:#f0e7cf;border:1px solid #e0cfa4;border-radius:999px;
+    padding:3px 9px;color:#7a5410;white-space:nowrap;
+  }
+  .doc-aviso-txt{font-size:12.5px;flex:1;min-width:240px;line-height:1.45;}
+  @media print{ .doc-aviso, .tab-alerta{display:none !important;} }
 
   .banner-draft{
     background:var(--warn-soft);
@@ -1160,6 +1280,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .fecha-coincidencia-selection .field label{font-size:11px;}
   .fecha-coincidencia-selection input{width:100%;box-sizing:border-box;}
+  .fecha-coincidencia-finde{
+    margin-top:10px;
+    border:1px dashed var(--accent2);
+    background:var(--accent2-soft);
+    border-radius:9px;
+    padding:10px;
+  }
+  .fecha-coincidencia-finde .hint{margin:0 0 6px;}
+  .fecha-coincidencia-finde .fecha-coincidencia-selection{margin-top:0;}
   .fecha-coincidencia-step{
     margin-top:8px;
     font-size:11.5px;
@@ -1358,7 +1487,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
     </div>
     <div id="topActions"></div>
-    <div id="capitanBackWrap" class="hidden"><button class="btn small ghost" id="capitanBackBtn" type="button">Volver a mi compañía</button></div>
     <input type="file" id="backupFileInput" accept=".json" class="hidden" />
     <input type="file" id="serverBackupFileInput" accept=".json" class="hidden" />
   </header>
@@ -1803,6 +1931,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     <!-- ---------- REFUERZOS PANEL ---------- -->
     <div id="refuerzosPanel" class="hidden">
 
+      <div class="doc-aviso hidden" id="refDocAviso"></div>
+
       <div class="banner-draft hidden" id="refDraftBanner">
         <span>Completando el refuerzo del expediente <strong id="refDraftExpediente"></strong> (traído desde Sanciones).</span>
         <button class="btn small ghost" id="refDraftCancelBtn" type="button">Cancelar / empezar en blanco</button>
@@ -1875,7 +2005,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div class="field-row">
               <div class="field narrow">
                 <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
-                <input type="time" id="refHoraInicioFinde" value="10:00">
+                <input type="time" id="refHoraInicioFinde" value="09:00">
               </div>
               <div class="field narrow">
                 <label for="refDuracionFinde">Duración fin de semana (horas)</label>
@@ -2027,6 +2157,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="fases-box">
           <h4>Fechas del ciclo</h4>
           <div class="fases-sub">Desde cuándo y hasta cuándo dura cada fase. Es lo que permite al calendario del alumno decir si un día concreto cae en FFMG o en FFE.</div>
+          <div class="fases-ciclo">
+            <label class="fases-lbl" for="cicloInput">Ciclo</label>
+            <input type="text" id="cicloInput" placeholder="Ej. 1º/26" autocomplete="off">
+            <span class="fases-sub" style="margin:0;">Sale tal cual en la hoja de seguimiento.</span>
+          </div>
           <div class="fases-grid">
             <div></div><span class="fases-lbl">Desde</span><span class="fases-lbl">Hasta</span><div></div>
             <span class="fase-chip" style="background:#8a5f1c;">FFMG</span>
@@ -2114,6 +2249,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               <option value="arresto_pendiente">Sanciones de arresto con fecha pendiente</option>
               <option value="trabajos">Sanciones de trabajo: hechos, pendientes y vencidos</option>
               <option value="expediente">Consulta de expediente (informe completo)</option>
+              <option value="seguimiento">Hoja de seguimiento del alumno</option>
             </select>
           </div>
         </div>
@@ -2198,6 +2334,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           </div>
         </div>
 
+        <div class="hidden" id="consSeguimientoWrap" style="margin-top:4px;">
+          <div class="field" style="grid-column:1/-1;">
+            <label for="segCadeteInput">Alumno</label>
+            <input type="text" id="segCadeteInput" list="segCadeteList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+            <datalist id="segCadeteList"></datalist>
+            <div class="cadet-preview" id="segCadetePreview"></div>
+            <div class="hint error hidden" id="segCadeteHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+          </div>
+        </div>
+
         <div class="form-actions hidden" id="consActions">
           <button class="btn primary" id="consBuscarBtn" type="button">Consultar</button>
           <button class="btn ghost" id="consImprimirBtn" type="button" disabled>Imprimir</button>
@@ -2211,6 +2357,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="panel-sub">Todos los alumnos en vertical y todos los días en horizontal: rebajes, refuerzos, sanciones, arrestos, trabajos y actividades, de un vistazo.</div>
         <div class="form-actions">
           <button class="btn primary" id="calAbrirBtn" type="button">Ver calendario lineal…</button>
+        </div>
+      </div>
+
+      <div id="segWrap" class="hidden">
+        <div class="panel seg-cabecera-form" style="margin-top:14px;">
+          <h3>Hoja de seguimiento</h3>
+          <div class="panel-sub">Se rellena con las sanciones del alumno. Marca las que deban figurar y ajusta el texto de las observaciones si hace falta. Lo que edites se guarda: la próxima vez la hoja sale como la dejaste.</div>
+        </div>
+        <div class="panel" id="segCasa" style="margin-top:0;border-top-left-radius:0;border-top-right-radius:0;">
+          <div id="segBody"></div>
         </div>
       </div>
 
@@ -2968,6 +3124,24 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return rangoTieneCoincidencia(caso.alumno.numero, ini, fin, caso.opts);
   }
 
+  // Los dos formularios no entregan lo mismo: el de sanciones pasa filas del
+  // listado tal cual (con las claves de la hoja: NUMERO, APE1, ...) y el de
+  // refuerzos pasa la ficha ya montada (numero, ape1, ...). Sin normalizar,
+  // "alumno.numero" salía vacío para las sanciones y la búsqueda de
+  // coincidencias de arrestos no encontraba nunca nada.
+  function fichaAlumnoParaCaso(a){
+    if (!a) return { numero:"", ape1:"", ape2:"", nombre:"", peloton:"" };
+    if (a.numero != null && a.numero !== "") return a;
+    var k = state.keys || {};
+    return {
+      numero: getVal(a, k.numero),
+      ape1: getVal(a, k.ape1),
+      ape2: getVal(a, k.ape2),
+      nombre: getVal(a, k.nombre),
+      peloton: getVal(a, k.peloton)
+    };
+  }
+
   function casoEscapedAlumno(caso){
     return escapeHtml([caso.alumno.ape1, caso.alumno.ape2].filter(Boolean).join(" ") + ", " + (caso.alumno.nombre || ""));
   }
@@ -3028,6 +3202,29 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var finInput = root.querySelector('.fecha-cal-fin');
     if (iniInput) iniInput.value = caso.ini || "";
     if (finInput) finInput.value = caso.fin || "";
+
+    var findeWrap = root.querySelector('.fecha-coincidencia-finde');
+    if (findeWrap){
+      findeWrap.classList.toggle('hidden', !casoNecesitaFinde(caso));
+      var findeHoraInput = root.querySelector('.fecha-cal-finde-hora');
+      var findeDurInput = root.querySelector('.fecha-cal-finde-dur');
+      if (findeHoraInput){
+        findeHoraInput.value = caso.findeHora || "";
+        findeHoraInput.onchange = function(){
+          caso.findeHora = findeHoraInput.value;
+          setCasoError(caso, "");
+          actualizarFechaCoincidenciaSummary();
+        };
+      }
+      if (findeDurInput){
+        findeDurInput.value = caso.findeDur || "";
+        findeDurInput.oninput = function(){
+          caso.findeDur = findeDurInput.value;
+          setCasoError(caso, "");
+          actualizarFechaCoincidenciaSummary();
+        };
+      }
+    }
     root.querySelectorAll('.fecha-cal-day:not(.disabled)').forEach(function(btn){
       btn.addEventListener('click', function(){
         var iso = btn.getAttribute('data-iso');
@@ -3096,6 +3293,29 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
   }
 
+  // ¿Este caso tiene que pedir horario de fin de semana? Solo si quien abrió
+  // el calendario lo pide (los refuerzos sí, los arrestos no tienen horario)
+  // y el intervalo elegido incluye sábado o domingo.
+  function casoNecesitaFinde(caso){
+    if (!(caso.opts && caso.opts.pedirFinde)) return false;
+    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
+    return rangoTieneFinde(caso.ini, caso.fin);
+  }
+
+  function casoFindeCompleto(caso){
+    if (!casoNecesitaFinde(caso)) return true;
+    if (!caso.findeHora) return false;
+    var d = parseFloat(caso.findeDur);
+    return !!caso.findeDur && !isNaN(d) && d > 0;
+  }
+
+  function casoCompleto(caso){
+    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
+    if (caso.error) return false;
+    if (rangoEstaDentroDeDiasOcupados(caso, caso.ini, caso.fin)) return false;
+    return casoFindeCompleto(caso);
+  }
+
   function setCasoError(caso, msg){
     caso.error = msg || "";
     var root = document.getElementById(caso.domId);
@@ -3125,6 +3345,16 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           '<div class="field"><label>Nueva fecha inicio</label><input type="date" class="fecha-cal-ini"></div>' +
           '<div class="field"><label>Nueva fecha fin</label><input type="date" class="fecha-cal-fin"></div>' +
         '</div>' +
+        // La fecha nueva puede caer en sábado o domingo aunque la original no
+        // lo hiciera. En ese caso hay que marcar aquí el horario de esos días:
+        // el del formulario es el de entre semana y no sirve.
+        '<div class="fecha-coincidencia-finde hidden">' +
+          '<div class="hint" style="margin:0 0 6px;">El nuevo periodo incluye <strong>sábado y/o domingo</strong>: marca el horario de esos días.</div>' +
+          '<div class="fecha-coincidencia-selection" style="margin-top:0;">' +
+            '<div class="field"><label>Hora inicio (sáb. y dom.)</label><input type="time" class="fecha-cal-finde-hora"></div>' +
+            '<div class="field"><label>Duración (horas)</label><input type="text" class="fecha-cal-finde-dur" inputmode="decimal"></div>' +
+          '</div>' +
+        '</div>' +
         '<div class="fecha-coincidencia-step">Selecciona la fecha de inicio y después la fecha de fin.</div>' +
         '<div class="hint error hidden fecha-cal-error"></div>' +
       '</div>';
@@ -3136,11 +3366,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   function actualizarFechaCoincidenciaSummary(){
     var total = fechaCoincidenciaCasosState.length;
-    var completos = 0;
+    var completos = 0, faltaFinde = 0;
     fechaCoincidenciaCasosState.forEach(function(c){
-      if (c.ini && c.fin && c.fin >= c.ini && !c.error && !rangoEstaDentroDeDiasOcupados(c, c.ini, c.fin)) completos++;
+      if (casoCompleto(c)) completos++;
+      else if (casoNecesitaFinde(c) && !casoFindeCompleto(c)) faltaFinde++;
     });
-    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida.";
+    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida." +
+      (faltaFinde ? " Falta el horario de fin de semana de " + faltaFinde + " alumno" + (faltaFinde === 1 ? "" : "s") + "." : "");
     fechaCoincidenciaGuardarBtn.disabled = completos !== total;
   }
 
@@ -3162,6 +3394,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           id: "caso-" + idx + "-" + Date.now(),
           domId: "fecha-caso-" + idx + "-" + Date.now(),
           alumno: caso.alumno,
+          alumnoOriginal: caso.alumnoOriginal || caso.alumno,
           coincidencias: caso.coincidencias,
           originalIni: caso.originalIni,
           originalFin: caso.originalFin,
@@ -3171,7 +3404,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           selecting: "inicio",
           monthYear: base.getFullYear(),
           monthMonth: base.getMonth(),
-          error: ""
+          error: "",
+          // Horario de fin de semana para la NUEVA fecha de este alumno. Se
+          // parte de lo que hubiera en el formulario y, si no había nada,
+          // del estándar; siempre hay que dejarlo marcado.
+          findeHora: (caso.opts && caso.opts.findeHora) || HORA_FINDE_ESTANDAR,
+          findeDur: (caso.opts && caso.opts.findeDur) || DURACION_FINDE_ESTANDAR
         };
       });
       fechaCoincidenciaAlumno.textContent = fechaCoincidenciaCasosState.length === 1
@@ -3188,9 +3426,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var normal = [];
     var casos = [];
     alumnos.forEach(function(alumno){
-      var coincidencias = buscarFechasCoincidentes([alumno.numero], ini, fin, opts);
+      var ficha = fichaAlumnoParaCaso(alumno);
+      var coincidencias = buscarFechasCoincidentes([ficha.numero], ini, fin, opts);
       if (coincidencias.length){
-        casos.push({ alumno: alumno, coincidencias: coincidencias, originalIni: ini, originalFin: fin, opts: opts });
+        casos.push({
+          alumno: ficha, alumnoOriginal: alumno, coincidencias: coincidencias,
+          originalIni: ini, originalFin: fin, opts: opts
+        });
       } else {
         normal.push(alumno);
       }
@@ -3202,7 +3444,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return {
       normal: normal,
       separados: respuesta.map(function(c){
-        return { alumno: c.alumno, ini: c.ini, fin: c.fin };
+        return {
+          alumno: c.alumno, ini: c.ini, fin: c.fin,
+          tieneFinde: !!c.tieneFinde, findeHora: c.findeHora || "", findeDur: c.findeDur || ""
+        };
       })
     };
   }
@@ -3217,6 +3462,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         setCasoError(c, "El intervalo elegido contiene días ocupados. Selecciona otro intervalo.");
         break;
       }
+      if (!casoFindeCompleto(c)){
+        invalid = c;
+        setCasoError(c, "El nuevo periodo cae en fin de semana: marca la hora de inicio y la duración de esos días.");
+        break;
+      }
     }
     if (invalid){
       var root = document.getElementById(invalid.domId);
@@ -3224,7 +3474,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return;
     }
     cerrarFechaCoincidencia(fechaCoincidenciaCasosState.map(function(c){
-      return { alumno:c.alumno, ini:c.ini, fin:c.fin };
+      var conFinde = casoNecesitaFinde(c);
+      return {
+        alumno: c.alumnoOriginal || c.alumno, ini: c.ini, fin: c.fin,
+        tieneFinde: conFinde,
+        findeHora: conFinde ? c.findeHora : "",
+        findeDur: conFinde ? String(c.findeDur || "").trim() : ""
+      };
     }));
   });
   fechaCoincidenciaCancelarBtn.addEventListener("click", function(){ cerrarFechaCoincidencia(null); });
@@ -3540,10 +3796,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function showUpload(){
     uploadScreen.classList.remove("hidden");
     appShell.classList.add("hidden");
-    topActions.innerHTML = '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
-    document.getElementById("logoutBtnTop").addEventListener("click", function(){
-      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
-    });
+    topActions.innerHTML = "";
     applySeccionBranding(null);
   }
 
@@ -3554,8 +3807,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       '<button class="btn small ghost" id="exportBackupBtn">Copia de seguridad</button>' +
       '<button class="btn small ghost" id="importBackupBtn">Importar copia</button>' +
       '<button class="btn small ghost" id="importServerBackupBtn">Importar copia del servidor (añadir)</button>' +
-      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>' +
-      '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
+      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>';
     document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
     document.getElementById("importBackupBtn").addEventListener("click", function(){
@@ -3565,9 +3817,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     document.getElementById("importServerBackupBtn").addEventListener("click", function(){
       serverBackupFileInput.value = "";
       serverBackupFileInput.click();
-    });
-    document.getElementById("logoutBtnTop").addEventListener("click", function(){
-      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
     });
     updateBackupReminder();
   }
@@ -3637,7 +3886,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     backupFileInput.value = "";
     backupFileInput.click();
   });
-
   uploadImportServerBackupBtn.addEventListener("click", function(){
     serverBackupFileInput.value = "";
     serverBackupFileInput.click();
@@ -3677,6 +3925,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       refuerzos: refuerzos,
       actividades: actividades,
       fases: fasesCiclo,
+      seguimientos: seguimientos,
       expedienteCounter: (function(){
         try { return parseInt(localStorage.getItem(EXPEDIENTE_COUNTER_KEY), 10) || 0; }
         catch(err){ return 0; }
@@ -3817,6 +4066,21 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             });
           });
           localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo));
+        }
+
+        // Hojas de seguimiento: solo se añaden los alumnos y las líneas que
+        // aquí no existen; lo que ya se haya editado en este navegador no se toca.
+        if (data.seguimientos && typeof data.seguimientos === "object"){
+          Object.keys(data.seguimientos).forEach(function(num){
+            var otra = data.seguimientos[num];
+            if (!otra || !otra.lineas) return;
+            var mia = seguimientos[num];
+            if (!mia || !mia.lineas){ seguimientos[num] = otra; return; }
+            Object.keys(otra.lineas).forEach(function(id){
+              if (!Object.prototype.hasOwnProperty.call(mia.lineas, id)) mia.lineas[id] = otra.lineas[id];
+            });
+          });
+          persistSeguimientos();
         }
 
         // El contador de expedientes nunca retrocede: queda por delante del
@@ -5268,6 +5532,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   }
 
   function closeHistorial(){
+    segDevolverACConsultas();
     historialModal.classList.add("hidden");
   }
 
@@ -5727,7 +5992,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           p.classList.toggle("hidden", p.getAttribute("data-hpane") !== pane);
         });
         var card = document.getElementById("historialCard");
-        if (card) card.classList.toggle("ancho", pane === "calendario");
+        if (card) card.classList.toggle("ancho", pane === "calendario" || pane === "seguimiento");
+        if (pane === "seguimiento") segAbrirEnHistorial(hcalNumero);
       });
     });
   }
@@ -5754,6 +6020,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       '<button type="button" class="hist-tab" data-hpane="sanciones">Sanciones <span class="cnt">' + sanRows.length + '</span></button>' +
       '<button type="button" class="hist-tab" data-hpane="refuerzos">Refuerzos <span class="cnt">' + refRows.length + '</span></button>' +
       '<button type="button" class="hist-tab" data-hpane="calendario">Calendario</button>' +
+      '<button type="button" class="hist-tab" data-hpane="seguimiento">Hoja de seguimiento' +
+        (segTieneHoja(numero) ? ' <span class="cnt">✎</span>' : '') + '</button>' +
       '</div>';
 
     html += '<div class="hist-pane" data-hpane="rebajes">';
@@ -5803,6 +6071,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + (r.origen === "sancion" ? "alerta" : "vigente") + '">' + (r.origen === "sancion" ? "De sanción" : "Manual") + '</span>' +
             (r.expediente ? '<span class="historial-count">Exp. Nº ' + escapeHtml(String(r.expediente)) + '</span>' : '') +
+            (r.alumnos && r.alumnos.length > 1 ? '<span class="historial-count">Compartido (' + r.alumnos.length + ' alumnos)</span>' : '') +
             '</span></div>' +
             '<dl>' +
             '<dt>Tipo</dt><dd>' + escapeHtml(r.tipo || "—") + '</dd>' +
@@ -5816,6 +6085,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     html += '<div class="hist-pane hidden" data-hpane="calendario">' + hcalControlesHtml() + '</div>';
 
+    html += '<div class="hist-pane hidden" data-hpane="seguimiento">' +
+      '<div class="panel-sub" style="margin-bottom:0;">Se rellena con las sanciones de este alumno. ' +
+      'Lo que edites se guarda: la próxima vez la hoja sale como la dejaste.</div>' +
+      '<div id="histSegBody"></div></div>';
+
     if (info && info.hasAlert){
       var histReasons = [];
       if (info.totalAlert) histReasons.push(info.total + " sanciones en total");
@@ -5824,6 +6098,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
 
     historialBody.innerHTML = html;
+
     var histCard = document.getElementById("historialCard");
     if (histCard) histCard.classList.remove("ancho");
     hcalNumero = numero;
@@ -6881,42 +7156,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     applyRefuerzoDraft();
   });
 
-  // Punto de enganche para el aviso de partes de pelotón (seccion-avisos.js,
-  // otro <script> aparte que no tiene acceso a las variables de este): en
-  // vez de crear una sanción nueva desde el formulario, arma el borrador de
-  // refuerzo directamente con los datos que ya trae el aviso (la sanción del
-  // jefe de pelotón puede no estar sincronizada todavía en este dispositivo).
-  window.cefotGenerarRefuerzoDesdeSancion = function(aviso){
-    if (!aviso) return;
-    refuerzoDraft = {
-      expediente: aviso.expediente,
-      sancionId: aviso.sancionId,
-      alumnos: aviso.alumnos || [],
-      fecha: aviso.fecha || "",
-      lugar: aviso.lugar || "",
-      hora: aviso.hora || "",
-      profEmpleo: aviso.profEmpleo || "",
-      profNombre: aviso.profNombre || "",
-      profApellidos: aviso.profApellidos || "",
-      profDni: aviso.profDni || "",
-      tipoFalta: aviso.tipoFalta || "",
-      fundamento: aviso.fundamento || "",
-      fundamentoLetra: aviso.fundamentoLetra || "",
-      motivo: aviso.motivo || "",
-      observaciones: aviso.observaciones || ""
-    };
-    switchTab("refuerzos");
-    renderRefuerzosTab();
-    applyRefuerzoDraft();
-  };
-
-  function deleteSancion(id){
-    if (!confirm("¿Eliminar este expediente? Esta acción no se puede deshacer y afecta a todos los alumnos incluidos.")) return;
-    sanciones = sanciones.filter(function(r){ return r.id !== id; });
-    persistSanciones();
-    renderSancionesList();
-  }
-
   function renderSancionesTab(){
     buildSanCadetOptions();
     refreshSanciondatalists();
@@ -7069,12 +7308,16 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         '<td class="cat-cell">' + escapeHtml(r.motivo) + "</td>" +
         '<td class="cat-cell">' + medidaCell + "</td>" +
         "<td>" + alertaCell + "</td>" +
-        '<td><button class="btn small danger-ghost" data-delsan="' + r.id + '">Eliminar</button></td>' +
+        '<td><button class="btn small danger-ghost" data-delsan="' + r.id + '" data-delnum="' + escapeHtml(String(al.numero)) + '" title="Quita a este alumno del expediente. Los demás alumnos del expediente no se ven afectados.">Eliminar</button></td>' +
         "</tr>";
     }).join("");
 
     sancionesTableBody.querySelectorAll("[data-delsan]").forEach(function(btn){
-      btn.addEventListener("click", function(){ deleteSancion(btn.getAttribute("data-delsan")); });
+      btn.addEventListener("click", function(){
+        if (!quitarAlumnoDeSancion(btn.getAttribute("data-delsan"), btn.getAttribute("data-delnum"))) return;
+        renderSancionesList();
+        renderRefuerzosList();
+      });
     });
 
     sancionesTableBody.querySelectorAll(".trab-hecho-check").forEach(function(cb){
@@ -7440,6 +7683,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var dow = d.day();
     return dow === 0 || dow === 6;
   }
+  // Hora de referencia para los días de fin de semana. Es solo el punto de
+  // partida del campo: quien genera el expediente la marca a su criterio, y
+  // el campo no se puede dejar en blanco.
+  var HORA_FINDE_ESTANDAR = "09:00";
+  var DURACION_FINDE_ESTANDAR = "1";
+
   function rangoTieneFinde(inicio, fin){
     return isoDatesInRange(inicio, fin).some(esFinDeSemanaIso);
   }
@@ -7564,7 +7813,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refDuracion.value = record.duracion || "1";
     var tieneFinde = updateRefFindeVisibility();
     if (tieneFinde){
-      refHoraInicioFinde.value = record.horaInicioFinde || "10:00";
+      refHoraInicioFinde.value = record.horaInicioFinde || HORA_FINDE_ESTANDAR;
       refDuracionFinde.value = record.duracionFinde || "1";
     }
     refObservaciones.value = record.observaciones || "";
@@ -7634,7 +7883,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refTipo.value = "IFM";
     refHoraInicio.value = "09:00";
     refDuracion.value = "1";
-    refHoraInicioFinde.value = "10:00";
+    refHoraInicioFinde.value = HORA_FINDE_ESTANDAR;
     refDuracionFinde.value = "1";
     updateRefFindeVisibility();
     refObservaciones.value = "";
@@ -7742,7 +7991,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alumnos,
         refFechaInicio.value,
         refFechaFin.value,
-        {}
+        {
+          pedirFinde: true,
+          findeHora: (tieneFinde && refHoraInicioFinde.value) || HORA_FINDE_ESTANDAR,
+          findeDur: (tieneFinde && refDuracionFinde.value.trim()) || DURACION_FINDE_ESTANDAR
+        }
       );
       if (!fechaRefResolucion){
         refFormMsg.textContent = "Guardado cancelado.";
@@ -7832,6 +8085,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         separado.alumnos = [item.alumno];
         separado.fechaInicio = item.ini;
         separado.fechaFin = item.fin;
+        // El horario de fin de semana se calcula sobre la fecha NUEVA, no
+        // sobre la del formulario: si la reasignación cae en sábado o domingo
+        // lleva el horario marcado en el calendario, y si deja de caer en fin
+        // de semana se vacía para que no arrastre un horario que ya no aplica.
+        separado.horaInicioFinde = item.tieneFinde ? (item.findeHora || "") : "";
+        separado.duracionFinde = item.tieneFinde ? (item.findeDur || "") : "";
         separado.createdAt = new Date().toISOString();
         separado.editado = false;
         separado.editadoFecha = null;
@@ -7850,13 +8109,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
   });
 
-  function deleteRefuerzo(id){
-    if (!confirm("¿Eliminar este refuerzo? Esta acción no se puede deshacer.")) return;
-    refuerzos = refuerzos.filter(function(r){ return r.id !== id; });
-    persistRefuerzos();
-    renderRefuerzosList();
-  }
-
   // Fuentes de autocompletado del formulario de refuerzo manual: se combinan
   // los refuerzos y las sanciones ya registrados, para que el profesor no
   // tenga que volver a escribir su empleo/nombre/apellidos/DNI cada vez.
@@ -7872,6 +8124,74 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var motivos = uniqueSorted(MOTIVO_SEED.concat(refuerzos.map(function(r){ return r.motivo; })).concat(sanciones.map(function(r){ return r.motivo; })));
     refMotivoList.innerHTML = motivos.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
+  }
+
+  // Pinta la franja de avisos de la pestaña Refuerzos y el contador rojo
+  // sobre el propio botón de la pestaña (visible desde cualquier otra).
+  function renderAvisoDocumentos(){
+    var pendientes = refuerzosConDocumentoPendiente();
+
+    var tab = document.getElementById("tabBtnRefuerzos");
+    if (tab){
+      var cnt = tab.querySelector(".tab-alerta");
+      if (!pendientes.length){
+        if (cnt) cnt.remove();
+      } else {
+        if (!cnt){
+          cnt = document.createElement("span");
+          cnt.className = "tab-alerta";
+          tab.appendChild(cnt);
+        }
+        cnt.textContent = String(pendientes.length);
+        cnt.title = pendientes.length === 1
+          ? "1 documento pendiente de volver a generar"
+          : pendientes.length + " documentos pendientes de volver a generar";
+      }
+    }
+
+    var caja = document.getElementById("refDocAviso");
+    if (!caja) return;
+    if (!pendientes.length){
+      caja.innerHTML = "";
+      caja.classList.add("hidden");
+      return;
+    }
+    var n = pendientes.length;
+    var html = '<div class="doc-aviso-tit">⚠ ' + n + (n === 1 ? ' documento hay que volver a generarlo' : ' documentos hay que volver a generarlos') + '</div>';
+    html += '<div class="doc-aviso-sub">Se ha quitado a un alumno después de generar el ANEXO: el PDF que tienes descargado todavía lo nombra.</div>';
+    pendientes.forEach(function(r){
+      var quedan = (r.alumnos || []).length;
+      html += '<div class="doc-aviso-linea">' +
+        '<span class="doc-aviso-exp">Exp. Nº ' + escapeHtml(String(r.expediente || "—")) + '</span>' +
+        '<span class="doc-aviso-txt"><strong>' + escapeHtml(textoQuitadosDe(r)) + '</strong> · quitado el ' +
+          escapeHtml(formatDateDisplay(fechaUltimoQuitado(r))) +
+          ' · documento generado el ' + escapeHtml(formatDateDisplay(String(r.docPendiente.generadoFecha || "").slice(0,10))) +
+          ' · queda' + (quedan === 1 ? '' : 'n') + ' ' + quedan + ' alumno' + (quedan === 1 ? '' : 's') + '</span>' +
+        '<button type="button" class="btn small primary" data-regenref="' + escapeHtml(String(r.id)) + '">Generar documento</button>' +
+        '<button type="button" class="btn small ghost" data-yaregen="' + escapeHtml(String(r.id)) + '">Ya lo he hecho</button>' +
+        '</div>';
+    });
+    caja.innerHTML = html;
+    caja.classList.remove("hidden");
+
+    caja.querySelectorAll("[data-regenref]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var rec = refuerzos.filter(function(x){ return String(x.id) === btn.getAttribute("data-regenref"); })[0];
+        if (rec) generarDocumentoPDF(rec);
+      });
+    });
+    caja.querySelectorAll("[data-yaregen]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-yaregen");
+        var rec = refuerzos.filter(function(x){ return String(x.id) === id; })[0];
+        if (!rec) return;
+        if (!confirm("Se quitará el aviso del expediente Nº " + rec.expediente + " sin generar ningún documento.\n\n" +
+                     "Hazlo solo si ya tienes el documento correcto por otro medio. ¿Continuar?")) return;
+        delete rec.docPendiente;
+        persistRefuerzos();
+        renderRefuerzosList();
+      });
+    });
   }
 
   function renderRefuerzosTab(){
@@ -7925,6 +8245,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       refuerzosTableBody.innerHTML = "";
       refuerzosEmptyState.classList.remove("hidden");
       refuerzosEmptyState.textContent = refuerzos.length ? "No se han encontrado refuerzos con ese filtro." : "Todavía no se ha registrado ningún refuerzo.";
+      renderAvisoDocumentos();
       return;
     }
     refuerzosEmptyState.classList.add("hidden");
@@ -7948,9 +8269,27 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var rellenadoTitle = "Documento generado el " + formatDateDisplay(r.rellenadoFecha ? r.rellenadoFecha.slice(0,10) : "") +
         (r.editado && r.editadoFecha ? " · Editado por última vez el " + formatDateDisplay(r.editadoFecha.slice(0,10)) : "") +
         " — pulsa para corregir los datos y regenerarlo";
+      var obsoleto = !!(r.docPendiente && r.docPendiente.quitados && r.docPendiente.quitados.length);
+      if (obsoleto){
+        rellenadoTitle = "Se quitó a " + textoQuitadosDe(r) + " el " + formatDateDisplay(fechaUltimoQuitado(r)) +
+          ", después de generar el documento el " + formatDateDisplay(String(r.docPendiente.generadoFecha || "").slice(0,10)) +
+          ". El PDF descargado todavía lo nombra: pulsa para rehacerlo.";
+      }
       var rellenadoBadge = r.rellenado
-        ? '<button type="button" class="fill-badge" data-editref="' + r.id + '" title="' + escapeHtml(rellenadoTitle) + '">RELLENADO ✎</button>'
+        ? '<button type="button" class="fill-badge' + (obsoleto ? ' obsoleto' : '') + '" data-editref="' + r.id +
+          '" title="' + escapeHtml(rellenadoTitle) + '">' + (obsoleto ? '⚠ REGENERAR' : 'RELLENADO ✎') + '</button>'
         : "";
+      // Desde la v37 solo se puede quitar a un alumno desde UN sitio. Si el
+      // refuerzo viene de una sanción, ese sitio es la pestaña Sanciones: al
+      // quitarlo de la sanción se le quita también de aquí y se avisa de que
+      // hay que rehacer el documento. Un refuerzo MANUAL no tiene sanción
+      // detrás, así que se borra desde aquí mismo.
+      var borrarCell = r.origen === "sancion"
+        ? '<span class="desde-sanciones" title="Este refuerzo viene de la sanción del expediente Nº ' +
+          escapeHtml(String(r.expediente)) + '. Para quitar a un alumno, hazlo desde la pestaña Sanciones: ' +
+          'se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento.">Desde Sanciones</span>'
+        : '<button class="btn small danger-ghost" data-delref="' + r.id + '" data-delrefnum="' + escapeHtml(String(al.numero)) +
+          '" title="Refuerzo manual: quita a este alumno del expediente. Los demás alumnos no se ven afectados.">Eliminar</button>';
       return "<tr>" +
         "<td>" + escapeHtml(al.numero) + "</td>" +
         "<td>" + alumnoLineaHtml(al.numero, escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre)) + "</td>" +
@@ -7960,12 +8299,18 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "<td>" + escapeHtml(r.tipo) + "</td>" +
         "<td>" + escapeHtml(r.horaInicio || "—") + "</td>" +
         "<td>" + origenCell + "</td>" +
-        '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + pdfBtn + rellenadoBadge + '<button class="btn small danger-ghost" data-delref="' + r.id + '">Eliminar</button></td>' +
+        '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + pdfBtn + rellenadoBadge + borrarCell + '</td>' +
         "</tr>";
     }).join("");
 
+    renderAvisoDocumentos();
+
     refuerzosTableBody.querySelectorAll("[data-delref]").forEach(function(btn){
-      btn.addEventListener("click", function(){ deleteRefuerzo(btn.getAttribute("data-delref")); });
+      btn.addEventListener("click", function(){
+        if (!quitarAlumnoDeRefuerzo(btn.getAttribute("data-delref"), btn.getAttribute("data-delrefnum"))) return;
+        renderRefuerzosList();
+        renderSancionesList();
+      });
     });
     refuerzosTableBody.querySelectorAll("[data-pdfref]").forEach(function(btn){
       btn.addEventListener("click", function(){
@@ -8216,6 +8561,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       // con marcarlo una vez para que la leyenda aparezca en todas sus filas.
       record.rellenado = true;
       record.rellenadoFecha = new Date().toISOString();
+      // El documento recién generado ya lleva los alumnos que hay ahora, así
+      // que el aviso de "hay que regenerarlo" deja de tener sentido.
+      delete record.docPendiente;
       persistRefuerzos();
       renderRefuerzosList();
     } catch(err){
@@ -8524,46 +8872,167 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // no se "borra" como concepto, sigue existiendo si tiene más contenido.
   // Se usa desde Consultas, donde se pide poder quitar a un alumno de un
   // expediente sin tocar el resto.
-  function quitarAlumnoDeExpedienteDesdeConsulta(sancionId, numero, nombreCompleto, expediente){
-    var record = sanciones.filter(function(r){ return r.id === sancionId; })[0];
-    if (!record) return false;
-    var confirmMsg = "¿Quitar a " + nombreCompleto + " (Nº " + numero + ") del expediente Nº " + expediente + "?\n\n" +
-      "Esto NO elimina el expediente ni afecta a otros alumnos u otras sanciones que compartan ese mismo número. " +
-      "Si era el único alumno de esta sanción en concreto, esa sanción desaparecerá por quedarse sin nadie; " +
-      "el expediente seguirá existiendo si tiene más contenido.";
-    if (!confirm(confirmMsg)) return false;
-    record.alumnos = (record.alumnos || []).filter(function(al){ return al.numero !== numero; });
+  // Las tablas de Sanciones y de Refuerzos muestran UNA FILA POR ALUMNO, pero
+  // hasta la v34 su botón "Eliminar" borraba el REGISTRO ENTERO: al pulsarlo en
+  // la fila de un alumno desaparecían también sus compañeros de expediente.
+  // Desde la v34 estas dos funciones son la ÚNICA vía de borrado desde
+  // cualquier sitio (pestañas, historial del alumno y Consultas) y quitan
+  // solo al alumno indicado. El registro desaparece únicamente si se queda
+  // sin ningún alumno.
+  function nombreCompletoDeAlumnoRec(al){
+    return [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + (al.nombre || "");
+  }
+
+  function listaOtrosAlumnosTexto(alumnos, numero){
+    return (alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); })
+      .map(function(al){ return "  · " + nombreCompletoDeAlumnoRec(al) + " (Nº " + al.numero + ")"; })
+      .join("\n");
+  }
+
+  // Refuerzos que nacieron de esta sanción y en los que además figura el alumno.
+  function refuerzosDerivadosDe(sancionId, numero){
+    return refuerzos.filter(function(r){
+      return r.sancionId && String(r.sancionId) === String(sancionId) &&
+        (r.alumnos || []).some(function(al){ return String(al.numero) === String(numero); });
+    });
+  }
+
+  // Borra la línea que esa sanción tuviera en la hoja de seguimiento del alumno.
+  function olvidarLineaSeguimiento(numero, sancionId){
+    var s = seguimientos[String(numero)];
+    if (!s || !s.lineas || !s.lineas[sancionId]) return;
+    delete s.lineas[sancionId];
+    persistSeguimientos();
+  }
+
+  // ---------- DOCUMENTO (ANEXO) DESACTUALIZADO ----------
+  // El ANEXO de un refuerzo nombra a todos sus alumnos. Si se quita a uno
+  // DESPUÉS de haberlo generado, el PDF descargado deja de ser válido y hay
+  // que rehacerlo. Se anota en el propio registro para poder avisar de qué
+  // expediente y qué alumno se trata.
+  function marcarDocumentoDesactualizado(record, alumno){
+    if (!record || !record.rellenado || !alumno) return;
+    if (!record.docPendiente){
+      record.docPendiente = { generadoFecha: record.rellenadoFecha || "", quitados: [] };
+    }
+    record.docPendiente.quitados.push({
+      numero: String(alumno.numero),
+      nombre: nombreCompletoDeAlumnoRec(alumno),
+      fecha: new Date().toISOString()
+    });
+  }
+
+  function refuerzosConDocumentoPendiente(){
+    return refuerzos.filter(function(r){
+      return r.docPendiente && r.docPendiente.quitados && r.docPendiente.quitados.length;
+    });
+  }
+
+  function textoQuitadosDe(record){
+    var q = (record.docPendiente && record.docPendiente.quitados) || [];
+    return q.map(function(x){ return x.nombre + " (Nº " + x.numero + ")"; }).join(", ");
+  }
+
+  function fechaUltimoQuitado(record){
+    var q = (record.docPendiente && record.docPendiente.quitados) || [];
+    if (!q.length) return "";
+    return String(q[q.length - 1].fecha || "").slice(0, 10);
+  }
+
+  function quitarAlumnoDeRefuerzoRecord(record, numero){
+    var alumno = (record.alumnos || []).filter(function(al){ return String(al.numero) === String(numero); })[0];
+    record.alumnos = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
     if (!record.alumnos.length){
-      sanciones = sanciones.filter(function(r){ return r.id !== sancionId; });
+      // El refuerzo desaparece: no queda documento que regenerar. El aviso de
+      // confirmación ya advirtió de que el documento generado queda anulado.
+      refuerzos = refuerzos.filter(function(r){ return r.id !== record.id; });
+      return true;
+    }
+    marcarDocumentoDesactualizado(record, alumno);
+    return false;
+  }
+
+  function quitarAlumnoDeSancion(sancionId, numero){
+    var record = sanciones.filter(function(r){ return String(r.id) === String(sancionId); })[0];
+    if (!record) return false;
+    var alumno = (record.alumnos || []).filter(function(al){ return String(al.numero) === String(numero); })[0];
+    if (!alumno) return false;
+    var restantes = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
+    var derivados = refuerzosDerivadosDe(sancionId, numero);
+
+    var msg = "Vas a quitar a " + nombreCompletoDeAlumnoRec(alumno) + " (Nº " + numero +
+      ") del expediente de sanción Nº " + record.expediente + ".\n\n";
+    if (!restantes.length){
+      msg += "Es el ÚNICO alumno de esta sanción, así que la sanción se eliminará por completo.\n" +
+        "Otras sanciones que compartan ese mismo número de expediente NO se ven afectadas.\n";
+    } else {
+      msg += "La sanción SEGUIRÁ EXISTIENDO con " + restantes.length + " alumno" +
+        (restantes.length === 1 ? "" : "s") + ":\n" + listaOtrosAlumnosTexto(record.alumnos, numero) + "\n";
+    }
+    if (derivados.length){
+      msg += "\nTambién se le quitará del refuerzo derivado de esta sanción (" +
+        derivados.map(function(r){ return "Nº " + r.expediente; }).join(", ") + ").\n";
+      derivados.forEach(function(r){
+        if (!r.rellenado) return;
+        var soloEl = (r.alumnos || []).length <= 1;
+        var cuando = formatDateDisplay(String(r.rellenadoFecha || "").slice(0,10));
+        msg += soloEl
+          ? "\nATENCIÓN: el documento (ANEXO) del refuerzo Nº " + r.expediente + " ya se generó el " + cuando +
+            ". Al quedarse ese refuerzo sin alumnos desaparecerá, así que ese documento queda ANULADO.\n"
+          : "\nEl documento (ANEXO) del refuerzo Nº " + r.expediente + " ya se generó el " + cuando +
+            ": habrá que volver a generarlo. La aplicación te lo recordará en la pestaña Refuerzos.\n";
+      });
+    }
+    msg += "\nEsta acción no se puede deshacer. ¿Continuar?";
+    if (!confirm(msg)) return false;
+
+    if (record.trabajoHechoPor) delete record.trabajoHechoPor[String(numero)];
+    olvidarLineaSeguimiento(numero, record.id);
+    record.alumnos = restantes;
+    if (!restantes.length){
+      sanciones = sanciones.filter(function(r){ return String(r.id) !== String(sancionId); });
     }
     persistSanciones();
+
+    if (derivados.length){
+      derivados.forEach(function(r){ quitarAlumnoDeRefuerzoRecord(r, numero); });
+      persistRefuerzos();
+    }
     return true;
   }
 
-  // HTML del botón que aparece en las filas de Consultas para poder quitar
-  // a ese alumno de ese expediente en concreto (ver quitarAlumnoDeExpedienteDesdeConsulta).
-  function botonQuitarExpedienteHtml(sancionId, numero, ape1, ape2, nombre, expediente){
-    var nombreCompleto = [ape1, ape2].filter(Boolean).join(" ") + ", " + (nombre || "");
-    return '<button type="button" class="btn small danger-ghost" data-quitar-san="' + escapeHtml(String(sancionId)) +
-      '" data-quitar-num="' + escapeHtml(String(numero)) + '" data-quitar-nombre="' + escapeHtml(nombreCompleto) +
-      '" data-quitar-exp="' + escapeHtml(String(expediente)) + '">Quitar del expediente</button>';
-  }
+  function quitarAlumnoDeRefuerzo(refuerzoId, numero){
+    var record = refuerzos.filter(function(r){ return String(r.id) === String(refuerzoId); })[0];
+    if (!record) return false;
+    var alumno = (record.alumnos || []).filter(function(al){ return String(al.numero) === String(numero); })[0];
+    if (!alumno) return false;
+    var restantes = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
 
-  // Delega el evento "quitar alumno del expediente" desde cualquier tabla
-  // de resultados de Consultas y, si se llevó a cabo, vuelve a lanzar la
-  // misma consulta (con los mismos filtros ya puestos) para refrescar.
-  function wireQuitarAlumnoDeExpedienteEnConsulta(container){
-    container.querySelectorAll("[data-quitar-san]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        var hecho = quitarAlumnoDeExpedienteDesdeConsulta(
-          btn.getAttribute("data-quitar-san"),
-          btn.getAttribute("data-quitar-num"),
-          btn.getAttribute("data-quitar-nombre"),
-          btn.getAttribute("data-quitar-exp")
-        );
-        if (hecho) consBuscarBtn.click();
-      });
-    });
+    var msg = "Vas a quitar a " + nombreCompletoDeAlumnoRec(alumno) + " (Nº " + numero +
+      ") del expediente de refuerzo Nº " + (record.expediente || "—") + ".\n\n";
+    if (!restantes.length){
+      msg += "Es el ÚNICO alumno de este refuerzo, así que el refuerzo se eliminará por completo.\n";
+    } else {
+      msg += "El refuerzo SEGUIRÁ EXISTIENDO con " + restantes.length + " alumno" +
+        (restantes.length === 1 ? "" : "s") + ":\n" + listaOtrosAlumnosTexto(record.alumnos, numero) + "\n";
+    }
+    if (record.origen === "sancion"){
+      msg += "\nLa sanción de la que salió este refuerzo NO se toca.\n";
+    }
+    if (record.rellenado){
+      var cuandoDoc = formatDateDisplay(String(record.rellenadoFecha || "").slice(0,10));
+      msg += restantes.length
+        ? "\nEl documento (ANEXO) de este refuerzo ya se generó el " + cuandoDoc +
+          ": habrá que volver a generarlo sin este alumno. La aplicación te lo recordará en la pestaña Refuerzos.\n"
+        : "\nATENCIÓN: el documento (ANEXO) de este refuerzo ya se generó el " + cuandoDoc +
+          ". Al desaparecer el refuerzo, ese documento queda ANULADO.\n";
+    }
+    msg += "\nEsta acción no se puede deshacer. ¿Continuar?";
+    if (!confirm(msg)) return false;
+
+    quitarAlumnoDeRefuerzoRecord(record, numero);
+    persistRefuerzos();
+    return true;
   }
 
   // Recopila el personal con rebaje, refuerzo o arresto que se solape con
@@ -8625,7 +9094,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       } else {
         body = '<table class="consulta-table"><thead><tr>' +
           '<th>Número</th><th>Alumno</th><th>Pelotón</th><th>Desde</th><th>Hasta</th><th>Detalle</th>' +
-          (esSancionados ? '<th class="no-print">Acciones</th>' : '') +
           '</tr></thead><tbody>' +
           rows.map(function(r){
             return "<tr>" +
@@ -8635,7 +9103,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               "<td>" + formatDateDisplay(r.desde) + "</td>" +
               "<td>" + formatDateDisplay(r.hasta) + "</td>" +
               "<td>" + escapeHtml(r.detalle || "—") + "</td>" +
-              (esSancionados ? "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" : "") +
               "</tr>";
           }).join("") +
           "</tbody></table>";
@@ -8655,7 +9122,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   // Sanciones de "Arresto" cuya fecha se marcó como pendiente al crearlas
@@ -8687,7 +9153,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       html += '<div class="empty-state">No hay sanciones de arresto con la fecha pendiente.</div>';
     } else {
       html += '<table class="consulta-table"><thead><tr>' +
-        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha sanción</th><th>Motivo</th><th class="no-print">Acciones</th>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha sanción</th><th>Motivo</th>' +
         '</tr></thead><tbody>' +
         rows.map(function(r){
           return "<tr>" +
@@ -8697,7 +9163,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
             "<td>" + formatDateDisplay(r.fecha) + "</td>" +
             "<td>" + escapeHtml(r.motivo || "—") + "</td>" +
-            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
             "</tr>";
         }).join("") +
         "</tbody></table>";
@@ -8705,7 +9170,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   // Misma consulta que arriba, pero agrupada por expediente (una sanción de
@@ -8744,14 +9208,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           body = '<div class="empty-state">Sin alumnos.</div>';
         } else {
           body = '<table class="consulta-table"><thead><tr>' +
-            '<th>Número</th><th>Alumno</th><th>Pelotón</th><th class="no-print">Acciones</th>' +
+            '<th>Número</th><th>Alumno</th><th>Pelotón</th>' +
             '</tr></thead><tbody>' +
             g.alumnos.map(function(r){
               return "<tr>" +
                 "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
                 "<td>" + alumnoLineaHtml(r.numero, escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "")) + "</td>" +
                 "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
-                "<td class=\"no-print\">" + botonQuitarExpedienteHtml(g.sancionId, r.numero, r.ape1, r.ape2, r.nombre, g.expediente) + "</td>" +
                 "</tr>";
             }).join("") +
             "</tbody></table>";
@@ -8766,7 +9229,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
 
     consResultados.innerHTML = html;
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
     consResultadosWrap.classList.remove("hidden");
   }
 
@@ -8817,7 +9279,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       html += '<div class="empty-state">' + (soloVencidos ? "No hay trabajos vencidos: todo está al día." : "No hay sanciones con medida «Trabajo no superior a 5 horas» registradas.") + '</div>';
     } else {
       html += '<table class="consulta-table"><thead><tr>' +
-        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha límite</th><th>Estado</th><th class="no-print">Marcar</th><th class="no-print">Acciones</th>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha límite</th><th>Estado</th><th class="no-print">Marcar</th>' +
         '</tr></thead><tbody>' +
         rows.map(function(r){
           var estadoCell = r.trabajoHecho
@@ -8831,7 +9293,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             "<td>" + formatDateDisplay(r.trabajoFechaFin) + "</td>" +
             "<td>" + estadoCell + "</td>" +
             '<td class="no-print"><label class="multi-list-item" style="margin:0;"><input type="checkbox" class="cons-trab-hecho-check" data-trabajoid="' + escapeHtml(String(r.sancionId)) + '" data-numero="' + escapeHtml(String(r.numero)) + '" ' + (r.trabajoHecho ? 'checked' : '') + '><span>Hecho</span></label></td>' +
-            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
             "</tr>";
         }).join("") +
         "</tbody></table>";
@@ -8839,7 +9300,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
     consResultados.querySelectorAll(".cons-trab-hecho-check").forEach(function(cb){
       cb.addEventListener("change", function(){
         toggleTrabajoHecho(cb.getAttribute("data-trabajoid"), cb.getAttribute("data-numero"), cb.checked);
@@ -9090,6 +9550,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return '<tr><th style="width:32%;white-space:normal;">' + escapeHtml(label) + '</th><td style="white-space:normal;">' + (valor || "—") + '</td></tr>';
   }
 
+  // Desde la v37 esta tabla es SOLO DE LECTURA. Quitar a un alumno se hace
+  // únicamente desde la pestaña Sanciones (o desde Refuerzos si el refuerzo
+  // es manual), para que haya un solo sitio donde borrar y no se generen
+  // descuadres entre una vista y otra.
   function alumnosTablaHtml(alumnos){
     if (!alumnos || !alumnos.length) return '<div class="empty-state">Sin alumnos en este registro.</div>';
     // Un solo alumno: su retrato al lado. Varios: desplegable con la foto,
@@ -9103,7 +9567,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       alumnos.map(function(al){
         return "<tr><td>" + escapeHtml(String(al.numero || "—")) + "</td><td>" +
           alumnoLineaHtml(al.numero, escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre || "")) +
-          "</td><td>" + (al.peloton ? '<span class="pelo-badge">' + escapeHtml(al.peloton) + '</span>' : "—") + "</td></tr>";
+          "</td><td>" + (al.peloton ? '<span class="pelo-badge">' + escapeHtml(al.peloton) + '</span>' : "—") + "</td>" +
+          "</tr>";
       }).join("") + "</tbody></table>";
   }
 
@@ -9194,7 +9659,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   if (consExpedienteInput){
@@ -9208,12 +9672,25 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var esArrestoPendiente = tipo === "arresto_pendiente";
     var esTrabajos = tipo === "trabajos";
     var esExpediente = tipo === "expediente";
+    var esSeguimiento = tipo === "seguimiento";
     consFechasWrap.classList.toggle("hidden", !esEstadoPeriodo);
     consActividadFaseWrap.classList.toggle("hidden", !esActividades);
     consArrestoPendienteWrap.classList.toggle("hidden", !esArrestoPendiente);
     consTrabajosWrap.classList.toggle("hidden", !esTrabajos);
     consExpedienteWrap.classList.toggle("hidden", !esExpediente);
+    consSeguimientoWrap.classList.toggle("hidden", !esSeguimiento);
+    // La hoja de seguimiento no usa el botón «Consultar»: se abre sola al
+    // elegir al alumno, porque es una pantalla de edición, no un informe.
     consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos || esExpediente));
+    if (!esSeguimiento){
+      segWrap.classList.add("hidden");
+    } else {
+      segCadeteInput.value = "";
+      segCadetePreview.classList.remove("show");
+      segCadeteHint.classList.add("hidden");
+      segWrap.classList.add("hidden");
+      buildSegCadeteOptions();
+    }
     consResultadosWrap.classList.add("hidden");
     consResultados.innerHTML = "";
     consImprimirBtn.disabled = true;
@@ -9745,12 +10222,507 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     setTimeout(function(){ document.body.classList.remove("print-calendario"); }, 400);
   });
 
+
+  // ================= HOJA DE SEGUIMIENTO =================
+  // Replica el formato del archivo de la Sección: cabecera con protocolo,
+  // filiación, ciclo, compañía, sección y foto, y una tabla de FECHA ·
+  // MOTIVO · FIRMA INSTRUCTOR · FIRMA AMPT · OBSERVACIONES. Se rellena con
+  // las sanciones del alumno; se elige cuáles van y se pueden reescribir sus
+  // observaciones sin tocar el expediente original.
+  var SEG_FILAS_PRIMERA = 5;   // filas que caben en la primera página
+  var SEG_FILAS_SIGUIENTE = 7; // y en las siguientes, que no llevan tanta cabecera
+
+  var SEGUIMIENTO_KEY = "seccion3_seguimiento_v1";
+  // Lo que el usuario elige y reescribe se guarda por alumno, para poder
+  // volver luego a la hoja y seguir editándola en vez de empezar de cero.
+  var seguimientos = {};   // numero -> { lineas: { sancionId: {incluida, observaciones} }, actualizado }
+
+  var segNumero = null;
+  var segLineas = [];   // { id, fecha, motivo, observaciones, incluida }
+  var segDestino = "consulta";  // "consulta" | "historial"
+
+  function persistSeguimientos(){
+    try { localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(seguimientos)); return true; }
+    catch(err){ return false; }
+  }
+  function loadSeguimientosFromStorage(){
+    try {
+      var raw = localStorage.getItem(SEGUIMIENTO_KEY);
+      if (raw){
+        var d = JSON.parse(raw);
+        if (d && typeof d === "object") seguimientos = d;
+      }
+    } catch(err){}
+  }
+  function segGuardarEstado(){
+    if (segNumero == null) return;
+    var lineas = {};
+    segLineas.forEach(function(l){
+      lineas[l.id] = { incluida: !!l.incluida, observaciones: l.observaciones || "" };
+    });
+    seguimientos[String(segNumero)] = { lineas: lineas, actualizado: new Date().toISOString() };
+    persistSeguimientos();
+  }
+  function segTieneHoja(numero){
+    var g = seguimientos[String(numero)];
+    return !!(g && g.lineas && Object.keys(g.lineas).length);
+  }
+
+  // Texto de partida de las observaciones de una sanción.
+  function segObservacionesDe(r){
+    if (r.observaciones && r.observaciones.trim()) return r.observaciones.trim();
+    var partes = [];
+    if (r.motivo) partes.push(r.motivo.trim());
+    var medida = formatMedidaCorrectora(r);
+    if (medida && medida !== "—") partes.push("Medida correctora: " + medida + ".");
+    return partes.join(" ");
+  }
+  function segMotivoDe(r){
+    return (r.motivo && r.motivo.trim()) || (r.fundamento || "").trim();
+  }
+
+  // Todas las sanciones del alumno, ordenadas por fecha, listas para elegir.
+  function segConstruirLineas(numero){
+    var num = String(numero);
+    var guardado = (seguimientos[num] && seguimientos[num].lineas) || {};
+    var lista = [];
+    sanciones.forEach(function(r){
+      if (!(r.alumnos || []).some(function(al){ return String(al.numero) === num; })) return;
+      var previo = guardado[r.id];
+      lista.push({
+        id: r.id,
+        expediente: r.expediente,
+        fecha: r.fecha,
+        motivo: segMotivoDe(r),
+        // Si ya se editó esta hoja antes, se recupera tal cual se dejó; las
+        // sanciones nuevas entran marcadas y con el texto del expediente.
+        observaciones: previo ? previo.observaciones : segObservacionesDe(r),
+        incluida: previo ? !!previo.incluida : true
+      });
+    });
+    lista.sort(function(a,b){ return String(a.fecha).localeCompare(String(b.fecha)); });
+    return lista;
+  }
+
+  // Reparte las líneas elegidas en páginas. No hay tope: cuando se llena una,
+  // se abre otra con la misma cabecera y la marca de continuación.
+  function segPaginar(lineas){
+    var paginas = [], i = 0;
+    while (i < lineas.length){
+      var cabe = paginas.length === 0 ? SEG_FILAS_PRIMERA : SEG_FILAS_SIGUIENTE;
+      paginas.push(lineas.slice(i, i + cabe));
+      i += cabe;
+    }
+    if (!paginas.length) paginas.push([]);
+    return paginas;
+  }
+
+  function segDatosAlumno(numero){
+    var d = datosAlumnoFoto(numero);
+    var info = computeSeccionInfo();
+    return {
+      numero: d.numero,
+      completo: (d.apellidos ? d.apellidos.toUpperCase() : "") + (d.nombre ? ", " + d.nombre.toUpperCase() : ""),
+      foto: d.foto,
+      compania: info && info.company ? seccionOrdinal(info.company) + " COMPAÑÍA" : "",
+      seccion: info && info.section ? seccionOrdinal(info.section) + " SECCIÓN" : "",
+      ciclo: (fasesCiclo.ciclo || "").trim()
+    };
+  }
+
+  function segHojaHtml(pagina, indice, total, alumno){
+    var filas = pagina.map(function(l){
+      return '<tr><td class="f">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+        '<td class="m">' + escapeHtml(l.motivo || "") + '</td>' +
+        '<td class="fir"></td><td class="fir"></td>' +
+        '<td>' + escapeHtml(l.observaciones || "") + '</td></tr>';
+    }).join("");
+    if (!filas){
+      filas = '<tr><td class="f">&nbsp;</td><td class="m"></td><td class="fir"></td>' +
+              '<td class="fir"></td><td></td></tr>';
+    }
+    return '<div class="seg-hoja">' +
+      '<div class="seg-h1"><span>CEFOT 2</span><span>BON. ALUMNOS</span></div>' +
+      '<div class="seg-tit">HOJA DE SEGUIMIENTO' +
+        (indice > 0 ? ' <i>(continuación)</i>' : '') + '</div>' +
+      '<div class="seg-prot"><span>N.º PROTOCOLO</span>' +
+        '<span class="caja">' + escapeHtml(alumno.numero) + '</span></div>' +
+      '<div class="seg-cab"><div class="seg-cab-izq">' +
+        '<div class="seg-lin"><b>APELLIDOS, NOMBRE</b><span class="caja">' +
+          escapeHtml(alumno.completo) + '</span></div>' +
+        '<div class="seg-lin"><b>CICLO</b><span class="caja corta">' +
+          escapeHtml(alumno.ciclo) + '</span>' +
+          '<span style="flex:1;"><div class="seg-centro">' + escapeHtml(alumno.compania) + '</div>' +
+          '<div class="seg-centro">' + escapeHtml(alumno.seccion) + '</div></span></div>' +
+      '</div>' +
+      '<div class="seg-foto">' + (alumno.foto
+        ? '<img src="' + alumno.foto + '" alt="">'
+        : 'FOTO') + '</div></div>' +
+      '<table><thead><tr><th style="width:72px;">FECHA</th><th style="width:205px;">MOTIVO</th>' +
+        '<th style="width:86px;">FIRMA<br>INSTRUCTOR</th><th style="width:86px;">FIRMA<br>AMPT</th>' +
+        '<th>OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<div class="seg-pie">Página ' + (indice + 1) + ' de ' + total +
+        (indice + 1 < total ? ' · continúa en la página siguiente' : '') + '</div>' +
+      '</div>';
+  }
+
+  function segRenderizar(){
+    var cont = document.getElementById("segBody");
+    if (!cont || segNumero == null) return;
+    var alumno = segDatosAlumno(segNumero);
+    var elegidas = segLineas.filter(function(l){ return l.incluida; });
+    var paginas = segPaginar(elegidas);
+
+    var h = [];
+    h.push('<div class="chips">' +
+      '<span class="chip">' + segLineas.length + (segLineas.length === 1 ? ' sanción registrada' : ' sanciones registradas') + '</span>' +
+      '<span class="chip">' + elegidas.length + ' seleccionada' + (elegidas.length === 1 ? '' : 's') + '</span>' +
+      '<span class="chip">' + paginas.length + ' página' + (paginas.length === 1 ? '' : 's') + '</span>' +
+      (alumno.ciclo ? '' : '<span class="chip" style="background:var(--warn-soft);color:var(--warn);border-color:#e8d3a0;">Sin ciclo: ponlo en Actividades</span>') +
+      (segTieneHoja(segNumero)
+        ? '<span class="chip" style="background:var(--accent2-soft);color:var(--accent2-bright);border-color:#e0cfa4;">Hoja ya editada · ' +
+          escapeHtml(formatDateDisplay(String((seguimientos[String(segNumero)] || {}).actualizado || "").slice(0,10))) + '</span>'
+        : '') +
+      '</div>');
+
+    if (!segLineas.length){
+      h.push('<div class="empty-state">Este alumno no tiene ninguna sanción registrada.</div>');
+    } else {
+      h.push('<table class="seg-sel"><thead><tr><th></th><th>Fecha</th><th>Exp.</th>' +
+        '<th>Motivo</th><th>Observaciones (editables)</th></tr></thead><tbody>' +
+        segLineas.map(function(l, i){
+          return '<tr class="' + (l.incluida ? '' : 'off') + '">' +
+            '<td style="width:26px;"><input type="checkbox" class="seg-check" data-i="' + i + '"' +
+              (l.incluida ? ' checked' : '') + '></td>' +
+            '<td style="width:88px;white-space:nowrap;">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+            '<td style="width:52px;"><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
+            '<td style="width:240px;">' + escapeHtml(l.motivo || "—") + '</td>' +
+            '<td><textarea class="seg-obs" data-i="' + i + '" rows="2">' + escapeHtml(l.observaciones || "") + '</textarea></td>' +
+          '</tr>';
+        }).join("") + '</tbody></table>');
+      h.push('<div class="seg-aviso">Las observaciones salen del expediente tal cual están. Lo que escribas aquí es lo que irá al documento; el expediente original no se toca.</div>');
+    }
+
+    h.push('<div class="seg-papel">' + paginas.map(function(pag, i){
+      return segHojaHtml(pag, i, paginas.length, alumno);
+    }).join("") + '</div>');
+
+    h.push('<div class="form-actions seg-acciones">' +
+      '<button type="button" class="btn primary" id="segDescargarBtn"' +
+        (elegidas.length ? '' : ' disabled') + '>Rellenar documento</button>' +
+      '<button type="button" class="btn ghost" id="segImprimirBtn"' +
+        (elegidas.length ? '' : ' disabled') + '>Imprimir</button>' +
+      '<span class="hint" style="margin:0;">El documento se descarga como PDF editable, con la foto del alumno y el mismo formato: puedes rellenar y corregir cada casilla en el propio PDF. Aquí puedes seguir cambiando las casillas y el texto y volver a generarlo.</span>' +
+      '</div>');
+
+    cont.innerHTML = h.join("");
+    segConectarControles(cont);
+  }
+
+  function segConectarControles(cont){
+    cont.querySelectorAll(".seg-check").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var i = parseInt(cb.getAttribute("data-i"), 10);
+        if (segLineas[i]) segLineas[i].incluida = cb.checked;
+        segGuardarEstado();
+        segRenderizar();
+      });
+    });
+    cont.querySelectorAll(".seg-obs").forEach(function(ta){
+      ta.addEventListener("input", function(){
+        var i = parseInt(ta.getAttribute("data-i"), 10);
+        if (segLineas[i]) segLineas[i].observaciones = ta.value;
+      });
+      // Al salir del campo se repinta la vista previa con el texto nuevo.
+      ta.addEventListener("blur", function(){ segGuardarEstado(); segRenderizar(); });
+    });
+    var desc = cont.querySelector("#segDescargarBtn");
+    if (desc) desc.addEventListener("click", segDescargar);
+    var imp = cont.querySelector("#segImprimirBtn");
+    if (imp) imp.addEventListener("click", function(){
+      document.body.classList.add("print-seg");
+      document.body.classList.add(segDestino === "historial" ? "seg-desde-historial" : "seg-desde-consulta");
+      window.print();
+      setTimeout(function(){
+        document.body.classList.remove("print-seg", "seg-desde-historial", "seg-desde-consulta");
+      }, 400);
+    });
+  }
+
+  // Genera la hoja de cálculo con el mismo formato que el archivo original.
+  // La hoja de seguimiento se descarga como PDF EDITABLE: cada casilla es un
+  // campo de formulario que se puede rellenar y corregir en cualquier lector
+  // de PDF, y la fotografía del alumno va incrustada como en la pantalla.
+  // Se usa pdf-lib (ya incrustada para el ANEXO), no una plantilla externa.
+  var SEG_PDF_ANCHOS = [62, 150, 72, 72, 159]; // FECHA, MOTIVO, FIRMAS, OBSERVACIONES
+
+  // Helvetica solo admite WinAnsi: se cambian los caracteres que no entran
+  // para que pdf-lib no falle al dibujar.
+  function segPdfTexto(v){
+    return String(v == null ? "" : v)
+      .replace(/[\u2018\u2019\u201A\u2032]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u2033]/g, '"')
+      .replace(/[\u2013\u2014\u2212]/g, "-")
+      .replace(/\u2026/g, "...")
+      .replace(/\u00A0/g, " ")
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
+  }
+
+  async function segDescargar(){
+    if (typeof PDFLib === "undefined"){
+      alert("No se ha podido cargar la librería de PDF.");
+      return;
+    }
+    var alumno = segDatosAlumno(segNumero);
+    var elegidas = segLineas.filter(function(l){ return l.incluida; });
+    if (!elegidas.length) return;
+    var paginas = segPaginar(elegidas);
+
+    try {
+      var rgb = PDFLib.rgb;
+      var NEGRO = rgb(0, 0, 0);
+      var BLANCO = rgb(1, 1, 1);
+      var GRIS = rgb(0.86, 0.86, 0.86);
+
+      var pdfDoc = await PDFLib.PDFDocument.create();
+      var form = pdfDoc.getForm();
+      var fn = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      var fb = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+      // Fotografía del alumno (la misma que se ve en pantalla).
+      var foto = null;
+      if (alumno.foto){
+        try {
+          foto = /^data:image\/png/i.test(alumno.foto)
+            ? await pdfDoc.embedPng(alumno.foto)
+            : await pdfDoc.embedJpg(alumno.foto);
+        } catch(e){ foto = null; }
+      }
+
+      var ANCHO = 595.28, ALTO = 841.89, M = 40;
+      var UTIL = SEG_PDF_ANCHOS.reduce(function(a, b){ return a + b; }, 0); // 515
+
+      paginas.forEach(function(pag, idx){
+        var pagina = pdfDoc.addPage([ANCHO, ALTO]);
+        var top = ALTO - M;
+
+        function texto(t, x, y, size, negrita, color){
+          pagina.drawText(segPdfTexto(t), {
+            x: x, y: y, size: size || 9,
+            font: negrita ? fb : fn,
+            color: color || NEGRO
+          });
+        }
+        function anchoDe(t, size, negrita){
+          return (negrita ? fb : fn).widthOfTextAtSize(segPdfTexto(t), size);
+        }
+        function subrayado(t, x, y, size, negrita){
+          texto(t, x, y, size, negrita);
+          pagina.drawLine({
+            start: { x: x, y: y - 2 }, end: { x: x + anchoDe(t, size, negrita), y: y - 2 },
+            thickness: 0.8, color: NEGRO
+          });
+        }
+        function caja(x, y, w, h, relleno){
+          pagina.drawRectangle({
+            x: x, y: y, width: w, height: h,
+            borderWidth: 0.8, borderColor: NEGRO,
+            color: relleno || undefined
+          });
+        }
+        // OJO: setFontSize y setAlignment necesitan que el campo tenga ya su
+        // entrada /DA, y esa la crea addToPage. Si se llaman antes, pdf-lib
+        // lanza «No /DA (default appearance) entry found for field».
+        function campo(nombre, valor, x, y, w, h, opts){
+          opts = opts || {};
+          var f = form.createTextField("p" + idx + "_" + nombre);
+          f.setText(segPdfTexto(valor || ""));
+          if (opts.multi) f.enableMultiline();
+          f.addToPage(pagina, {
+            x: x, y: y, width: w, height: h,
+            borderWidth: 0.8, borderColor: NEGRO, backgroundColor: BLANCO,
+            font: fn
+          });
+          f.setFontSize(opts.size || 8);
+          if (opts.centrado) f.setAlignment(PDFLib.TextAlignment.Center);
+          return f;
+        }
+
+        // ---------- cabecera ----------
+        subrayado("CEFOT 2", M, top - 10, 11, true);
+        var derecha = "BON. ALUMNOS";
+        subrayado(derecha, M + UTIL - anchoDe(derecha, 11, true), top - 10, 11, true);
+
+        var titulo = "HOJA DE SEGUIMIENTO" + (idx > 0 ? " (continuación)" : "");
+        subrayado(titulo, M + (UTIL - anchoDe(titulo, 12, true)) / 2, top - 40, 12, true);
+
+        // ---------- nº protocolo ----------
+        var protW = 92, protX = M + UTIL - protW, protY = top - 74;
+        var etiqProt = "N.º PROTOCOLO";
+        texto(etiqProt, protX - anchoDe(etiqProt, 9, true) - 8, protY + 5, 9, true);
+        campo("protocolo", alumno.numero, protX, protY, protW, 17, { centrado: true, size: 9 });
+
+        // ---------- datos del alumno + foto ----------
+        var fotoW = 92, fotoH = 108;
+        var fotoX = M + UTIL - fotoW, fotoY = top - 104 - fotoH;
+        caja(fotoX, fotoY, fotoW, fotoH);
+        if (foto){
+          var esc = Math.min((fotoW - 6) / foto.width, (fotoH - 6) / foto.height);
+          var iw = foto.width * esc, ih = foto.height * esc;
+          pagina.drawImage(foto, {
+            x: fotoX + (fotoW - iw) / 2, y: fotoY + (fotoH - ih) / 2, width: iw, height: ih
+          });
+        } else {
+          texto("FOTO", fotoX + (fotoW - anchoDe("FOTO", 9, true)) / 2, fotoY + fotoH / 2 - 3, 9, true);
+        }
+
+        var etiqX = M, campoX = M + 118, campoW = fotoX - 12 - campoX;
+        texto("APELLIDOS, NOMBRE", etiqX, top - 116, 9, true);
+        campo("nombre", alumno.completo, campoX, top - 122, campoW, 17, { size: 9 });
+
+        texto("CICLO", etiqX, top - 150, 9, true);
+        campo("ciclo", alumno.ciclo, campoX, top - 156, 78, 17, { centrado: true, size: 9 });
+
+        var centroX = campoX + 78, centroW = campoW - 78;
+        texto(alumno.compania, centroX + (centroW - anchoDe(alumno.compania, 9, true)) / 2, top - 150, 9, true);
+        texto(alumno.seccion, centroX + (centroW - anchoDe(alumno.seccion, 9, true)) / 2, top - 164, 9, true);
+
+        // ---------- tabla ----------
+        var CABS = ["FECHA", "MOTIVO", "FIRMA\nINSTRUCTOR", "FIRMA\nAMPT", "OBSERVACIONES"];
+        var tablaTop = fotoY - 16;
+        var cabH = 24;
+        var pieY = 42;
+        // Altura de fila IGUAL en todas las páginas: se reparte el hueco entre
+        // el máximo de filas que cabe (7). Una página con menos filas deja el
+        // hueco abajo, como en el documento original, en vez de estirarse.
+        var disponible = (tablaTop - cabH) - (pieY + 14);
+        var filaH = disponible / SEG_FILAS_SIGUIENTE;
+
+        var x = M;
+        CABS.forEach(function(c, i){
+          var w = SEG_PDF_ANCHOS[i];
+          caja(x, tablaTop - cabH, w, cabH, GRIS);
+          var lineas = c.split("\n");
+          lineas.forEach(function(ln, k){
+            var yy = tablaTop - cabH / 2 - 3 + (lineas.length === 2 ? (k === 0 ? 5 : -4) : 0);
+            texto(ln, x + (w - anchoDe(ln, 7.5, true)) / 2, yy, 7.5, true);
+          });
+          x += w;
+        });
+
+        pag.forEach(function(l, fi){
+          var y = tablaTop - cabH - filaH * (fi + 1);
+          var cx = M;
+          var valores = [
+            formatDateDisplay(l.fecha),
+            l.motivo || "",
+            "",
+            "",
+            l.observaciones || ""
+          ];
+          valores.forEach(function(v, ci){
+            var w = SEG_PDF_ANCHOS[ci];
+            campo("f" + fi + "c" + ci, v, cx, y, w, filaH, {
+              multi: ci !== 0,
+              centrado: ci === 0 || ci === 1,
+              size: ci === 0 ? 8 : 7.5
+            });
+            cx += w;
+          });
+        });
+
+        // ---------- pie ----------
+        var pie = "Página " + (idx + 1) + " de " + paginas.length +
+          (idx + 1 < paginas.length ? " · continúa en la página siguiente" : "");
+        texto(pie, M + UTIL - anchoDe(pie, 7.5, false), pieY, 7.5, false, rgb(0.35, 0.35, 0.35));
+      });
+
+      // Las tildes se dibujan con la fuente incrustada.
+      form.updateFieldAppearances(fn);
+
+      var bytes = await pdfDoc.save();
+      var blob = new Blob([bytes], { type: "application/pdf" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "HOJA_SEGUIMIENTO_" + alumno.numero + "_" + todayIso() + ".pdf";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 400);
+    } catch(err){
+      console.error(err);
+      alert("No se ha podido generar la hoja: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  var segCadeteInput = document.getElementById("segCadeteInput");
+  var segCadeteList = document.getElementById("segCadeteList");
+  var segCadetePreview = document.getElementById("segCadetePreview");
+  var segCadeteHint = document.getElementById("segCadeteHint");
+  var segWrap = document.getElementById("segWrap");
+  var consSeguimientoWrap = document.getElementById("consSeguimientoWrap");
+
+  function buildSegCadeteOptions(){
+    var k = state.keys;
+    segCadeteList.innerHTML = state.rows.map(function(row){
+      var numero = getVal(row, k.numero);
+      var etiqueta = numero + " — " + [getVal(row,k.ape1), getVal(row,k.ape2)].filter(Boolean).join(" ") +
+        ", " + getVal(row, k.nombre);
+      return '<option value="' + escapeHtml(etiqueta) + '">';
+    }).join("");
+  }
+
+  segCadeteInput.addEventListener("input", function(){
+    var val = segCadeteInput.value.trim();
+    var m = val.match(/^(\S+)\s*—/);
+    var numero = m ? m[1] : (val.match(/^(\d+)$/) ? val : null);
+    var row = numero ? findCadetByNumero(numero) : null;
+    if (row){
+      var k = state.keys;
+      var pel = getVal(row, k.peloton);
+      segCadetePreview.innerHTML = avatarHtml(numero, "md") + '<span class="num">Nº ' + escapeHtml(numero) + '</span><span>' +
+        escapeHtml([getVal(row,k.ape1), getVal(row,k.ape2)].filter(Boolean).join(" ")) + ', ' +
+        escapeHtml(getVal(row, k.nombre)) + (pel ? ' · Pelotón ' + escapeHtml(pel) : '') + '</span>';
+      segCadetePreview.classList.add("show");
+      segCadeteHint.classList.add("hidden");
+      segWrap.classList.remove("hidden");
+      segAbrir(numero, "consulta");
+    } else {
+      segCadetePreview.classList.remove("show");
+      segCadeteHint.classList.toggle("hidden", val === "");
+      segWrap.classList.add("hidden");
+    }
+  });
+
+  // La hoja dentro del historial es la MISMA pantalla, con el alumno puesto.
+  // Se mueve el contenedor #segBody al panel del historial y se devuelve a
+  // Consultas al cerrar, para no duplicar el código ni el estado.
+  function segAbrirEnHistorial(numero){
+    var destinoDom = document.getElementById("histSegBody");
+    var cuerpo = document.getElementById("segBody");
+    if (!destinoDom || !cuerpo) return;
+    if (cuerpo.parentNode !== destinoDom) destinoDom.appendChild(cuerpo);
+    segAbrir(numero, "historial");
+  }
+  function segDevolverACConsultas(){
+    var cuerpo = document.getElementById("segBody");
+    var casa = document.getElementById("segCasa");
+    if (cuerpo && casa && cuerpo.parentNode !== casa) casa.appendChild(cuerpo);
+  }
+
+  function segAbrir(numero, destino){
+    segNumero = numero;
+    segDestino = destino || "consulta";
+    segLineas = segConstruirLineas(numero);
+    segRenderizar();
+  }
+
   // ================= FECHAS DEL CICLO (FFMG / FFE) =================
   // Se guardan una sola vez para toda la sección. El calendario del alumno
   // las usa para etiquetar cada día con su fase y para acotar el periodo
   // cuando se elige ver una fase concreta.
   var FASES_KEY = "seccion3_fases_v1";
-  var fasesCiclo = { FFMG:{ini:"",fin:""}, FFE:{ini:"",fin:""} };
+  var fasesCiclo = { FFMG:{ini:"",fin:""}, FFE:{ini:"",fin:""}, ciclo:"" };
 
   var faseFFMGIni = document.getElementById("faseFFMGIni");
   var faseFFMGFin = document.getElementById("faseFFMGFin");
@@ -9759,6 +10731,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var faseFFMGDur = document.getElementById("faseFFMGDur");
   var faseFFEDur  = document.getElementById("faseFFEDur");
   var fasesHint   = document.getElementById("fasesHint");
+  var cicloInput  = document.getElementById("cicloInput");
 
   function persistFases(){
     try { localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo)); return true; }
@@ -9769,7 +10742,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var raw = localStorage.getItem(FASES_KEY);
       if (!raw) return;
       var d = JSON.parse(raw);
-      if (d && d.FFMG && d.FFE) fasesCiclo = d;
+      if (d && d.FFMG && d.FFE){
+        fasesCiclo = d;
+        if (typeof fasesCiclo.ciclo !== "string") fasesCiclo.ciclo = "";
+      }
     } catch(err){}
   }
   function faseDeFecha(iso){
@@ -9786,6 +10762,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     faseFFMGFin.value = fasesCiclo.FFMG.fin || "";
     faseFFEIni.value  = fasesCiclo.FFE.ini || "";
     faseFFEFin.value  = fasesCiclo.FFE.fin || "";
+    cicloInput.value  = fasesCiclo.ciclo || "";
     [["FFMG", faseFFMGDur], ["FFE", faseFFEDur]].forEach(function(par){
       var f = fasesCiclo[par[0]];
       var n = (f.ini && f.fin) ? diffDaysInclusive(f.ini, f.fin) : 0;
@@ -9795,7 +10772,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function leerFases(){
     var nuevo = {
       FFMG: { ini: faseFFMGIni.value, fin: faseFFMGFin.value },
-      FFE:  { ini: faseFFEIni.value,  fin: faseFFEFin.value }
+      FFE:  { ini: faseFFEIni.value,  fin: faseFFEFin.value },
+      ciclo: cicloInput.value.trim()
     };
     var mal = (nuevo.FFMG.ini && nuevo.FFMG.fin && nuevo.FFMG.fin < nuevo.FFMG.ini) ||
               (nuevo.FFE.ini && nuevo.FFE.fin && nuevo.FFE.fin < nuevo.FFE.ini);
@@ -9808,6 +10786,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   [faseFFMGIni, faseFFMGFin, faseFFEIni, faseFFEFin].forEach(function(el){
     el.addEventListener("change", leerFases);
   });
+  cicloInput.addEventListener("input", leerFases);
 
   // ================= CUESTIONARIO DE NOTAS TAB =================
   // Permite adjuntar una o varias hojas de cálculo/CSV con notas de un
@@ -10047,7 +11026,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // "estado" distingue a quien ha suspendido (tiene nota, por debajo de la
   // mínima) de quien no se ha presentado (no tiene nota utilizable, o ni
   // siquiera aparece en el archivo).
-  function filaResultadoNotas(alumno, estado, nota){
+  function filaResultadoNotas(alumno, estado, nota, intentos, conNota){
     var k = state.keys;
     return {
       numero: getVal(alumno, k.numero),
@@ -10056,7 +11035,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       nombre: getVal(alumno, k.nombre),
       peloton: getVal(alumno, k.peloton),
       estado: estado,
-      nota: nota
+      nota: nota,
+      intentos: intentos || 0,      // veces que aparece en el archivo
+      conNota: conNota || 0         // de esas, cuántas traían una nota utilizable
     };
   }
 
@@ -10070,6 +11051,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var incidencias = [];
       var vistos = {}; // números del listado ya localizados en este archivo
 
+      // Un mismo alumno puede aparecer varias veces en el archivo: son los
+      // sucesivos intentos del ejercicio. Se recogen TODAS sus filas y después
+      // se toma su nota más alta, que es la que cuenta. No hace falta que el
+      // usuario haga nada: es automático al comprobar.
+      var porAlumno = {};
+      var ordenAlumnos = [];
+
       archivo.rows.forEach(function(fila){
         var busq = buscarAlumnoNotas(fila, archivo);
         if (busq.estado === "ambiguo"){
@@ -10081,20 +11069,32 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return;
         }
         var numero = getVal(busq.alumno, k.numero);
-        if (vistos[numero]){
-          incidencias.push({ motivo: "el alumno aparece en más de una fila del archivo; solo se ha tenido en cuenta la primera", fila: fila });
-          return;
+        if (!porAlumno[numero]){
+          porAlumno[numero] = { alumno: busq.alumno, notas: [], intentos: 0 };
+          ordenAlumnos.push(numero);
         }
-        vistos[numero] = true;
+        var reg = porAlumno[numero];
+        reg.intentos++;
         // Cualquier valor que no sea un número utilizable (celda vacía, «NP»,
-        // «No presentado», un guion…) se considera que no ha realizado la prueba.
+        // «No presentado», un guion…) es un intento sin nota aprovechable.
         var nota = parseNota(fila[archivo.colNota]);
-        if (nota == null){
-          resultados.push(filaResultadoNotas(busq.alumno, "no_presentado", null));
+        if (nota != null) reg.notas.push(nota);
+      });
+
+      ordenAlumnos.forEach(function(numero){
+        var reg = porAlumno[numero];
+        vistos[numero] = true;
+        // Sin ninguna nota utilizable en ningún intento: no presentado.
+        if (!reg.notas.length){
+          resultados.push(filaResultadoNotas(reg.alumno, "no_presentado", null, reg.intentos, 0));
           return;
         }
-        if (nota < minima){
-          resultados.push(filaResultadoNotas(busq.alumno, "suspenso", nota));
+        var mejor = reg.notas[0];
+        for (var i = 1; i < reg.notas.length; i++){
+          if (reg.notas[i] > mejor) mejor = reg.notas[i];
+        }
+        if (mejor < minima){
+          resultados.push(filaResultadoNotas(reg.alumno, "suspenso", mejor, reg.intentos, reg.notas.length));
         }
       });
 
@@ -10160,9 +11160,20 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         nNoPresentados + (nNoPresentados === 1 ? " no presentado" : " no presentados");
       var filas = archivo.resultados.map(function(row){
         var key = notasRowKey(archivo.id, row.numero);
+        // Solo se avisa de los intentos cuando de verdad hay más de uno, y con
+        // el texto que corresponde: «la mejor de N» si alguna traía nota, o
+        // «N intentos, ninguno con nota» si ninguna la traía.
+        var pistaIntentos = "";
+        if (row.intentos > 1){
+          pistaIntentos = row.conNota > 1
+            ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; se ha tomado la nota más alta">la mejor de ' + row.conNota + ' notas</span>'
+            : (row.conNota === 1
+                ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; solo una traía nota">' + row.intentos + ' intentos, 1 con nota</span>'
+                : '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo y ninguna traía una nota utilizable">' + row.intentos + ' intentos, ninguno con nota</span>');
+        }
         var notaCell = row.estado === "suspenso"
-          ? escapeHtml(String(row.nota))
-          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>';
+          ? escapeHtml(String(row.nota)) + pistaIntentos
+          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>' + pistaIntentos;
         return "<tr>" +
           '<td class="no-print"><input type="checkbox" class="notas-select-check" data-rowkey="' + escapeHtml(key) + '" ' + (notasSeleccion[key] ? "checked" : "") + '></td>' +
           "<td>" + escapeHtml(row.numero) + "</td>" +
@@ -10237,27 +11248,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     sanFormMsg.className = "form-msg ok";
   }
 
-  // ---------------- modo capitán: volver a la compañía sin cerrar sesión ----------------
-  // Si quien ha entrado es un capitán de compañía "dentro" de una sección
-  // (token con capitanCompania, aunque tenga role:admin de esa sección),
-  // se muestra un botón para volver a su panel de capitán sin tener que
-  // cerrar sesión y volver a entrar.
-  fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
-    if (me && me.capitanCompania){
-      var wrap = document.getElementById("capitanBackWrap");
-      wrap.classList.remove("hidden");
-      document.getElementById("capitanBackBtn").addEventListener("click", function(){
-        location.href = "/capitan.html";
-      });
-    }
-  }).catch(function(){});
-
   // ---------------- boot ----------------
   loadRebajesFromStorage();
   loadSancionesFromStorage();
   loadRefuerzosFromStorage();
   loadActividadesFromStorage();
   loadFasesFromStorage();
+  loadSeguimientosFromStorage();
   pintarFases();
   seedActividadesFFEIfEmpty();
   seedActividadesFFMGIfEmpty();
@@ -10478,6 +11475,5 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   render();
 })();
 </script>
-<script src="/shared/admin-extras.js"></script>
 </body>
 </html>

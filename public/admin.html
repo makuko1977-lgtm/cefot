@@ -960,6 +960,30 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     cursor:pointer;
   }
   .fill-badge:hover{filter:brightness(0.95);}
+  /* v37: el refuerzo derivado se corrige desde Sanciones; documento del
+     ANEXO desactualizado porque se quitó a un alumno después de generarlo:
+     la chapa verde "RELLENADO" pasa a roja "REGENERAR". */
+  .desde-sanciones{
+    display:inline-flex;align-items:center;
+    font-size:11px;font-weight:700;letter-spacing:.2px;
+    color:var(--text-dim);background:var(--panel-2);
+    border:1px dashed var(--border);border-radius:999px;
+    padding:3px 9px;white-space:nowrap;cursor:help;
+  }
+  .fill-badge.obsoleto{background:var(--danger-soft);color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger);}
+  .tab-alerta{
+    display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:7px;
+    border-radius:999px;background:var(--danger);color:#fff;font-family:var(--font-mono);
+    font-size:11px;font-weight:800;line-height:1;vertical-align:middle;
+  }
+  .doc-aviso{border:1px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:13px 15px;margin-bottom:14px;}
+  .doc-aviso-tit{font-weight:800;font-size:15px;color:#7a5410;margin-bottom:3px;}
+  .doc-aviso-sub{font-size:12.5px;color:#7a6a45;margin-bottom:11px;line-height:1.5;}
+  .doc-aviso-linea{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid #e6d6ae;border-radius:9px;padding:9px 11px;margin-bottom:7px;}
+  .doc-aviso-linea:last-child{margin-bottom:0;}
+  .doc-aviso-exp{font-family:var(--font-mono);font-size:12px;font-weight:800;background:#f0e7cf;border:1px solid #e0cfa4;border-radius:999px;padding:3px 9px;color:#7a5410;white-space:nowrap;}
+  .doc-aviso-txt{font-size:12.5px;flex:1;min-width:240px;line-height:1.45;}
+  @media print{ .doc-aviso, .tab-alerta{display:none !important;} }
 
   .exp-print-check{
     display:inline-flex; align-items:center; gap:5px; font-weight:600; text-transform:none;
@@ -1535,6 +1559,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     <!-- ---------- REFUERZOS PANEL ---------- -->
     <div id="refuerzosPanel" class="hidden">
+
+      <div class="doc-aviso hidden" id="refDocAviso"></div>
 
       <div class="banner-draft hidden" id="refDraftBanner">
         <span>Completando el refuerzo del expediente <strong id="refDraftExpediente"></strong> (traído desde Sanciones).</span>
@@ -3400,6 +3426,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function fetchRefuerzosServer(){
     return fetch("/api/refuerzos").then(function(r){ return r.json(); }).then(function(data){
       refuerzos = data.refuerzos || [];
+      renderAvisoDocumentos();
     });
   }
 
@@ -6182,14 +6209,119 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     applyRefuerzoDraft();
   };
 
-  function deleteSancion(id){
-    if (!confirm("¿Eliminar este expediente? Esta acción no se puede deshacer y afecta a todos los alumnos incluidos.")) return;
-    fetch("/api/sanciones/" + encodeURIComponent(id), { method: "DELETE" }).then(function(r){
-      if (!r.ok) throw new Error("delete failed");
-      sanciones = sanciones.filter(function(r){ return r.id !== id; });
+  // ---------------- quitar a un alumno (v37: se borra desde un único sitio) ----------------
+  // De una sanción se quita SOLO desde la pestaña Sanciones: sale también de
+  // su refuerzo derivado y, si el documento (ANEXO) ya se generó, queda
+  // marcado para rehacerlo. De un refuerzo MANUAL, desde la pestaña Refuerzos.
+  function nombreCompletoDeAlumnoRec(al){
+    return [al.ape1, al.ape2].filter(Boolean).join(" ") + ", " + (al.nombre || "");
+  }
+  function listaOtrosAlumnosTexto(alumnos, numero){
+    return (alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); })
+      .map(function(al){ return "  · " + nombreCompletoDeAlumnoRec(al) + " (Nº " + al.numero + ")"; }).join("\n");
+  }
+  function refuerzosDerivadosDe(sancionId, numero){
+    return refuerzos.filter(function(r){
+      return r.sancionId && String(r.sancionId) === String(sancionId) &&
+        (r.alumnos || []).some(function(al){ return String(al.numero) === String(numero); });
+    });
+  }
+  function patchQuitarAlumno(url, numero){
+    return fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ numero: numero })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); });
+  }
+  // Aplica en memoria lo que ha devuelto el servidor para un refuerzo.
+  function aplicarRefuerzoDevuelto(id, eliminado, refuerzo){
+    if (eliminado){ refuerzos = refuerzos.filter(function(r){ return r.id !== id; }); return; }
+    var idx = refuerzos.findIndex(function(r){ return r.id === id; });
+    if (idx !== -1 && refuerzo) refuerzos[idx] = refuerzo;
+  }
+
+  function quitarAlumnoDeSancion(sancionId, numero){
+    var record = sanciones.filter(function(r){ return String(r.id) === String(sancionId); })[0];
+    if (!record) return;
+    var alumno = (record.alumnos || []).filter(function(al){ return String(al.numero) === String(numero); })[0];
+    if (!alumno) return;
+    var restantes = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
+    var derivados = refuerzosDerivadosDe(sancionId, numero);
+
+    var msg = "Vas a quitar a " + nombreCompletoDeAlumnoRec(alumno) + " (Nº " + numero +
+      ") del expediente de sanción Nº " + record.expediente + ".\n\n";
+    if (!restantes.length){
+      msg += "Es el ÚNICO alumno de esta sanción, así que la sanción se eliminará por completo.\n" +
+        "Otras sanciones que compartan ese mismo número de expediente NO se ven afectadas.\n";
+    } else {
+      msg += "La sanción SEGUIRÁ EXISTIENDO con " + restantes.length + " alumno" +
+        (restantes.length === 1 ? "" : "s") + ":\n" + listaOtrosAlumnosTexto(record.alumnos, numero) + "\n";
+    }
+    if (derivados.length){
+      msg += "\nTambién se le quitará del refuerzo derivado de esta sanción (" +
+        derivados.map(function(r){ return "Nº " + r.expediente; }).join(", ") + ").\n";
+      derivados.forEach(function(r){
+        if (!r.rellenado) return;
+        var soloEl = (r.alumnos || []).length <= 1;
+        var cuando = formatDateDisplay(String(r.rellenadoFecha || "").slice(0,10));
+        msg += soloEl
+          ? "\nATENCIÓN: el documento (ANEXO) del refuerzo Nº " + r.expediente + " ya se generó el " + cuando +
+            ". Al quedarse ese refuerzo sin alumnos desaparecerá, así que ese documento queda ANULADO.\n"
+          : "\nEl documento (ANEXO) del refuerzo Nº " + r.expediente + " ya se generó el " + cuando +
+            ": habrá que volver a generarlo. La aplicación te lo recordará en la pestaña Refuerzos.\n";
+      });
+    }
+    msg += "\nEsta acción no se puede deshacer. ¿Continuar?";
+    if (!confirm(msg)) return;
+
+    patchQuitarAlumno("/api/sanciones/" + encodeURIComponent(sancionId) + "/quitar-alumno", numero).then(function(res){
+      if (!res.ok){ alert((res.data && res.data.error) || "No se ha podido quitar al alumno del expediente."); return; }
+      if (res.data.eliminada){
+        sanciones = sanciones.filter(function(r){ return r.id !== sancionId; });
+      } else if (res.data.sancion){
+        var idx = sanciones.findIndex(function(r){ return r.id === sancionId; });
+        if (idx !== -1) sanciones[idx] = res.data.sancion;
+      }
+      (res.data.refuerzos || []).forEach(function(x){ aplicarRefuerzoDevuelto(x.id, x.eliminado, x.refuerzo); });
       renderSancionesList();
+      renderRefuerzosList();
     }).catch(function(){
-      alert("No se ha podido eliminar la sanción.");
+      alert("Error de conexión con el servidor.");
+    });
+  }
+
+  function quitarAlumnoDeRefuerzo(refuerzoId, numero){
+    var record = refuerzos.filter(function(r){ return String(r.id) === String(refuerzoId); })[0];
+    if (!record) return;
+    var alumno = (record.alumnos || []).filter(function(al){ return String(al.numero) === String(numero); })[0];
+    if (!alumno) return;
+    var restantes = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
+
+    var msg = "Vas a quitar a " + nombreCompletoDeAlumnoRec(alumno) + " (Nº " + numero +
+      ") del expediente de refuerzo Nº " + (record.expediente || "—") + ".\n\n";
+    if (!restantes.length){
+      msg += "Es el ÚNICO alumno de este refuerzo, así que el refuerzo se eliminará por completo.\n";
+    } else {
+      msg += "El refuerzo SEGUIRÁ EXISTIENDO con " + restantes.length + " alumno" +
+        (restantes.length === 1 ? "" : "s") + ":\n" + listaOtrosAlumnosTexto(record.alumnos, numero) + "\n";
+    }
+    if (record.rellenado){
+      var cuandoDoc = formatDateDisplay(String(record.rellenadoFecha || "").slice(0,10));
+      msg += restantes.length
+        ? "\nEl documento (ANEXO) de este refuerzo ya se generó el " + cuandoDoc +
+          ": habrá que volver a generarlo sin este alumno. La aplicación te lo recordará en la pestaña Refuerzos.\n"
+        : "\nATENCIÓN: el documento (ANEXO) de este refuerzo ya se generó el " + cuandoDoc +
+          ". Al desaparecer el refuerzo, ese documento queda ANULADO.\n";
+    }
+    msg += "\nEsta acción no se puede deshacer. ¿Continuar?";
+    if (!confirm(msg)) return;
+
+    patchQuitarAlumno("/api/refuerzos/" + encodeURIComponent(refuerzoId) + "/quitar-alumno", numero).then(function(res){
+      if (!res.ok){ alert((res.data && res.data.error) || "No se ha podido quitar al alumno del refuerzo."); return; }
+      aplicarRefuerzoDevuelto(refuerzoId, res.data.eliminado, res.data.refuerzo);
+      renderRefuerzosList();
+    }).catch(function(){
+      alert("Error de conexión con el servidor.");
     });
   }
 
@@ -6523,7 +6655,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
                 ? '<span class="status-pill vigente">Refuerzo generado</span>'
                 : '<button class="btn small primary" data-genref="' + r.id + '">Generar refuerzo</button>')
             : "") +
-          '<button class="btn small danger-ghost" data-delsan="' + r.id + '">Eliminar</button>' +
+          '<button class="btn small danger-ghost" data-delsan="' + r.id + '" data-delnum="' + escapeHtml(String(al.numero)) + '" title="Quita a este alumno del expediente. Los demás alumnos del expediente no se ven afectados.">Eliminar</button>' +
         "</td>" +
         "</tr>";
     }).join("");
@@ -6543,7 +6675,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       });
     });
     sancionesTableBody.querySelectorAll("[data-delsan]").forEach(function(btn){
-      btn.addEventListener("click", function(){ deleteSancion(btn.getAttribute("data-delsan")); });
+      btn.addEventListener("click", function(){ quitarAlumnoDeSancion(btn.getAttribute("data-delsan"), btn.getAttribute("data-delnum")); });
     });
     sancionesTableBody.querySelectorAll(".arresto-pendiente-form").forEach(function(form){
       var btn = form.querySelector(".arr-guardar-btn");
@@ -7241,17 +7373,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     });
   });
 
-  function deleteRefuerzo(id){
-    if (!confirm("¿Eliminar este refuerzo? Esta acción no se puede deshacer.")) return;
-    fetch("/api/refuerzos/" + encodeURIComponent(id), { method: "DELETE" }).then(function(r){
-      if (!r.ok) throw new Error("delete failed");
-      refuerzos = refuerzos.filter(function(r){ return r.id !== id; });
-      renderRefuerzosList();
-    }).catch(function(){
-      alert("No se ha podido eliminar el refuerzo.");
-    });
-  }
-
   function refreshRefuerzodatalists(){
     var jefes = uniqueSorted(refuerzos.map(function(r){ return r.jefeCia; }));
     refJefeCiaList.innerHTML = jefes.map(function(m){ return '<option value="' + escapeHtml(m) + '">'; }).join("");
@@ -7276,6 +7397,80 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       pelotones.map(function(p){ return '<option value="'+escapeHtml(p)+'">Pelotón '+escapeHtml(p)+'</option>'; }).join("");
 
     renderRefuerzosList();
+  }
+
+  // ---------- DOCUMENTO (ANEXO) DESACTUALIZADO ----------
+  // El ANEXO de un refuerzo nombra a todos sus alumnos. Si se quita a uno
+  // DESPUÉS de haberlo generado, el servidor lo anota en `docPendiente` y
+  // aquí se avisa: contador rojo en la pestaña, franja arriba y chapa
+  // «⚠ REGENERAR». Al volver a generar el documento el aviso desaparece.
+  function refuerzosConDocumentoPendiente(){
+    return refuerzos.filter(function(r){ return r.docPendiente && r.docPendiente.quitados && r.docPendiente.quitados.length; });
+  }
+  function textoQuitadosDe(record){
+    var q = (record.docPendiente && record.docPendiente.quitados) || [];
+    return q.map(function(x){ return x.nombre + " (Nº " + x.numero + ")"; }).join(", ");
+  }
+  function fechaUltimoQuitado(record){
+    var q = (record.docPendiente && record.docPendiente.quitados) || [];
+    if (!q.length) return "";
+    return String(q[q.length - 1].fecha || "").slice(0, 10);
+  }
+  function renderAvisoDocumentos(){
+    var pendientes = refuerzosConDocumentoPendiente();
+    var tab = document.getElementById("tabBtnRefuerzos");
+    if (tab){
+      var cnt = tab.querySelector(".tab-alerta");
+      if (!pendientes.length){
+        if (cnt) cnt.remove();
+      } else {
+        if (!cnt){ cnt = document.createElement("span"); cnt.className = "tab-alerta"; tab.appendChild(cnt); }
+        cnt.textContent = String(pendientes.length);
+        cnt.title = pendientes.length === 1 ? "1 documento pendiente de volver a generar" : pendientes.length + " documentos pendientes de volver a generar";
+      }
+    }
+    var caja = document.getElementById("refDocAviso");
+    if (!caja) return;
+    if (!pendientes.length){ caja.innerHTML = ""; caja.classList.add("hidden"); return; }
+    var n = pendientes.length;
+    var html = '<div class="doc-aviso-tit">⚠ ' + n + (n === 1 ? ' documento hay que volver a generarlo' : ' documentos hay que volver a generarlos') + '</div>';
+    html += '<div class="doc-aviso-sub">Se ha quitado a un alumno después de generar el ANEXO: el PDF que tienes descargado todavía lo nombra.</div>';
+    pendientes.forEach(function(r){
+      var quedan = (r.alumnos || []).length;
+      html += '<div class="doc-aviso-linea">' +
+        '<span class="doc-aviso-exp">Exp. Nº ' + escapeHtml(String(r.expediente || "—")) + '</span>' +
+        '<span class="doc-aviso-txt"><strong>' + escapeHtml(textoQuitadosDe(r)) + '</strong> · quitado el ' +
+          escapeHtml(formatDateDisplay(fechaUltimoQuitado(r))) +
+          ' · documento generado el ' + escapeHtml(formatDateDisplay(String(r.docPendiente.generadoFecha || "").slice(0,10))) +
+          ' · queda' + (quedan === 1 ? '' : 'n') + ' ' + quedan + ' alumno' + (quedan === 1 ? '' : 's') + '</span>' +
+        '<button type="button" class="btn small primary" data-regenref="' + escapeHtml(String(r.id)) + '">Generar documento</button>' +
+        '<button type="button" class="btn small ghost" data-yaregen="' + escapeHtml(String(r.id)) + '">Ya lo he hecho</button>' +
+        '</div>';
+    });
+    caja.innerHTML = html;
+    caja.classList.remove("hidden");
+    caja.querySelectorAll("[data-regenref]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var rec = refuerzos.filter(function(x){ return String(x.id) === btn.getAttribute("data-regenref"); })[0];
+        if (rec) generarDocumentoPDF(rec);
+      });
+    });
+    caja.querySelectorAll("[data-yaregen]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = btn.getAttribute("data-yaregen");
+        var rec = refuerzos.filter(function(x){ return String(x.id) === id; })[0];
+        if (!rec) return;
+        if (!confirm("Se quitará el aviso del expediente Nº " + rec.expediente + " sin generar ningún documento.\n\n" +
+                     "Hazlo solo si ya tienes el documento correcto por otro medio. ¿Continuar?")) return;
+        fetch("/api/refuerzos/" + encodeURIComponent(id) + "/descartar-aviso-documento", { method: "PATCH" })
+          .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+          .then(function(res){
+            if (!res.ok){ alert((res.data && res.data.error) || "No se ha podido quitar el aviso."); return; }
+            aplicarRefuerzoDevuelto(id, false, res.data.refuerzo);
+            renderRefuerzosList();
+          }).catch(function(){ alert("Error de conexión con el servidor."); });
+      });
+    });
   }
 
   function renderRefuerzosList(){
@@ -7317,6 +7512,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       refuerzosTableBody.innerHTML = "";
       refuerzosEmptyState.classList.remove("hidden");
       refuerzosEmptyState.textContent = refuerzos.length ? "No se han encontrado refuerzos con ese filtro." : "Todavía no se ha registrado ningún refuerzo.";
+      renderAvisoDocumentos();
       return;
     }
     refuerzosEmptyState.classList.add("hidden");
@@ -7330,9 +7526,25 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var rellenadoTitle = "Documento generado el " + formatDateDisplay(r.rellenadoFecha ? r.rellenadoFecha.slice(0,10) : "") +
         (r.editado && r.editadoFecha ? " · Editado por última vez el " + formatDateDisplay(r.editadoFecha.slice(0,10)) : "") +
         " — pulsa para corregir los datos y regenerarlo";
+      var obsoleto = !!(r.docPendiente && r.docPendiente.quitados && r.docPendiente.quitados.length);
+      if (obsoleto){
+        rellenadoTitle = "Se quitó a " + textoQuitadosDe(r) + " el " + formatDateDisplay(fechaUltimoQuitado(r)) +
+          ", después de generar el documento el " + formatDateDisplay(String(r.docPendiente.generadoFecha || "").slice(0,10)) +
+          ". El PDF descargado todavía lo nombra: pulsa para rehacerlo.";
+      }
       var rellenadoBadge = r.rellenado
-        ? '<button type="button" class="fill-badge" data-editref="' + r.id + '" title="' + escapeHtml(rellenadoTitle) + '">RELLENADO ✎</button>'
+        ? '<button type="button" class="fill-badge' + (obsoleto ? ' obsoleto' : '') + '" data-editref="' + r.id + '" title="' + escapeHtml(rellenadoTitle) + '">' + (obsoleto ? '⚠ REGENERAR' : 'RELLENADO ✎') + '</button>'
         : "";
+      // v37: solo se puede quitar a un alumno desde UN sitio. Si el refuerzo
+      // viene de una sanción, ese sitio es la pestaña Sanciones (al quitarlo
+      // de la sanción se le quita también de aquí). Un refuerzo MANUAL no
+      // tiene sanción detrás, así que se corrige desde aquí mismo.
+      var borrarCell = r.origen === "sancion"
+        ? '<span class="desde-sanciones" title="Este refuerzo viene de la sanción del expediente Nº ' +
+          escapeHtml(String(r.expediente)) + '. Para quitar a un alumno, hazlo desde la pestaña Sanciones: ' +
+          'se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento.">Desde Sanciones</span>'
+        : '<button class="btn small danger-ghost" data-delref="' + r.id + '" data-delrefnum="' + escapeHtml(String(al.numero)) +
+          '" title="Refuerzo manual: quita a este alumno del expediente. Los demás alumnos no se ven afectados.">Eliminar</button>';
       return "<tr>" +
         "<td>" + escapeHtml(al.numero) + "</td>" +
         "<td>" + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + "</td>" +
@@ -7342,13 +7554,14 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "<td>" + escapeHtml(r.tipo) + "</td>" +
         "<td>" + escapeHtml(r.horaInicio || "—") + "</td>" +
         "<td>" + origenCell + "</td>" +
-        '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + pdfBtn + rellenadoBadge + '<button class="btn small danger-ghost" data-delref="' + r.id + '">Eliminar</button></td>' +
+        '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' + pdfBtn + rellenadoBadge + borrarCell + '</td>' +
         "</tr>";
     }).join("");
 
     refuerzosTableBody.querySelectorAll("[data-delref]").forEach(function(btn){
-      btn.addEventListener("click", function(){ deleteRefuerzo(btn.getAttribute("data-delref")); });
+      btn.addEventListener("click", function(){ quitarAlumnoDeRefuerzo(btn.getAttribute("data-delref"), btn.getAttribute("data-delrefnum")); });
     });
+    renderAvisoDocumentos();
     refuerzosTableBody.querySelectorAll("[data-pdfref]").forEach(function(btn){
       btn.addEventListener("click", function(){
         var id = btn.getAttribute("data-pdfref");
@@ -8097,7 +8310,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       html += '<div class="empty-state">No hay sanciones de arresto con la fecha pendiente.</div>';
     } else {
       html += '<table class="consulta-table"><thead><tr>' +
-        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha sanción</th><th>Motivo</th><th class="no-print">Acciones</th>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha sanción</th><th>Motivo</th>' +
         '</tr></thead><tbody>' +
         rows.map(function(r){
           return "<tr>" +
@@ -8107,7 +8320,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
             "<td>" + formatDateDisplay(r.fecha) + "</td>" +
             "<td>" + escapeHtml(r.motivo || "—") + "</td>" +
-            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
             "</tr>";
         }).join("") +
         "</tbody></table>";
@@ -8115,7 +8327,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   function computeConsultaArrestoPendienteAgrupado(){
@@ -8152,14 +8363,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           body = '<div class="empty-state">Sin alumnos.</div>';
         } else {
           body = '<table class="consulta-table"><thead><tr>' +
-            '<th>Número</th><th>Alumno</th><th>Pelotón</th><th class="no-print">Acciones</th>' +
+            '<th>Número</th><th>Alumno</th><th>Pelotón</th>' +
             '</tr></thead><tbody>' +
             g.alumnos.map(function(r){
               return "<tr>" +
                 "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
                 "<td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "") + "</td>" +
                 "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
-                "<td class=\"no-print\">" + botonQuitarExpedienteHtml(g.sancionId, r.numero, r.ape1, r.ape2, r.nombre, g.expediente) + "</td>" +
                 "</tr>";
             }).join("") +
             "</tbody></table>";
@@ -8171,7 +8381,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
 
     consResultados.innerHTML = html;
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
     consResultadosWrap.classList.remove("hidden");
   }
 
@@ -8216,7 +8425,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       html += '<div class="empty-state">' + (soloVencidos ? "No hay trabajos vencidos: todo está al día." : "No hay sanciones con medida «Trabajo no superior a 5 horas» registradas.") + '</div>';
     } else {
       html += '<table class="consulta-table"><thead><tr>' +
-        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha límite</th><th>Estado</th><th class="no-print">Marcar</th><th class="no-print">Acciones</th>' +
+        '<th>Expediente</th><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha límite</th><th>Estado</th><th class="no-print">Marcar</th>' +
         '</tr></thead><tbody>' +
         rows.map(function(r){
           var estadoCell = r.hecho
@@ -8230,7 +8439,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             "<td>" + formatDateDisplay(r.trabajoFechaFin) + "</td>" +
             "<td>" + estadoCell + "</td>" +
             '<td class="no-print"><label class="multi-list-item" style="margin:0;"><input type="checkbox" class="cons-trab-hecho-check" data-trabajoid="' + escapeHtml(String(r.sancionId)) + '" data-numero="' + escapeHtml(String(r.numero)) + '" ' + (r.hecho ? 'checked' : '') + '><span>Hecho</span></label></td>' +
-            "<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>" +
             "</tr>";
         }).join("") +
         "</tbody></table>";
@@ -8238,7 +8446,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
     consResultados.querySelectorAll(".cons-trab-hecho-check").forEach(function(cb){
       cb.addEventListener("change", function(){
         cb.disabled = true;
@@ -8405,65 +8612,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
-  }
-
-  // ---------------- Consultas: quitar un alumno de un expediente ----------------
-  // Quita a UN alumno de UNA sanción concreta (identificada por su id),
-  // no borra el expediente: si esa sanción tiene más alumnos, o si el
-  // mismo número de expediente tiene otras sanciones vinculadas, esas
-  // no se ven afectadas en absoluto. Solo si el alumno quitado era el
-  // único que quedaba en esa sanción concreta, esa sanción (esa falta)
-  // desaparece por quedarse sin nadie — el número de expediente en sí
-  // no se "borra" como concepto, sigue existiendo si tiene más contenido.
-  function quitarAlumnoDeExpedienteDesdeConsulta(sancionId, numero, nombreCompleto, expediente, callback){
-    var confirmMsg = "¿Quitar a " + nombreCompleto + " (Nº " + numero + ") del expediente Nº " + expediente + "?\n\n" +
-      "Esto NO elimina el expediente ni afecta a otros alumnos u otras sanciones que compartan ese mismo número. " +
-      "Si era el único alumno de esta sanción en concreto, esa sanción desaparecerá por quedarse sin nadie; " +
-      "el expediente seguirá existiendo si tiene más contenido.";
-    if (!confirm(confirmMsg)) return;
-    fetch("/api/sanciones/" + encodeURIComponent(sancionId) + "/quitar-alumno", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero: numero })
-    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
-      .then(function(res){
-        if (!res.ok){
-          alert((res.data && res.data.error) || "No se ha podido quitar al alumno del expediente.");
-          return;
-        }
-        if (res.data.eliminada){
-          sanciones = sanciones.filter(function(r){ return r.id !== sancionId; });
-        } else {
-          var record = sanciones.filter(function(r){ return r.id === sancionId; })[0];
-          if (record) record.alumnos = (record.alumnos || []).filter(function(al){ return String(al.numero) !== String(numero); });
-        }
-        if (callback) callback();
-      }).catch(function(){
-        alert("Error de conexión con el servidor.");
-      });
-  }
-
-  function botonQuitarExpedienteHtml(sancionId, numero, ape1, ape2, nombre, expediente){
-    var nombreCompleto = [ape1, ape2].filter(Boolean).join(" ") + ", " + (nombre || "");
-    return '<button type="button" class="btn small danger-ghost" data-quitar-san="' + escapeHtml(String(sancionId)) +
-      '" data-quitar-num="' + escapeHtml(String(numero)) + '" data-quitar-nombre="' + escapeHtml(nombreCompleto) +
-      '" data-quitar-exp="' + escapeHtml(String(expediente)) + '">Quitar del expediente</button>';
-  }
-
-  function wireQuitarAlumnoDeExpedienteEnConsulta(container){
-    container.querySelectorAll("[data-quitar-san]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        btn.disabled = true;
-        quitarAlumnoDeExpedienteDesdeConsulta(
-          btn.getAttribute("data-quitar-san"),
-          btn.getAttribute("data-quitar-num"),
-          btn.getAttribute("data-quitar-nombre"),
-          btn.getAttribute("data-quitar-exp"),
-          function(){ consBuscarBtn.click(); }
-        );
-      });
-    });
   }
 
   // Recopila el personal con rebaje, refuerzo o arresto que se solape con
@@ -8518,14 +8666,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function renderConsultaResultados(fechaIni, fechaFin, data){
     var total = data.rebajados.length + data.refuerzo.length + data.sancionados.length;
 
-    function tablaSeccion(titulo, rows, esSancionados){
+    function tablaSeccion(titulo, rows){
       var body;
       if (!rows.length){
         body = '<div class="empty-state">Sin resultados en este periodo.</div>';
       } else {
         body = '<table class="consulta-table"><thead><tr>' +
           '<th>Número</th><th>Alumno</th><th>Pelotón</th><th>Desde</th><th>Hasta</th><th>Detalle</th>' +
-          (esSancionados ? '<th class="no-print">Acciones</th>' : "") +
           '</tr></thead><tbody>' +
           rows.map(function(r){
             return "<tr>" +
@@ -8535,7 +8682,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               "<td>" + formatDateDisplay(r.desde) + "</td>" +
               "<td>" + formatDateDisplay(r.hasta) + "</td>" +
               "<td>" + escapeHtml(r.detalle || "—") + "</td>" +
-              (esSancionados ? ("<td class=\"no-print\">" + botonQuitarExpedienteHtml(r.sancionId, r.numero, r.ape1, r.ape2, r.nombre, r.expediente) + "</td>") : "") +
               "</tr>";
           }).join("") +
           "</tbody></table>";
@@ -8549,13 +8695,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     html += '<div class="consulta-report-sub">Personal con rebaje, refuerzo o arresto en el periodo del ' + formatDateDisplay(fechaIni) + ' al ' + formatDateDisplay(fechaFin) + '</div>';
     html += '<div class="consulta-report-meta">Total: ' + total + ' registro' + (total === 1 ? "" : "s") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
-    html += tablaSeccion("Rebajados", data.rebajados, false);
-    html += tablaSeccion("En refuerzo", data.refuerzo, false);
-    html += tablaSeccion("Sancionados (arresto)", data.sancionados, true);
+    html += tablaSeccion("Rebajados", data.rebajados);
+    html += tablaSeccion("En refuerzo", data.refuerzo);
+    html += tablaSeccion("Sancionados (arresto)", data.sancionados);
 
     consResultados.innerHTML = html;
     consResultadosWrap.classList.remove("hidden");
-    wireQuitarAlumnoDeExpedienteEnConsulta(consResultados);
   }
 
   function validateConsFechasLive(){

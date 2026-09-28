@@ -212,7 +212,7 @@ demo('seccion_sancion', false, async ({ p, paso, firmar })=>{
   await p.click('#firmaPrevioSiguienteBtn'); await p.waitForTimeout(2500);
   await verDesde(p, '#sanStatRow');
   await paso('#sancionesTableBody tr:first-child .status-pill.programado:has-text("capitán")', 'Sanción registrada', 'Aparece en el listado. Como es un arresto, lleva la etiqueta <b>«Enviado al capitán»</b>, que cambiará a «Tramitado por el capitán» cuando él le dé curso.', {margen:6});
-  await paso(null, 'Fin', '¡Hecho! Desde el listado puedes consultar, generar documentos o eliminar el expediente.');
+  await paso(null, 'Fin', '¡Hecho! Desde el listado puedes generar documentos y, con <b>Eliminar</b>, quitar a un alumno del expediente (sale también de su refuerzo derivado). Es el único sitio para hacerlo.');
 });
 
 demo('seccion_fijar_fecha', false, async ({ p, paso })=>{
@@ -319,7 +319,7 @@ demo('seccion_refuerzos', false, async ({ p, paso })=>{
   await paso('#refSaveBtn', 'Guardar refuerzo', 'Pulsa <b>Guardar refuerzo</b>. Si coincide con otro arresto o refuerzo del alumno, la aplicación lo avisa.');
   await p.click('#refSaveBtn'); await p.waitForTimeout(1800);
   await verDesde(p, '#refStatRow');
-  await paso('#refuerzosTableBody [data-pdfref]', 'Rellenar documento', 'El refuerzo aparece en el listado, un registro por alumno, con su <b>expediente de origen</b>. <b>Rellenar documento</b> genera el ANEXO; <b>Eliminar</b> lo borra.');
+  await paso('#refuerzosTableBody [data-pdfref]', 'Rellenar documento', 'El refuerzo aparece en el listado, un registro por alumno, con su <b>expediente de origen</b>. <b>Rellenar documento</b> genera el ANEXO. Un refuerzo <b>manual</b> tiene <b>Eliminar</b> (quita a ese alumno); uno que viene de una sanción muestra <b>Desde Sanciones</b>: se corrige en esa pestaña.');
   await paso(null, 'Fin', '¡Hecho! Para un refuerzo voluntario, rellena el formulario de la pestaña <b>Refuerzos</b> directamente.');
 });
 

@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("crypto");
 const db = require("../lib/db");
 const auth = require("../lib/auth");
+const quitarAlumno = require("../lib/quitarAlumno.js");
 
 const router = express.Router();
 
@@ -66,18 +67,44 @@ router.patch("/:id/rellenado", auth.requireAuth, auth.requireRole("admin"), func
   if (!record) return res.status(404).json({ error: "No encontrado." });
   record.rellenado = true;
   record.rellenadoFecha = new Date().toISOString();
+  // El documento recién generado ya lleva los alumnos que hay ahora: el
+  // aviso de «hay que regenerarlo» deja de tener sentido.
+  delete record.docPendiente;
   db.save();
   res.json({ ok: true, refuerzo: record });
 });
 
-router.delete("/:id", auth.requireAuth, auth.requireRole("admin"), function (req, res){
-  const before = req.db.refuerzos.length;
-  req.db.refuerzos = req.db.refuerzos.filter(function (r){ return r.id !== req.params.id; });
-  if (req.db.refuerzos.length === before){
-    return res.status(404).json({ error: "No encontrado." });
-  }
+// «Ya lo he hecho»: quita el aviso de documento pendiente sin generar nada
+// (el jefe de sección ya tiene el documento correcto por otro medio).
+router.patch("/:id/descartar-aviso-documento", auth.requireAuth, auth.requireRole("admin"), function (req, res){
+  const record = req.db.refuerzos.find(function (r){ return r.id === req.params.id; });
+  if (!record) return res.status(404).json({ error: "No encontrado." });
+  delete record.docPendiente;
   db.save();
-  res.json({ ok: true });
+  res.json({ ok: true, refuerzo: record });
 });
+
+// Quita a UN alumno de un refuerzo MANUAL (v37). Un refuerzo derivado de
+// una sanción se corrige desde la pestaña Sanciones, que es el único sitio
+// para quitar a un alumno de una sanción (y de su refuerzo a la vez).
+router.patch("/:id/quitar-alumno", auth.requireAuth, auth.requireRole("admin"), function (req, res){
+  const record = req.db.refuerzos.find(function (r){ return r.id === req.params.id; });
+  if (!record) return res.status(404).json({ error: "No encontrado." });
+  if (record.origen === "sancion"){
+    return res.status(409).json({ error: "Este refuerzo viene de una sanción: quita al alumno desde la pestaña Sanciones." });
+  }
+  const numero = req.body && req.body.numero != null ? String(req.body.numero) : "";
+  if (!numero) return res.status(400).json({ error: "Falta el número de alumno." });
+  if (!(record.alumnos || []).some(function (al){ return String(al.numero) === numero; })){
+    return res.status(404).json({ error: "Ese alumno no está en este refuerzo." });
+  }
+  const r = quitarAlumno.quitarDeRefuerzo(req.db, record, numero);
+  db.save();
+  res.json({ ok: true, eliminado: r.eliminado, refuerzo: r.eliminado ? null : r.refuerzo });
+});
+
+// v37: ya no hay «eliminar refuerzo entero». Un refuerzo MANUAL se corrige
+// alumno a alumno con PATCH /:id/quitar-alumno; uno derivado de una sanción,
+// desde la pestaña Sanciones.
 
 module.exports = router;

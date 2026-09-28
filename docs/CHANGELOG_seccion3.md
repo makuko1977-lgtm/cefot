@@ -1036,6 +1036,114 @@ otros 11 conjuntos siguen pasando.
 
 ---
 
+## v37 — 2026-09-28 — Se borra desde un único sitio
+
+**Qué se pidió:** concentrar el borrado en un solo lugar para evitar líos. Se
+quita a un alumno **solo desde la pestaña Sanciones**; y si el refuerzo es
+**manual**, desde la propia pestaña Refuerzos, porque no tiene ninguna sanción
+detrás.
+
+### Dónde se puede borrar ahora
+
+| Sitio | v36 | v37 |
+|---|---|---|
+| Pestaña **Sanciones** | Sí | **Sí — el sitio principal** |
+| Pestaña **Refuerzos**, refuerzo **manual** | Sí | **Sí** |
+| Pestaña **Refuerzos**, refuerzo **de sanción** | Sí | **No** — etiqueta «Desde Sanciones» |
+| **Historial** del alumno | Sí | **No** — vuelve a ser solo de lectura |
+| **Consultas**, tablas de resultados | Sí | **No** |
+| **Consultas**, informe de expediente | Sí | **No** |
+
+### Cambiado
+
+- En el listado de refuerzos, los que vienen de una sanción ya no llevan botón
+  «Eliminar»: en su sitio sale la etiqueta **«Desde Sanciones»**, y al pasar el
+  ratón explica que hay que ir a esa pestaña, que al quitarlo de la sanción se
+  le quita también del refuerzo, y que se avisará de que hay que rehacer el
+  documento.
+- Los refuerzos **manuales** conservan su botón «Eliminar» con el mismo aviso
+  de siempre.
+- El **historial del alumno** vuelve a ser solo de consulta: fuera los botones
+  que se le añadieron en la v34.
+- **Consultas** vuelve a ser solo de lectura: fuera el botón «Quitar del
+  expediente» de las cuatro tablas de resultados y fuera la columna «Acciones»
+  del informe de expediente que se añadió en la v36.
+
+### Quitado del código
+
+Se ha eliminado todo el código que sostenía los botones retirados —
+`quitarAlumnoDeExpedienteDesdeConsulta`, `botonQuitarExpedienteHtml`,
+`botonQuitarRefuerzoHtml`, `wireQuitarAlumnoDeExpedienteEnConsulta`,
+`histBotonQuitarHtml` y sus estilos—, unos 2.600 caracteres. No se ha dejado
+como código muerto a propósito: un borrado que ya no se usa pero sigue ahí es
+una mina para el día de mañana.
+
+### Lo que NO cambia
+
+- Al quitar a un alumno de una sanción, sigue saliendo **también** del refuerzo
+  derivado, y sigue saltando el aviso de que **hay que rehacer el documento**
+  (contador en la pestaña, franja arriba y chapa roja «⚠ REGENERAR»). Eso era
+  la v36 y sigue igual.
+- Sigue limpiándose su marca de «trabajo hecho» y su línea de la hoja de
+  seguimiento.
+- Quitar a un alumno de un refuerzo manual **no toca ninguna sanción**.
+- Quite desde donde se quite, el alumno desaparece de todas partes a la vez,
+  porque el dato es único.
+
+### Verificado
+
+`tests/t15_borrado_unico.py` (pruebas del HTML local; no forman parte de este repositorio), nueva, con una sanción de medida «Refuerzo» que
+genera un derivado de 3 alumnos y un refuerzo manual de 2:
+
+| Comprobación | Resultado |
+|---|---|
+| Refuerzo derivado en su pestaña | Sin botón; con etiqueta «Desde Sanciones» y su explicación |
+| Refuerzo manual en su pestaña | Con botón, y borra solo a ese alumno |
+| Quitar desde Sanciones | Lo saca del derivado y marca el documento como pendiente |
+| Historial (Sanciones y Refuerzos) | 0 botones |
+| Consultas: trabajos, arrestos pendientes e informe de expediente | 0 botones y ninguna columna «Acciones» |
+
+`t8_quitar_alumno` reescrita para la nueva topología; `t10` y `t12` ajustadas.
+**Dieciséis pruebas en total, todas en verde y sin ningún error de consola.**
+
+### Integración en el repositorio (servidor y HTML local)
+
+- **HTML local (`legado/seccion3.html`)**: es la v37 entregada, fusionada con
+  lo que el repositorio ya tenía y la v37 no traía:
+  - Se conserva **«Importar copia del servidor (añadir)»** (pantalla de carga
+    y barra superior), necesaria para pasar al HTML local las copias
+    exportadas desde el servidor.
+  - **«Importar copia»** sigue siendo **aditiva**: la v37 la hacía
+    sustituyendo todo; aquí solo añade lo que falta y no borra ni sobrescribe
+    nada. Ahora incluye también las **hojas de seguimiento**: se añaden los
+    alumnos y líneas que falten y no se toca lo ya editado en este navegador.
+- **Servidor (`admin.html`)**, mismo criterio que la v37:
+  - **Sanciones**: «Eliminar» quita **solo a ese alumno**; antes borraba el
+    expediente entero. Sale también de su refuerzo derivado, se limpia su
+    marca de «trabajo hecho» y, si el ANEXO ya estaba generado, el refuerzo
+    queda marcado **«⚠ REGENERAR»**, con contador en la pestaña y una franja
+    arriba con «Generar documento» y «Ya lo he hecho».
+  - **Refuerzos**: los de sanción muestran **«Desde Sanciones»**; los
+    manuales conservan «Eliminar» por alumno.
+  - **Consultas**: solo lectura. Se quitan «Quitar del expediente» y la
+    columna «Acciones».
+  - **API**:
+    - `PATCH /api/sanciones/:id/quitar-alumno` también actualiza los
+      refuerzos derivados.
+    - Nuevas: `PATCH /api/refuerzos/:id/quitar-alumno` (solo manuales; los de
+      sanción responden 409) y `PATCH /api/refuerzos/:id/descartar-aviso-documento`.
+    - Se retiran `DELETE /api/sanciones/:id` y `DELETE /api/refuerzos/:id`,
+      que ya no usaba ninguna pantalla.
+  - El aviso usa el mismo campo `docPendiente` que el HTML local, así que la
+    copia exportada del servidor se entiende igual al importarla.
+  - Si la sanción viene de un **parte de pelotón** aún sin revisar, su aviso
+    se actualiza igual (el aviso guarda su propia copia de los alumnos); si la
+    sanción se queda sin alumnos, el aviso desaparece.
+- Pruebas: `tests/borrado-unico.test.js` (7 pruebas; 28 en total, todas en verde).
+- Manual PDF (apartados 5.3 y 6) y manual interactivo actualizados.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí

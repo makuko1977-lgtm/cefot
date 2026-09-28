@@ -5,6 +5,7 @@ const auth = require("../lib/auth");
 const catalog = require("../public/shared/catalog.js");
 const avisos = require("../lib/avisos.js");
 const arrestos = require("../lib/arrestos.js");
+const quitarAlumno = require("../lib/quitarAlumno.js");
 
 const router = express.Router();
 
@@ -256,33 +257,25 @@ router.patch("/:id/trabajo-hecho", auth.requireAuth, auth.requireRole("admin"), 
 // entero: si esa sanción tenía más alumnos, o si el mismo número de
 // expediente tiene otras sanciones vinculadas, no se ven afectadas). Si
 // era el único alumno de esa sanción concreta, la sanción desaparece por
-// quedarse sin nadie. Se usa desde Consultas.
+// quedarse sin nadie. Desde la v37 es el ÚNICO sitio para quitar a un
+// alumno de una sanción (pestaña Sanciones): sale también de los refuerzos
+// derivados y, si su documento ya se generó, queda marcado para rehacerlo.
 router.patch("/:id/quitar-alumno", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   const record = req.db.sanciones.find(function (r){ return r.id === req.params.id; });
   if (!record) return res.status(404).json({ error: "No encontrada." });
 
   const numero = req.body && req.body.numero != null ? String(req.body.numero) : "";
   if (!numero) return res.status(400).json({ error: "Falta el número de alumno." });
-
-  record.alumnos = (record.alumnos || []).filter(function (al){ return String(al.numero) !== numero; });
-  let eliminada = false;
-  if (!record.alumnos.length){
-    req.db.sanciones = req.db.sanciones.filter(function (r){ return r.id !== record.id; });
-    eliminada = true;
+  if (!(record.alumnos || []).some(function (al){ return String(al.numero) === numero; })){
+    return res.status(404).json({ error: "Ese alumno no está en esta sanción." });
   }
+
+  const r = quitarAlumno.quitarDeSancion(req.db, record, numero);
   db.save();
-  res.json({ ok: true, eliminada: eliminada });
+  res.json({ ok: true, eliminada: r.eliminada, sancion: r.eliminada ? null : r.sancion, refuerzos: r.refuerzos });
 });
 
-// Eliminar: solo jefe de sección.
-router.delete("/:id", auth.requireAuth, auth.requireRole("admin"), function (req, res){
-  const before = req.db.sanciones.length;
-  req.db.sanciones = req.db.sanciones.filter(function (r){ return r.id !== req.params.id; });
-  if (req.db.sanciones.length === before){
-    return res.status(404).json({ error: "No encontrada." });
-  }
-  db.save();
-  res.json({ ok: true });
-});
+// v37: ya no hay «eliminar expediente entero». Se quita alumno a alumno
+// con PATCH /:id/quitar-alumno (la sanción desaparece al quitar al último).
 
 module.exports = router;
