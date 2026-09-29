@@ -960,6 +960,71 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     cursor:pointer;
   }
   .fill-badge:hover{filter:brightness(0.95);}
+  /* ================= HOJA DE SEGUIMIENTO ================= */
+  .seg-sel{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+  .seg-sel th{background:var(--panel-2);text-align:left;padding:8px 9px;font-size:10.5px;
+    letter-spacing:.6px;text-transform:uppercase;color:var(--text-dim);
+    border-bottom:1px solid var(--border-light);}
+  .seg-sel td{padding:8px 9px;border-bottom:1px solid #eceee2;vertical-align:top;}
+  .seg-sel tr.off{opacity:.45;}
+  .seg-sel textarea{width:100%;font-family:inherit;font-size:12.5px;line-height:1.35;
+    padding:6px 8px;border-radius:8px;border:1px solid var(--border-light);
+    background:var(--panel-2);color:var(--text);resize:vertical;}
+  .seg-exp{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
+  .seg-aviso{font-size:12px;background:var(--warn-soft);border:1px solid #e8d3a0;color:#6b4a0c;
+    border-radius:8px;padding:8px 11px;margin-top:12px;}
+  /* --- el documento, con el formato del archivo original --- */
+  .seg-papel{background:#8b8f80;padding:14px;border-radius:10px;margin-top:12px;}
+  .seg-hoja{background:#fff;border:1px solid #bbb;padding:20px 24px 22px;
+    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;}
+  .seg-hoja:last-child{margin-bottom:0;}
+  .seg-h1{display:flex;justify-content:space-between;font-weight:700;font-size:13px;}
+  .seg-h1 span{text-decoration:underline;}
+  .seg-tit{text-align:center;font-weight:700;font-size:13px;text-decoration:underline;margin:4px 0 10px;}
+  .seg-tit i{font-weight:400;font-style:normal;text-decoration:none;}
+  .seg-prot{display:flex;justify-content:flex-end;align-items:center;gap:8px;font-weight:700;font-size:12.5px;}
+  .seg-prot .caja{border:1px solid #000;min-width:120px;text-align:center;padding:2px 8px;}
+  .seg-cab{display:flex;gap:10px;margin-top:10px;}
+  .seg-cab-izq{flex:1;min-width:0;}
+  .seg-lin{display:flex;align-items:center;gap:10px;margin-bottom:5px;font-size:12.5px;}
+  .seg-lin b{min-width:148px;font-size:12.5px;}
+  .seg-lin .caja{border:1px solid #000;padding:3px 7px;flex:1;min-height:22px;}
+  .seg-lin .caja.corta{flex:0 0 140px;}
+  .seg-centro{text-align:center;font-weight:700;font-size:12.5px;}
+  .seg-foto{width:104px;height:104px;border:1px solid #000;display:flex;align-items:center;
+    justify-content:center;font-weight:700;font-size:12px;flex:none;overflow:hidden;}
+  .seg-foto img{width:100%;height:100%;object-fit:cover;}
+  .seg-hoja table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px;}
+  .seg-hoja th{border:1px solid #000;background:#ccc;font-weight:700;padding:5px 4px;
+    text-align:center;font-size:11px;}
+  .seg-hoja td{border:1px solid #000;padding:4px 6px;vertical-align:top;}
+  .seg-hoja td.f{text-align:center;white-space:nowrap;width:72px;}
+  .seg-hoja td.m{text-align:center;width:205px;}
+  .seg-hoja td.fir{width:86px;}
+  /* La última columna de las tablas de la aplicación es fija a la derecha
+     (columna de acciones); en la hoja no debe serlo. */
+  .seg-hoja td:last-child, .seg-hoja th:last-child, .seg-sel td:last-child, .seg-sel th:last-child{position:static;box-shadow:none;}
+  .seg-hoja td:last-child, .seg-sel td:last-child{background:transparent;}
+  .seg-acciones .hint{font-size:11.5px;color:var(--text-dim);line-height:1.45;}
+  .seg-pie{margin-top:8px;text-align:right;font-size:10px;color:#555;}
+  @media print{
+    body.print-seg header.top, body.print-seg footer.info,
+    body.print-seg #fichaModal, body.print-seg #cuestModal, body.print-seg #historialModal{display:none !important;}
+    body.print-seg #appShell > *:not(#consultasPanel){display:none !important;}
+    body.print-seg #consultasPanel > *:not(#segWrap){display:none !important;}
+    body.print-seg{background:#fff;}
+    body.print-seg #segWrap{display:block !important;}
+    body.print-seg .seg-sel, body.print-seg .seg-aviso, body.print-seg .seg-acciones,
+    body.print-seg .seg-cabecera-form, body.print-seg .chips{display:none !important;}
+    body.print-seg .seg-papel{background:#fff;padding:0;}
+    body.print-seg .seg-hoja{border:0;padding:0;margin:0;page-break-after:always;}
+    body.print-seg .seg-hoja:last-child{page-break-after:auto;}
+    /* El @page apaisado se añade solo mientras se imprime la hoja
+       (segImprimir), para no cambiar la orientación del resto de impresiones. */
+  }
+
+
+
   /* v37: el refuerzo derivado se corrige desde Sanciones; documento del
      ANEXO desactualizado porque se quitó a un alumno después de generarlo:
      la chapa verde "RELLENADO" pasa a roja "REGENERAR". */
@@ -1857,6 +1922,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               <option value="arresto_pendiente">Sanciones de arresto con fecha pendiente</option>
               <option value="trabajos">Sanciones de trabajo: hechos, pendientes y vencidos</option>
               <option value="expediente">Consulta de expediente (informe completo)</option>
+              <option value="seguimiento">Hoja de seguimiento del alumno</option>
             </select>
           </div>
         </div>
@@ -1941,10 +2007,35 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           </div>
         </div>
 
+        <div class="hidden" id="consSeguimientoWrap" style="margin-top:4px;">
+          <div class="field" style="grid-column:1/-1;">
+            <label for="segCadeteInput">Alumno</label>
+            <input type="text" id="segCadeteInput" list="segCadeteList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+            <datalist id="segCadeteList"></datalist>
+            <div class="cadet-preview" id="segCadetePreview"></div>
+            <div class="hint error hidden" id="segCadeteHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+          </div>
+          <div class="field" style="max-width:320px;">
+            <label for="segCicloInput">Ciclo</label>
+            <input type="text" id="segCicloInput" placeholder="Ej. 1º/26" maxlength="40" autocomplete="off">
+            <div class="hint">Para toda la sección. Sale tal cual en la hoja de seguimiento.</div>
+          </div>
+        </div>
+
         <div class="form-actions hidden" id="consActions">
           <button class="btn primary" id="consBuscarBtn" type="button">Consultar</button>
           <button class="btn ghost" id="consImprimirBtn" type="button" disabled>Imprimir</button>
           <span class="form-msg" id="consFormMsg"></span>
+        </div>
+      </div>
+
+      <div id="segWrap" class="hidden">
+        <div class="panel seg-cabecera-form" style="margin-top:14px;">
+          <h3>Hoja de seguimiento</h3>
+          <div class="panel-sub">Se rellena con las sanciones del alumno. Marca las que deban figurar y ajusta el texto de las observaciones si hace falta. Lo que edites se guarda: la próxima vez la hoja sale como la dejaste.</div>
+        </div>
+        <div class="panel" id="segCasa" style="margin-top:0;border-top-left-radius:0;border-top-right-radius:0;">
+          <div id="segBody"></div>
         </div>
       </div>
 
@@ -6283,6 +6374,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         if (idx !== -1) sanciones[idx] = res.data.sancion;
       }
       (res.data.refuerzos || []).forEach(function(x){ aplicarRefuerzoDevuelto(x.id, x.eliminado, x.refuerzo); });
+      // El servidor ya ha quitado su línea de la hoja de seguimiento.
+      var hoja = seguimientos[String(numero)];
+      if (hoja && hoja.lineas) delete hoja.lineas[sancionId];
       renderSancionesList();
       renderRefuerzosList();
     }).catch(function(){
@@ -8715,6 +8809,520 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     consExpedienteInput.addEventListener("input", actualizarValidacionConsultaExpediente);
   }
 
+  // ================= HOJA DE SEGUIMIENTO =================
+  // Replica el formato del archivo de la Sección: cabecera con protocolo,
+  // filiación, ciclo, compañía, sección y foto, y una tabla de FECHA ·
+  // MOTIVO · FIRMA INSTRUCTOR · FIRMA AMPT · OBSERVACIONES. Se rellena con
+  // las sanciones del alumno; se elige cuáles van y se pueden reescribir sus
+  // observaciones sin tocar el expediente original.
+  var SEG_FILAS_PRIMERA = 5;   // filas que caben en la primera página
+  var SEG_FILAS_SIGUIENTE = 7; // y en las siguientes, que no llevan tanta cabecera
+
+  // Lo que el usuario elige y reescribe se guarda por alumno EN EL SERVIDOR
+  // (/api/seguimientos), para poder volver luego a la hoja y seguir
+  // editándola en vez de empezar de cero. Mismo formato que el HTML local.
+  var seguimientos = {};   // numero -> { lineas: { sancionId: {incluida, observaciones} }, actualizado }
+  var segCiclo = "";       // «Ciclo» de la sección, sale en la cabecera
+  var segCargadas = null;  // promesa de la primera carga
+
+  var segNumero = null;
+  var segLineas = [];   // { id, fecha, motivo, observaciones, incluida }
+
+  function cargarSeguimientos(){
+    if (!segCargadas){
+      segCargadas = fetch("/api/seguimientos").then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        if (d && d.seguimientos && typeof d.seguimientos === "object") seguimientos = d.seguimientos;
+        if (d && typeof d.ciclo === "string") segCiclo = d.ciclo;
+      }).catch(function(){ segCargadas = null; });
+    }
+    return segCargadas || Promise.resolve();
+  }
+  function segGuardarEstado(){
+    if (segNumero == null) return;
+    var lineas = {};
+    segLineas.forEach(function(l){
+      lineas[l.id] = { incluida: !!l.incluida, observaciones: l.observaciones || "" };
+    });
+    var num = String(segNumero);
+    seguimientos[num] = { lineas: lineas, actualizado: new Date().toISOString() };
+    fetch("/api/seguimientos/" + encodeURIComponent(num), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lineas: lineas })
+    }).then(function(r){
+      if (!r.ok) throw new Error("guardar");
+      return r.json();
+    }).then(function(d){
+      if (d && d.seguimiento) seguimientos[num] = d.seguimiento;
+    }).catch(function(){
+      alert("No se ha podido guardar la hoja de seguimiento en el servidor. Revisa la conexión y vuelve a intentarlo.");
+    });
+  }
+  function segTieneHoja(numero){
+    var g = seguimientos[String(numero)];
+    return !!(g && g.lineas && Object.keys(g.lineas).length);
+  }
+
+  // Texto de partida de las observaciones de una sanción.
+  function segObservacionesDe(r){
+    if (r.observaciones && r.observaciones.trim()) return r.observaciones.trim();
+    var partes = [];
+    if (r.motivo) partes.push(r.motivo.trim());
+    var medida = formatMedidaCorrectora(r);
+    if (medida && medida !== "—") partes.push("Medida correctora: " + medida + ".");
+    return partes.join(" ");
+  }
+  function segMotivoDe(r){
+    return (r.motivo && r.motivo.trim()) || (r.fundamento || "").trim();
+  }
+
+  // Todas las sanciones del alumno, ordenadas por fecha, listas para elegir.
+  function segConstruirLineas(numero){
+    var num = String(numero);
+    var guardado = (seguimientos[num] && seguimientos[num].lineas) || {};
+    var lista = [];
+    sanciones.forEach(function(r){
+      if (!(r.alumnos || []).some(function(al){ return String(al.numero) === num; })) return;
+      var previo = guardado[r.id];
+      lista.push({
+        id: r.id,
+        expediente: r.expediente,
+        fecha: r.fecha,
+        motivo: segMotivoDe(r),
+        // Si ya se editó esta hoja antes, se recupera tal cual se dejó; las
+        // sanciones nuevas entran marcadas y con el texto del expediente.
+        observaciones: previo ? previo.observaciones : segObservacionesDe(r),
+        incluida: previo ? !!previo.incluida : true
+      });
+    });
+    lista.sort(function(a,b){ return String(a.fecha).localeCompare(String(b.fecha)); });
+    return lista;
+  }
+
+  // Reparte las líneas elegidas en páginas. No hay tope: cuando se llena una,
+  // se abre otra con la misma cabecera y la marca de continuación.
+  function segPaginar(lineas){
+    var paginas = [], i = 0;
+    while (i < lineas.length){
+      var cabe = paginas.length === 0 ? SEG_FILAS_PRIMERA : SEG_FILAS_SIGUIENTE;
+      paginas.push(lineas.slice(i, i + cabe));
+      i += cabe;
+    }
+    if (!paginas.length) paginas.push([]);
+    return paginas;
+  }
+
+  function segDatosAlumno(numero){
+    var num = String(numero == null ? "" : numero).trim();
+    var row = num ? findCadetByNumero(num, true) : null;
+    var k = state.keys || {};
+    var apellidos = row ? [getVal(row, k.ape1), getVal(row, k.ape2)].filter(Boolean).join(" ") : "";
+    var nombre = row ? getVal(row, k.nombre) : "";
+    var info = computeSeccionInfo();
+    return {
+      numero: num,
+      completo: (apellidos ? apellidos.toUpperCase() : "") + (nombre ? ", " + nombre.toUpperCase() : ""),
+      foto: (row && row._foto) || null,
+      compania: info && info.company ? seccionOrdinal(info.company) + " COMPAÑÍA" : "",
+      seccion: info && info.section ? seccionOrdinal(info.section) + " SECCIÓN" : "",
+      ciclo: (segCiclo || "").trim()
+    };
+  }
+
+  function segHojaHtml(pagina, indice, total, alumno){
+    var filas = pagina.map(function(l){
+      return '<tr><td class="f">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+        '<td class="m">' + escapeHtml(l.motivo || "") + '</td>' +
+        '<td class="fir"></td><td class="fir"></td>' +
+        '<td>' + escapeHtml(l.observaciones || "") + '</td></tr>';
+    }).join("");
+    if (!filas){
+      filas = '<tr><td class="f">&nbsp;</td><td class="m"></td><td class="fir"></td>' +
+              '<td class="fir"></td><td></td></tr>';
+    }
+    return '<div class="seg-hoja">' +
+      '<div class="seg-h1"><span>CEFOT 2</span><span>BON. ALUMNOS</span></div>' +
+      '<div class="seg-tit">HOJA DE SEGUIMIENTO' +
+        (indice > 0 ? ' <i>(continuación)</i>' : '') + '</div>' +
+      '<div class="seg-prot"><span>N.º PROTOCOLO</span>' +
+        '<span class="caja">' + escapeHtml(alumno.numero) + '</span></div>' +
+      '<div class="seg-cab"><div class="seg-cab-izq">' +
+        '<div class="seg-lin"><b>APELLIDOS, NOMBRE</b><span class="caja">' +
+          escapeHtml(alumno.completo) + '</span></div>' +
+        '<div class="seg-lin"><b>CICLO</b><span class="caja corta">' +
+          escapeHtml(alumno.ciclo) + '</span>' +
+          '<span style="flex:1;"><div class="seg-centro">' + escapeHtml(alumno.compania) + '</div>' +
+          '<div class="seg-centro">' + escapeHtml(alumno.seccion) + '</div></span></div>' +
+      '</div>' +
+      '<div class="seg-foto">' + (alumno.foto
+        ? '<img src="' + alumno.foto + '" alt="">'
+        : 'FOTO') + '</div></div>' +
+      '<table><thead><tr><th style="width:72px;">FECHA</th><th style="width:205px;">MOTIVO</th>' +
+        '<th style="width:86px;">FIRMA<br>INSTRUCTOR</th><th style="width:86px;">FIRMA<br>AMPT</th>' +
+        '<th>OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<div class="seg-pie">Página ' + (indice + 1) + ' de ' + total +
+        (indice + 1 < total ? ' · continúa en la página siguiente' : '') + '</div>' +
+      '</div>';
+  }
+
+  function segRenderizar(){
+    var cont = document.getElementById("segBody");
+    if (!cont || segNumero == null) return;
+    var alumno = segDatosAlumno(segNumero);
+    var elegidas = segLineas.filter(function(l){ return l.incluida; });
+    var paginas = segPaginar(elegidas);
+
+    var h = [];
+    h.push('<div class="chips">' +
+      '<span class="chip">' + segLineas.length + (segLineas.length === 1 ? ' sanción registrada' : ' sanciones registradas') + '</span>' +
+      '<span class="chip">' + elegidas.length + ' seleccionada' + (elegidas.length === 1 ? '' : 's') + '</span>' +
+      '<span class="chip">' + paginas.length + ' página' + (paginas.length === 1 ? '' : 's') + '</span>' +
+      (alumno.ciclo ? '' : '<span class="chip" style="background:var(--warn-soft);color:var(--warn);border-color:#e8d3a0;">Sin ciclo: escríbelo en el campo «Ciclo»</span>') +
+      (segTieneHoja(segNumero)
+        ? '<span class="chip" style="background:var(--accent2-soft);color:var(--accent2-bright);border-color:#e0cfa4;">Hoja ya editada · ' +
+          escapeHtml(formatDateDisplay(String((seguimientos[String(segNumero)] || {}).actualizado || "").slice(0,10))) + '</span>'
+        : '') +
+      '</div>');
+
+    if (!segLineas.length){
+      h.push('<div class="empty-state">Este alumno no tiene ninguna sanción registrada.</div>');
+    } else {
+      h.push('<table class="seg-sel"><thead><tr><th></th><th>Fecha</th><th>Exp.</th>' +
+        '<th>Motivo</th><th>Observaciones (editables)</th></tr></thead><tbody>' +
+        segLineas.map(function(l, i){
+          return '<tr class="' + (l.incluida ? '' : 'off') + '">' +
+            '<td style="width:26px;"><input type="checkbox" class="seg-check" data-i="' + i + '"' +
+              (l.incluida ? ' checked' : '') + '></td>' +
+            '<td style="width:88px;white-space:nowrap;">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+            '<td style="width:52px;"><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
+            '<td style="width:240px;">' + escapeHtml(l.motivo || "—") + '</td>' +
+            '<td><textarea class="seg-obs" data-i="' + i + '" rows="2">' + escapeHtml(l.observaciones || "") + '</textarea></td>' +
+          '</tr>';
+        }).join("") + '</tbody></table>');
+      h.push('<div class="seg-aviso">Las observaciones salen del expediente tal cual están. Lo que escribas aquí es lo que irá al documento; el expediente original no se toca.</div>');
+    }
+
+    h.push('<div class="seg-papel">' + paginas.map(function(pag, i){
+      return segHojaHtml(pag, i, paginas.length, alumno);
+    }).join("") + '</div>');
+
+    h.push('<div class="form-actions seg-acciones">' +
+      '<button type="button" class="btn primary" id="segDescargarBtn"' +
+        (elegidas.length ? '' : ' disabled') + '>Rellenar documento</button>' +
+      '<button type="button" class="btn ghost" id="segImprimirBtn"' +
+        (elegidas.length ? '' : ' disabled') + '>Imprimir</button>' +
+      '<span class="hint" style="margin:0;">El documento se descarga como PDF editable, con la foto del alumno y el mismo formato: puedes rellenar y corregir cada casilla en el propio PDF. Aquí puedes seguir cambiando las casillas y el texto y volver a generarlo.</span>' +
+      '</div>');
+
+    cont.innerHTML = h.join("");
+    segConectarControles(cont);
+  }
+
+  function segConectarControles(cont){
+    cont.querySelectorAll(".seg-check").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var i = parseInt(cb.getAttribute("data-i"), 10);
+        if (segLineas[i]) segLineas[i].incluida = cb.checked;
+        segGuardarEstado();
+        segRenderizar();
+      });
+    });
+    cont.querySelectorAll(".seg-obs").forEach(function(ta){
+      ta.addEventListener("input", function(){
+        var i = parseInt(ta.getAttribute("data-i"), 10);
+        if (segLineas[i]) segLineas[i].observaciones = ta.value;
+      });
+      // Al salir del campo se repinta la vista previa con el texto nuevo.
+      ta.addEventListener("blur", function(){ segGuardarEstado(); segRenderizar(); });
+    });
+    var desc = cont.querySelector("#segDescargarBtn");
+    if (desc) desc.addEventListener("click", segDescargar);
+    var imp = cont.querySelector("#segImprimirBtn");
+    if (imp) imp.addEventListener("click", function(){
+      // Apaisado solo para esta impresión: el resto de la aplicación imprime como siempre.
+      var pagina = document.createElement("style");
+      pagina.textContent = "@media print{@page{size:landscape;margin:12mm;}}";
+      document.head.appendChild(pagina);
+      document.body.classList.add("print-seg");
+      window.print();
+      setTimeout(function(){
+        document.body.classList.remove("print-seg");
+        pagina.remove();
+      }, 400);
+    });
+  }
+
+  // Genera la hoja de cálculo con el mismo formato que el archivo original.
+  // La hoja de seguimiento se descarga como PDF EDITABLE: cada casilla es un
+  // campo de formulario que se puede rellenar y corregir en cualquier lector
+  // de PDF, y la fotografía del alumno va incrustada como en la pantalla.
+  // Se usa pdf-lib (ya incrustada para el ANEXO), no una plantilla externa.
+  var SEG_PDF_ANCHOS = [62, 150, 72, 72, 159]; // FECHA, MOTIVO, FIRMAS, OBSERVACIONES
+
+  // Helvetica solo admite WinAnsi: se cambian los caracteres que no entran
+  // para que pdf-lib no falle al dibujar.
+  function segPdfTexto(v){
+    return String(v == null ? "" : v)
+      .replace(/[\u2018\u2019\u201A\u2032]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u2033]/g, '"')
+      .replace(/[\u2013\u2014\u2212]/g, "-")
+      .replace(/\u2026/g, "...")
+      .replace(/\u00A0/g, " ")
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g, "");
+  }
+
+  async function segDescargar(){
+    if (typeof PDFLib === "undefined"){
+      alert("No se ha podido cargar la librería de PDF.");
+      return;
+    }
+    var alumno = segDatosAlumno(segNumero);
+    var elegidas = segLineas.filter(function(l){ return l.incluida; });
+    if (!elegidas.length) return;
+    var paginas = segPaginar(elegidas);
+
+    try {
+      var rgb = PDFLib.rgb;
+      var NEGRO = rgb(0, 0, 0);
+      var BLANCO = rgb(1, 1, 1);
+      var GRIS = rgb(0.86, 0.86, 0.86);
+
+      var pdfDoc = await PDFLib.PDFDocument.create();
+      var form = pdfDoc.getForm();
+      var fn = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      var fb = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+      // Fotografía del alumno (la misma que se ve en pantalla).
+      var foto = null;
+      if (alumno.foto){
+        try {
+          foto = /^data:image\/png/i.test(alumno.foto)
+            ? await pdfDoc.embedPng(alumno.foto)
+            : await pdfDoc.embedJpg(alumno.foto);
+        } catch(e){ foto = null; }
+      }
+
+      var ANCHO = 595.28, ALTO = 841.89, M = 40;
+      var UTIL = SEG_PDF_ANCHOS.reduce(function(a, b){ return a + b; }, 0); // 515
+
+      paginas.forEach(function(pag, idx){
+        var pagina = pdfDoc.addPage([ANCHO, ALTO]);
+        var top = ALTO - M;
+
+        function texto(t, x, y, size, negrita, color){
+          pagina.drawText(segPdfTexto(t), {
+            x: x, y: y, size: size || 9,
+            font: negrita ? fb : fn,
+            color: color || NEGRO
+          });
+        }
+        function anchoDe(t, size, negrita){
+          return (negrita ? fb : fn).widthOfTextAtSize(segPdfTexto(t), size);
+        }
+        function subrayado(t, x, y, size, negrita){
+          texto(t, x, y, size, negrita);
+          pagina.drawLine({
+            start: { x: x, y: y - 2 }, end: { x: x + anchoDe(t, size, negrita), y: y - 2 },
+            thickness: 0.8, color: NEGRO
+          });
+        }
+        function caja(x, y, w, h, relleno){
+          pagina.drawRectangle({
+            x: x, y: y, width: w, height: h,
+            borderWidth: 0.8, borderColor: NEGRO,
+            color: relleno || undefined
+          });
+        }
+        // OJO: setFontSize y setAlignment necesitan que el campo tenga ya su
+        // entrada /DA, y esa la crea addToPage. Si se llaman antes, pdf-lib
+        // lanza «No /DA (default appearance) entry found for field».
+        function campo(nombre, valor, x, y, w, h, opts){
+          opts = opts || {};
+          var f = form.createTextField("p" + idx + "_" + nombre);
+          f.setText(segPdfTexto(valor || ""));
+          if (opts.multi) f.enableMultiline();
+          f.addToPage(pagina, {
+            x: x, y: y, width: w, height: h,
+            borderWidth: 0.8, borderColor: NEGRO, backgroundColor: BLANCO,
+            font: fn
+          });
+          f.setFontSize(opts.size || 8);
+          if (opts.centrado) f.setAlignment(PDFLib.TextAlignment.Center);
+          return f;
+        }
+
+        // ---------- cabecera ----------
+        subrayado("CEFOT 2", M, top - 10, 11, true);
+        var derecha = "BON. ALUMNOS";
+        subrayado(derecha, M + UTIL - anchoDe(derecha, 11, true), top - 10, 11, true);
+
+        var titulo = "HOJA DE SEGUIMIENTO" + (idx > 0 ? " (continuación)" : "");
+        subrayado(titulo, M + (UTIL - anchoDe(titulo, 12, true)) / 2, top - 40, 12, true);
+
+        // ---------- nº protocolo ----------
+        var protW = 92, protX = M + UTIL - protW, protY = top - 74;
+        var etiqProt = "N.º PROTOCOLO";
+        texto(etiqProt, protX - anchoDe(etiqProt, 9, true) - 8, protY + 5, 9, true);
+        campo("protocolo", alumno.numero, protX, protY, protW, 17, { centrado: true, size: 9 });
+
+        // ---------- datos del alumno + foto ----------
+        var fotoW = 92, fotoH = 108;
+        var fotoX = M + UTIL - fotoW, fotoY = top - 104 - fotoH;
+        caja(fotoX, fotoY, fotoW, fotoH);
+        if (foto){
+          var esc = Math.min((fotoW - 6) / foto.width, (fotoH - 6) / foto.height);
+          var iw = foto.width * esc, ih = foto.height * esc;
+          pagina.drawImage(foto, {
+            x: fotoX + (fotoW - iw) / 2, y: fotoY + (fotoH - ih) / 2, width: iw, height: ih
+          });
+        } else {
+          texto("FOTO", fotoX + (fotoW - anchoDe("FOTO", 9, true)) / 2, fotoY + fotoH / 2 - 3, 9, true);
+        }
+
+        var etiqX = M, campoX = M + 118, campoW = fotoX - 12 - campoX;
+        texto("APELLIDOS, NOMBRE", etiqX, top - 116, 9, true);
+        campo("nombre", alumno.completo, campoX, top - 122, campoW, 17, { size: 9 });
+
+        texto("CICLO", etiqX, top - 150, 9, true);
+        campo("ciclo", alumno.ciclo, campoX, top - 156, 78, 17, { centrado: true, size: 9 });
+
+        var centroX = campoX + 78, centroW = campoW - 78;
+        texto(alumno.compania, centroX + (centroW - anchoDe(alumno.compania, 9, true)) / 2, top - 150, 9, true);
+        texto(alumno.seccion, centroX + (centroW - anchoDe(alumno.seccion, 9, true)) / 2, top - 164, 9, true);
+
+        // ---------- tabla ----------
+        var CABS = ["FECHA", "MOTIVO", "FIRMA\nINSTRUCTOR", "FIRMA\nAMPT", "OBSERVACIONES"];
+        var tablaTop = fotoY - 16;
+        var cabH = 24;
+        var pieY = 42;
+        // Altura de fila IGUAL en todas las páginas: se reparte el hueco entre
+        // el máximo de filas que cabe (7). Una página con menos filas deja el
+        // hueco abajo, como en el documento original, en vez de estirarse.
+        var disponible = (tablaTop - cabH) - (pieY + 14);
+        var filaH = disponible / SEG_FILAS_SIGUIENTE;
+
+        var x = M;
+        CABS.forEach(function(c, i){
+          var w = SEG_PDF_ANCHOS[i];
+          caja(x, tablaTop - cabH, w, cabH, GRIS);
+          var lineas = c.split("\n");
+          lineas.forEach(function(ln, k){
+            var yy = tablaTop - cabH / 2 - 3 + (lineas.length === 2 ? (k === 0 ? 5 : -4) : 0);
+            texto(ln, x + (w - anchoDe(ln, 7.5, true)) / 2, yy, 7.5, true);
+          });
+          x += w;
+        });
+
+        pag.forEach(function(l, fi){
+          var y = tablaTop - cabH - filaH * (fi + 1);
+          var cx = M;
+          var valores = [
+            formatDateDisplay(l.fecha),
+            l.motivo || "",
+            "",
+            "",
+            l.observaciones || ""
+          ];
+          valores.forEach(function(v, ci){
+            var w = SEG_PDF_ANCHOS[ci];
+            campo("f" + fi + "c" + ci, v, cx, y, w, filaH, {
+              multi: ci !== 0,
+              centrado: ci === 0 || ci === 1,
+              size: ci === 0 ? 8 : 7.5
+            });
+            cx += w;
+          });
+        });
+
+        // ---------- pie ----------
+        var pie = "Página " + (idx + 1) + " de " + paginas.length +
+          (idx + 1 < paginas.length ? " · continúa en la página siguiente" : "");
+        texto(pie, M + UTIL - anchoDe(pie, 7.5, false), pieY, 7.5, false, rgb(0.35, 0.35, 0.35));
+      });
+
+      // Las tildes se dibujan con la fuente incrustada.
+      form.updateFieldAppearances(fn);
+
+      var bytes = await pdfDoc.save();
+      var blob = new Blob([bytes], { type: "application/pdf" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "HOJA_SEGUIMIENTO_" + alumno.numero + "_" + todayIso() + ".pdf";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 400);
+    } catch(err){
+      console.error(err);
+      alert("No se ha podido generar la hoja: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  var segCadeteInput = document.getElementById("segCadeteInput");
+  var segCadeteList = document.getElementById("segCadeteList");
+  var segCadetePreview = document.getElementById("segCadetePreview");
+  var segCadeteHint = document.getElementById("segCadeteHint");
+  var segWrap = document.getElementById("segWrap");
+  var consSeguimientoWrap = document.getElementById("consSeguimientoWrap");
+
+  function buildSegCadeteOptions(){
+    var k = state.keys;
+    segCadeteList.innerHTML = state.rows.map(function(row){
+      var numero = getVal(row, k.numero);
+      var etiqueta = numero + " — " + [getVal(row,k.ape1), getVal(row,k.ape2)].filter(Boolean).join(" ") +
+        ", " + getVal(row, k.nombre);
+      return '<option value="' + escapeHtml(etiqueta) + '">';
+    }).join("");
+  }
+
+  segCadeteInput.addEventListener("input", function(){
+    var val = segCadeteInput.value.trim();
+    var m = val.match(/^(\S+)\s*—/);
+    var numero = m ? m[1] : (val.match(/^(\d+)$/) ? val : null);
+    var row = numero ? findCadetByNumero(numero) : null;
+    if (row){
+      var k = state.keys;
+      var pel = getVal(row, k.peloton);
+      segCadetePreview.innerHTML = (row._foto ? '<img class="roster-avatar" src="' + row._foto + '" alt="">' : "") + '<span class="num">Nº ' + escapeHtml(numero) + '</span><span>' +
+        escapeHtml([getVal(row,k.ape1), getVal(row,k.ape2)].filter(Boolean).join(" ")) + ', ' +
+        escapeHtml(getVal(row, k.nombre)) + (pel ? ' · Pelotón ' + escapeHtml(pel) : '') + '</span>';
+      segCadetePreview.classList.add("show");
+      segCadeteHint.classList.add("hidden");
+      segWrap.classList.remove("hidden");
+      segAbrir(numero);
+    } else {
+      segCadetePreview.classList.remove("show");
+      segCadeteHint.classList.toggle("hidden", val === "");
+      segWrap.classList.add("hidden");
+    }
+  });
+
+  function segAbrir(numero){
+    segNumero = numero;
+    cargarSeguimientos().then(function(){
+      if (segNumero !== numero) return;  // se eligió otro alumno mientras cargaba
+      segLineas = segConstruirLineas(numero);
+      segRenderizar();
+    });
+  }
+
+  var segCicloInput = document.getElementById("segCicloInput");
+  segCicloInput.addEventListener("change", function(){
+    var valor = segCicloInput.value.trim();
+    fetch("/api/seguimientos/ciclo", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ciclo: valor })
+    }).then(function(r){
+      if (!r.ok) throw new Error("ciclo");
+      segCiclo = valor;
+      if (segNumero != null && !segWrap.classList.contains("hidden")) segRenderizar();
+    }).catch(function(){
+      alert("No se ha podido guardar el ciclo en el servidor.");
+    });
+  });
+
+
   consTipoSelect.addEventListener("change", function(){
     var tipo = consTipoSelect.value;
     var esEstadoPeriodo = tipo === "estado_periodo";
@@ -8722,12 +9330,26 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var esArrestoPendiente = tipo === "arresto_pendiente";
     var esTrabajos = tipo === "trabajos";
     var esExpediente = tipo === "expediente";
+    var esSeguimiento = tipo === "seguimiento";
     consFechasWrap.classList.toggle("hidden", !esEstadoPeriodo);
     consActividadFaseWrap.classList.toggle("hidden", !esActividades);
     consArrestoPendienteWrap.classList.toggle("hidden", !esArrestoPendiente);
     consTrabajosWrap.classList.toggle("hidden", !esTrabajos);
     consExpedienteWrap.classList.toggle("hidden", !esExpediente);
+    consSeguimientoWrap.classList.toggle("hidden", !esSeguimiento);
+    // La hoja de seguimiento no usa el botón «Consultar»: se abre sola al
+    // elegir al alumno, porque es una pantalla de edición, no un informe.
     consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos || esExpediente));
+    if (!esSeguimiento){
+      segWrap.classList.add("hidden");
+    } else {
+      segCadeteInput.value = "";
+      segCadetePreview.classList.remove("show");
+      segCadeteHint.classList.add("hidden");
+      segWrap.classList.add("hidden");
+      buildSegCadeteOptions();
+      cargarSeguimientos().then(function(){ segCicloInput.value = segCiclo; });
+    }
     consResultadosWrap.classList.add("hidden");
     consResultados.innerHTML = "";
     consImprimirBtn.disabled = true;

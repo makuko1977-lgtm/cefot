@@ -66,6 +66,9 @@ router.post("/cerrar-curso", auth.requireAuth, auth.requireRole("admin"), auth.b
   req.db.rebajes = [];
   req.db.refuerzos = [];
   req.db.expedienteCounter = 0;
+  // Las hojas de seguimiento se basan en las sanciones del curso que se cierra.
+  req.db.seguimientos = {};
+  req.db.seguimientoCiclo = "";
   if (incluirRoster){
     req.db.roster = [];
     req.db.rosterUpdatedAt = null;

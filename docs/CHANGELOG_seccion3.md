@@ -1108,15 +1108,27 @@ genera un derivado de 3 alumnos y un refuerzo manual de 2:
 
 ### Integración en el repositorio (servidor y HTML local)
 
-- **HTML local (`legado/seccion3.html`)**: es la v37 entregada, fusionada con
-  lo que el repositorio ya tenía y la v37 no traía:
-  - Se conserva **«Importar copia del servidor (añadir)»** (pantalla de carga
-    y barra superior), necesaria para pasar al HTML local las copias
-    exportadas desde el servidor.
-  - **«Importar copia»** sigue siendo **aditiva**: la v37 la hacía
-    sustituyendo todo; aquí solo añade lo que falta y no borra ni sobrescribe
-    nada. Ahora incluye también las **hojas de seguimiento**: se añaden los
-    alumnos y líneas que falten y no se toca lo ya editado en este navegador.
+- **HTML local (`legado/seccion3.html`)**: sobre la versión anterior del
+  repositorio se han aplicado **solo** los cambios de la v37 de estos dos
+  asuntos (57 de los 108 bloques de diferencia); el resto de funciones se
+  queda como estaba:
+  - **Quitar a un alumno de un expediente**: Sanciones como único sitio (y
+    Refuerzos para los manuales), «Desde Sanciones», «⚠ REGENERAR» con
+    contador y franja de aviso, Consultas de solo lectura, fuera el código
+    del borrado antiguo.
+  - **Hoja de seguimiento**: consulta «Hoja de seguimiento del alumno» y
+    pestaña en el historial, campo «Ciclo» junto a las fechas FFMG/FFE, lo
+    editado se guarda y va en la copia de seguridad, y al quitar a un alumno
+    de una sanción se borra su línea.
+  - **No se ha incorporado** (se mantiene la versión anterior): horario de
+    fin de semana en refuerzos y en la coincidencia de fechas; intentos y
+    «mejor nota» del cuestionario de notas; la etiqueta «Compartido (N
+    alumnos)» del historial; y se conservan «Importar copia del servidor
+    (añadir)», la importación **aditiva** de «Importar copia» (la v37 la hacía
+    sustituyendo todo) y las piezas del modo servidor.
+  - Las dos importaciones añaden también las **hojas de seguimiento** (solo
+    alumnos y líneas que falten; lo editado en el navegador no se toca) y el
+    «Ciclo» si aquí está vacío.
 - **Servidor (`admin.html`)**, mismo criterio que la v37:
   - **Sanciones**: «Eliminar» quita **solo a ese alumno**; antes borraba el
     expediente entero. Sale también de su refuerzo derivado, se limpia su
@@ -1139,7 +1151,15 @@ genera un derivado de 3 alumnos y un refuerzo manual de 2:
   - Si la sanción viene de un **parte de pelotón** aún sin revisar, su aviso
     se actualiza igual (el aviso guarda su propia copia de los alumnos); si la
     sanción se queda sin alumnos, el aviso desaparece.
-- Pruebas: `tests/borrado-unico.test.js` (7 pruebas; 28 en total, todas en verde).
+  - **Hoja de seguimiento en el servidor**: en Consultas, con el mismo
+    formato, vista previa, impresión y PDF editable que el HTML local. Se
+    guarda en la sección (`GET /api/seguimientos`, `PUT /api/seguimientos/:numero`,
+    `PUT /api/seguimientos/ciclo`; solo el jefe de sección), solo con líneas de
+    sanciones del propio alumno. El «Ciclo» se escribe en la propia consulta.
+    Va en «Exportar copia» y en la copia completa; se vacía al cerrar el curso.
+    La pestaña de la hoja dentro del historial solo está en el HTML local (el
+    historial del servidor no tiene pestañas).
+- Pruebas: `tests/borrado-unico.test.js` (7) y `tests/seguimiento.test.js` (5); 33 en total, todas en verde.
 - Manual PDF (apartados 5.3 y 6) y manual interactivo actualizados.
 
 ---

@@ -626,7 +626,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      necesita todo el ancho para que quepan los meses de la fase. */
   #historialCard{max-width:760px;}
   #historialCard.ancho{max-width:1360px;}
-  .notas-intentos{display:block;font-size:10.5px;color:var(--text-dim);margin-top:2px;white-space:nowrap;}
   /* ================= HOJA DE SEGUIMIENTO ================= */
   .seg-sel{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
   .seg-sel th{background:var(--panel-2);text-align:left;padding:8px 9px;font-size:10.5px;
@@ -668,6 +667,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .seg-hoja td.f{text-align:center;white-space:nowrap;width:72px;}
   .seg-hoja td.m{text-align:center;width:205px;}
   .seg-hoja td.fir{width:86px;}
+  /* La última columna de las tablas de la aplicación es fija a la derecha
+     (columna de acciones); en la hoja no debe serlo. */
+  .seg-hoja td:last-child, .seg-hoja th:last-child, .seg-sel td:last-child, .seg-sel th:last-child{position:static;box-shadow:none;}
+  .seg-hoja td:last-child, .seg-sel td:last-child{background:transparent;}
+  .seg-acciones .hint{font-size:11.5px;color:var(--text-dim);line-height:1.45;}
   .seg-pie{margin-top:8px;text-align:right;font-size:10px;color:#555;}
   @media print{
     body.print-seg header.top, body.print-seg #appShell, body.print-seg footer.info,
@@ -1280,15 +1284,6 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .fecha-coincidencia-selection .field label{font-size:11px;}
   .fecha-coincidencia-selection input{width:100%;box-sizing:border-box;}
-  .fecha-coincidencia-finde{
-    margin-top:10px;
-    border:1px dashed var(--accent2);
-    background:var(--accent2-soft);
-    border-radius:9px;
-    padding:10px;
-  }
-  .fecha-coincidencia-finde .hint{margin:0 0 6px;}
-  .fecha-coincidencia-finde .fecha-coincidencia-selection{margin-top:0;}
   .fecha-coincidencia-step{
     margin-top:8px;
     font-size:11.5px;
@@ -1487,6 +1482,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
     </div>
     <div id="topActions"></div>
+    <div id="capitanBackWrap" class="hidden"><button class="btn small ghost" id="capitanBackBtn" type="button">Volver a mi compañía</button></div>
     <input type="file" id="backupFileInput" accept=".json" class="hidden" />
     <input type="file" id="serverBackupFileInput" accept=".json" class="hidden" />
   </header>
@@ -2005,7 +2001,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div class="field-row">
               <div class="field narrow">
                 <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
-                <input type="time" id="refHoraInicioFinde" value="09:00">
+                <input type="time" id="refHoraInicioFinde" value="10:00">
               </div>
               <div class="field narrow">
                 <label for="refDuracionFinde">Duración fin de semana (horas)</label>
@@ -3124,24 +3120,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return rangoTieneCoincidencia(caso.alumno.numero, ini, fin, caso.opts);
   }
 
-  // Los dos formularios no entregan lo mismo: el de sanciones pasa filas del
-  // listado tal cual (con las claves de la hoja: NUMERO, APE1, ...) y el de
-  // refuerzos pasa la ficha ya montada (numero, ape1, ...). Sin normalizar,
-  // "alumno.numero" salía vacío para las sanciones y la búsqueda de
-  // coincidencias de arrestos no encontraba nunca nada.
-  function fichaAlumnoParaCaso(a){
-    if (!a) return { numero:"", ape1:"", ape2:"", nombre:"", peloton:"" };
-    if (a.numero != null && a.numero !== "") return a;
-    var k = state.keys || {};
-    return {
-      numero: getVal(a, k.numero),
-      ape1: getVal(a, k.ape1),
-      ape2: getVal(a, k.ape2),
-      nombre: getVal(a, k.nombre),
-      peloton: getVal(a, k.peloton)
-    };
-  }
-
   function casoEscapedAlumno(caso){
     return escapeHtml([caso.alumno.ape1, caso.alumno.ape2].filter(Boolean).join(" ") + ", " + (caso.alumno.nombre || ""));
   }
@@ -3202,29 +3180,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var finInput = root.querySelector('.fecha-cal-fin');
     if (iniInput) iniInput.value = caso.ini || "";
     if (finInput) finInput.value = caso.fin || "";
-
-    var findeWrap = root.querySelector('.fecha-coincidencia-finde');
-    if (findeWrap){
-      findeWrap.classList.toggle('hidden', !casoNecesitaFinde(caso));
-      var findeHoraInput = root.querySelector('.fecha-cal-finde-hora');
-      var findeDurInput = root.querySelector('.fecha-cal-finde-dur');
-      if (findeHoraInput){
-        findeHoraInput.value = caso.findeHora || "";
-        findeHoraInput.onchange = function(){
-          caso.findeHora = findeHoraInput.value;
-          setCasoError(caso, "");
-          actualizarFechaCoincidenciaSummary();
-        };
-      }
-      if (findeDurInput){
-        findeDurInput.value = caso.findeDur || "";
-        findeDurInput.oninput = function(){
-          caso.findeDur = findeDurInput.value;
-          setCasoError(caso, "");
-          actualizarFechaCoincidenciaSummary();
-        };
-      }
-    }
     root.querySelectorAll('.fecha-cal-day:not(.disabled)').forEach(function(btn){
       btn.addEventListener('click', function(){
         var iso = btn.getAttribute('data-iso');
@@ -3293,29 +3248,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
   }
 
-  // ¿Este caso tiene que pedir horario de fin de semana? Solo si quien abrió
-  // el calendario lo pide (los refuerzos sí, los arrestos no tienen horario)
-  // y el intervalo elegido incluye sábado o domingo.
-  function casoNecesitaFinde(caso){
-    if (!(caso.opts && caso.opts.pedirFinde)) return false;
-    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
-    return rangoTieneFinde(caso.ini, caso.fin);
-  }
-
-  function casoFindeCompleto(caso){
-    if (!casoNecesitaFinde(caso)) return true;
-    if (!caso.findeHora) return false;
-    var d = parseFloat(caso.findeDur);
-    return !!caso.findeDur && !isNaN(d) && d > 0;
-  }
-
-  function casoCompleto(caso){
-    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
-    if (caso.error) return false;
-    if (rangoEstaDentroDeDiasOcupados(caso, caso.ini, caso.fin)) return false;
-    return casoFindeCompleto(caso);
-  }
-
   function setCasoError(caso, msg){
     caso.error = msg || "";
     var root = document.getElementById(caso.domId);
@@ -3345,16 +3277,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           '<div class="field"><label>Nueva fecha inicio</label><input type="date" class="fecha-cal-ini"></div>' +
           '<div class="field"><label>Nueva fecha fin</label><input type="date" class="fecha-cal-fin"></div>' +
         '</div>' +
-        // La fecha nueva puede caer en sábado o domingo aunque la original no
-        // lo hiciera. En ese caso hay que marcar aquí el horario de esos días:
-        // el del formulario es el de entre semana y no sirve.
-        '<div class="fecha-coincidencia-finde hidden">' +
-          '<div class="hint" style="margin:0 0 6px;">El nuevo periodo incluye <strong>sábado y/o domingo</strong>: marca el horario de esos días.</div>' +
-          '<div class="fecha-coincidencia-selection" style="margin-top:0;">' +
-            '<div class="field"><label>Hora inicio (sáb. y dom.)</label><input type="time" class="fecha-cal-finde-hora"></div>' +
-            '<div class="field"><label>Duración (horas)</label><input type="text" class="fecha-cal-finde-dur" inputmode="decimal"></div>' +
-          '</div>' +
-        '</div>' +
         '<div class="fecha-coincidencia-step">Selecciona la fecha de inicio y después la fecha de fin.</div>' +
         '<div class="hint error hidden fecha-cal-error"></div>' +
       '</div>';
@@ -3366,13 +3288,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   function actualizarFechaCoincidenciaSummary(){
     var total = fechaCoincidenciaCasosState.length;
-    var completos = 0, faltaFinde = 0;
+    var completos = 0;
     fechaCoincidenciaCasosState.forEach(function(c){
-      if (casoCompleto(c)) completos++;
-      else if (casoNecesitaFinde(c) && !casoFindeCompleto(c)) faltaFinde++;
+      if (c.ini && c.fin && c.fin >= c.ini && !c.error && !rangoEstaDentroDeDiasOcupados(c, c.ini, c.fin)) completos++;
     });
-    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida." +
-      (faltaFinde ? " Falta el horario de fin de semana de " + faltaFinde + " alumno" + (faltaFinde === 1 ? "" : "s") + "." : "");
+    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida.";
     fechaCoincidenciaGuardarBtn.disabled = completos !== total;
   }
 
@@ -3394,7 +3314,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           id: "caso-" + idx + "-" + Date.now(),
           domId: "fecha-caso-" + idx + "-" + Date.now(),
           alumno: caso.alumno,
-          alumnoOriginal: caso.alumnoOriginal || caso.alumno,
           coincidencias: caso.coincidencias,
           originalIni: caso.originalIni,
           originalFin: caso.originalFin,
@@ -3404,12 +3323,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           selecting: "inicio",
           monthYear: base.getFullYear(),
           monthMonth: base.getMonth(),
-          error: "",
-          // Horario de fin de semana para la NUEVA fecha de este alumno. Se
-          // parte de lo que hubiera en el formulario y, si no había nada,
-          // del estándar; siempre hay que dejarlo marcado.
-          findeHora: (caso.opts && caso.opts.findeHora) || HORA_FINDE_ESTANDAR,
-          findeDur: (caso.opts && caso.opts.findeDur) || DURACION_FINDE_ESTANDAR
+          error: ""
         };
       });
       fechaCoincidenciaAlumno.textContent = fechaCoincidenciaCasosState.length === 1
@@ -3426,13 +3340,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var normal = [];
     var casos = [];
     alumnos.forEach(function(alumno){
-      var ficha = fichaAlumnoParaCaso(alumno);
-      var coincidencias = buscarFechasCoincidentes([ficha.numero], ini, fin, opts);
+      var coincidencias = buscarFechasCoincidentes([alumno.numero], ini, fin, opts);
       if (coincidencias.length){
-        casos.push({
-          alumno: ficha, alumnoOriginal: alumno, coincidencias: coincidencias,
-          originalIni: ini, originalFin: fin, opts: opts
-        });
+        casos.push({ alumno: alumno, coincidencias: coincidencias, originalIni: ini, originalFin: fin, opts: opts });
       } else {
         normal.push(alumno);
       }
@@ -3444,10 +3354,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return {
       normal: normal,
       separados: respuesta.map(function(c){
-        return {
-          alumno: c.alumno, ini: c.ini, fin: c.fin,
-          tieneFinde: !!c.tieneFinde, findeHora: c.findeHora || "", findeDur: c.findeDur || ""
-        };
+        return { alumno: c.alumno, ini: c.ini, fin: c.fin };
       })
     };
   }
@@ -3462,11 +3369,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         setCasoError(c, "El intervalo elegido contiene días ocupados. Selecciona otro intervalo.");
         break;
       }
-      if (!casoFindeCompleto(c)){
-        invalid = c;
-        setCasoError(c, "El nuevo periodo cae en fin de semana: marca la hora de inicio y la duración de esos días.");
-        break;
-      }
     }
     if (invalid){
       var root = document.getElementById(invalid.domId);
@@ -3474,13 +3376,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return;
     }
     cerrarFechaCoincidencia(fechaCoincidenciaCasosState.map(function(c){
-      var conFinde = casoNecesitaFinde(c);
-      return {
-        alumno: c.alumnoOriginal || c.alumno, ini: c.ini, fin: c.fin,
-        tieneFinde: conFinde,
-        findeHora: conFinde ? c.findeHora : "",
-        findeDur: conFinde ? String(c.findeDur || "").trim() : ""
-      };
+      return { alumno:c.alumno, ini:c.ini, fin:c.fin };
     }));
   });
   fechaCoincidenciaCancelarBtn.addEventListener("click", function(){ cerrarFechaCoincidencia(null); });
@@ -3796,7 +3692,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function showUpload(){
     uploadScreen.classList.remove("hidden");
     appShell.classList.add("hidden");
-    topActions.innerHTML = "";
+    topActions.innerHTML = '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
+    document.getElementById("logoutBtnTop").addEventListener("click", function(){
+      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
+    });
     applySeccionBranding(null);
   }
 
@@ -3807,7 +3706,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       '<button class="btn small ghost" id="exportBackupBtn">Copia de seguridad</button>' +
       '<button class="btn small ghost" id="importBackupBtn">Importar copia</button>' +
       '<button class="btn small ghost" id="importServerBackupBtn">Importar copia del servidor (añadir)</button>' +
-      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>';
+      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>' +
+      '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
     document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
     document.getElementById("importBackupBtn").addEventListener("click", function(){
@@ -3817,6 +3717,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     document.getElementById("importServerBackupBtn").addEventListener("click", function(){
       serverBackupFileInput.value = "";
       serverBackupFileInput.click();
+    });
+    document.getElementById("logoutBtnTop").addEventListener("click", function(){
+      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
     });
     updateBackupReminder();
   }
@@ -3886,6 +3789,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     backupFileInput.value = "";
     backupFileInput.click();
   });
+
   uploadImportServerBackupBtn.addEventListener("click", function(){
     serverBackupFileInput.value = "";
     serverBackupFileInput.click();
@@ -4065,6 +3969,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               if (!fasesCiclo[f][k] && data.fases[f][k]) fasesCiclo[f][k] = data.fases[f][k];
             });
           });
+          // El «Ciclo» de la hoja de seguimiento, solo si aquí está vacío.
+          if (!fasesCiclo.ciclo && typeof data.fases.ciclo === "string") fasesCiclo.ciclo = data.fases.ciclo;
           localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo));
         }
 
@@ -4334,6 +4240,26 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       horasUaNuevas.forEach(function(key){ horasUaLocal[key] = horasUaImport[key]; });
       try { localStorage.setItem("cefot2_ua_fechas", JSON.stringify(horasUaLocal)); }
       catch(err){ console.warn("No se pudo guardar Horas UA fusionadas", err); }
+
+      // Hojas de seguimiento del servidor: solo se añaden los alumnos y las
+      // líneas que aquí no existen; lo ya editado en este navegador no se toca.
+      // El «Ciclo» solo se rellena si aquí está vacío.
+      if (data.seguimientos && typeof data.seguimientos === "object"){
+        Object.keys(data.seguimientos).forEach(function(num){
+          var otra = data.seguimientos[num];
+          if (!otra || !otra.lineas) return;
+          var mia = seguimientos[num];
+          if (!mia || !mia.lineas){ seguimientos[num] = otra; return; }
+          Object.keys(otra.lineas).forEach(function(id){
+            if (!Object.prototype.hasOwnProperty.call(mia.lineas, id)) mia.lineas[id] = otra.lineas[id];
+          });
+        });
+        persistSeguimientos();
+      }
+      if (!fasesCiclo.ciclo && typeof data.seguimientoCiclo === "string" && data.seguimientoCiclo){
+        fasesCiclo.ciclo = data.seguimientoCiclo;
+        try { localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo)); } catch(err){}
+      }
 
       // El contador de expedientes debe quedar por delante del expediente
       // más alto ya fusionado (local + recién añadidos), para que ningún
@@ -6071,7 +5997,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + (r.origen === "sancion" ? "alerta" : "vigente") + '">' + (r.origen === "sancion" ? "De sanción" : "Manual") + '</span>' +
             (r.expediente ? '<span class="historial-count">Exp. Nº ' + escapeHtml(String(r.expediente)) + '</span>' : '') +
-            (r.alumnos && r.alumnos.length > 1 ? '<span class="historial-count">Compartido (' + r.alumnos.length + ' alumnos)</span>' : '') +
             '</span></div>' +
             '<dl>' +
             '<dt>Tipo</dt><dd>' + escapeHtml(r.tipo || "—") + '</dd>' +
@@ -7156,6 +7081,35 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     applyRefuerzoDraft();
   });
 
+  // Punto de enganche para el aviso de partes de pelotón (seccion-avisos.js,
+  // otro <script> aparte que no tiene acceso a las variables de este): en
+  // vez de crear una sanción nueva desde el formulario, arma el borrador de
+  // refuerzo directamente con los datos que ya trae el aviso (la sanción del
+  // jefe de pelotón puede no estar sincronizada todavía en este dispositivo).
+  window.cefotGenerarRefuerzoDesdeSancion = function(aviso){
+    if (!aviso) return;
+    refuerzoDraft = {
+      expediente: aviso.expediente,
+      sancionId: aviso.sancionId,
+      alumnos: aviso.alumnos || [],
+      fecha: aviso.fecha || "",
+      lugar: aviso.lugar || "",
+      hora: aviso.hora || "",
+      profEmpleo: aviso.profEmpleo || "",
+      profNombre: aviso.profNombre || "",
+      profApellidos: aviso.profApellidos || "",
+      profDni: aviso.profDni || "",
+      tipoFalta: aviso.tipoFalta || "",
+      fundamento: aviso.fundamento || "",
+      fundamentoLetra: aviso.fundamentoLetra || "",
+      motivo: aviso.motivo || "",
+      observaciones: aviso.observaciones || ""
+    };
+    switchTab("refuerzos");
+    renderRefuerzosTab();
+    applyRefuerzoDraft();
+  };
+
   function renderSancionesTab(){
     buildSanCadetOptions();
     refreshSanciondatalists();
@@ -7683,12 +7637,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var dow = d.day();
     return dow === 0 || dow === 6;
   }
-  // Hora de referencia para los días de fin de semana. Es solo el punto de
-  // partida del campo: quien genera el expediente la marca a su criterio, y
-  // el campo no se puede dejar en blanco.
-  var HORA_FINDE_ESTANDAR = "09:00";
-  var DURACION_FINDE_ESTANDAR = "1";
-
   function rangoTieneFinde(inicio, fin){
     return isoDatesInRange(inicio, fin).some(esFinDeSemanaIso);
   }
@@ -7813,7 +7761,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refDuracion.value = record.duracion || "1";
     var tieneFinde = updateRefFindeVisibility();
     if (tieneFinde){
-      refHoraInicioFinde.value = record.horaInicioFinde || HORA_FINDE_ESTANDAR;
+      refHoraInicioFinde.value = record.horaInicioFinde || "10:00";
       refDuracionFinde.value = record.duracionFinde || "1";
     }
     refObservaciones.value = record.observaciones || "";
@@ -7883,7 +7831,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refTipo.value = "IFM";
     refHoraInicio.value = "09:00";
     refDuracion.value = "1";
-    refHoraInicioFinde.value = HORA_FINDE_ESTANDAR;
+    refHoraInicioFinde.value = "10:00";
     refDuracionFinde.value = "1";
     updateRefFindeVisibility();
     refObservaciones.value = "";
@@ -7991,11 +7939,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alumnos,
         refFechaInicio.value,
         refFechaFin.value,
-        {
-          pedirFinde: true,
-          findeHora: (tieneFinde && refHoraInicioFinde.value) || HORA_FINDE_ESTANDAR,
-          findeDur: (tieneFinde && refDuracionFinde.value.trim()) || DURACION_FINDE_ESTANDAR
-        }
+        {}
       );
       if (!fechaRefResolucion){
         refFormMsg.textContent = "Guardado cancelado.";
@@ -8085,12 +8029,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         separado.alumnos = [item.alumno];
         separado.fechaInicio = item.ini;
         separado.fechaFin = item.fin;
-        // El horario de fin de semana se calcula sobre la fecha NUEVA, no
-        // sobre la del formulario: si la reasignación cae en sábado o domingo
-        // lleva el horario marcado en el calendario, y si deja de caer en fin
-        // de semana se vacía para que no arrastre un horario que ya no aplica.
-        separado.horaInicioFinde = item.tieneFinde ? (item.findeHora || "") : "";
-        separado.duracionFinde = item.tieneFinde ? (item.findeDur || "") : "";
         separado.createdAt = new Date().toISOString();
         separado.editado = false;
         separado.editadoFecha = null;
@@ -11026,7 +10964,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // "estado" distingue a quien ha suspendido (tiene nota, por debajo de la
   // mínima) de quien no se ha presentado (no tiene nota utilizable, o ni
   // siquiera aparece en el archivo).
-  function filaResultadoNotas(alumno, estado, nota, intentos, conNota){
+  function filaResultadoNotas(alumno, estado, nota){
     var k = state.keys;
     return {
       numero: getVal(alumno, k.numero),
@@ -11035,9 +10973,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       nombre: getVal(alumno, k.nombre),
       peloton: getVal(alumno, k.peloton),
       estado: estado,
-      nota: nota,
-      intentos: intentos || 0,      // veces que aparece en el archivo
-      conNota: conNota || 0         // de esas, cuántas traían una nota utilizable
+      nota: nota
     };
   }
 
@@ -11051,13 +10987,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var incidencias = [];
       var vistos = {}; // números del listado ya localizados en este archivo
 
-      // Un mismo alumno puede aparecer varias veces en el archivo: son los
-      // sucesivos intentos del ejercicio. Se recogen TODAS sus filas y después
-      // se toma su nota más alta, que es la que cuenta. No hace falta que el
-      // usuario haga nada: es automático al comprobar.
-      var porAlumno = {};
-      var ordenAlumnos = [];
-
       archivo.rows.forEach(function(fila){
         var busq = buscarAlumnoNotas(fila, archivo);
         if (busq.estado === "ambiguo"){
@@ -11069,32 +10998,20 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return;
         }
         var numero = getVal(busq.alumno, k.numero);
-        if (!porAlumno[numero]){
-          porAlumno[numero] = { alumno: busq.alumno, notas: [], intentos: 0 };
-          ordenAlumnos.push(numero);
-        }
-        var reg = porAlumno[numero];
-        reg.intentos++;
-        // Cualquier valor que no sea un número utilizable (celda vacía, «NP»,
-        // «No presentado», un guion…) es un intento sin nota aprovechable.
-        var nota = parseNota(fila[archivo.colNota]);
-        if (nota != null) reg.notas.push(nota);
-      });
-
-      ordenAlumnos.forEach(function(numero){
-        var reg = porAlumno[numero];
-        vistos[numero] = true;
-        // Sin ninguna nota utilizable en ningún intento: no presentado.
-        if (!reg.notas.length){
-          resultados.push(filaResultadoNotas(reg.alumno, "no_presentado", null, reg.intentos, 0));
+        if (vistos[numero]){
+          incidencias.push({ motivo: "el alumno aparece en más de una fila del archivo; solo se ha tenido en cuenta la primera", fila: fila });
           return;
         }
-        var mejor = reg.notas[0];
-        for (var i = 1; i < reg.notas.length; i++){
-          if (reg.notas[i] > mejor) mejor = reg.notas[i];
+        vistos[numero] = true;
+        // Cualquier valor que no sea un número utilizable (celda vacía, «NP»,
+        // «No presentado», un guion…) se considera que no ha realizado la prueba.
+        var nota = parseNota(fila[archivo.colNota]);
+        if (nota == null){
+          resultados.push(filaResultadoNotas(busq.alumno, "no_presentado", null));
+          return;
         }
-        if (mejor < minima){
-          resultados.push(filaResultadoNotas(reg.alumno, "suspenso", mejor, reg.intentos, reg.notas.length));
+        if (nota < minima){
+          resultados.push(filaResultadoNotas(busq.alumno, "suspenso", nota));
         }
       });
 
@@ -11160,20 +11077,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         nNoPresentados + (nNoPresentados === 1 ? " no presentado" : " no presentados");
       var filas = archivo.resultados.map(function(row){
         var key = notasRowKey(archivo.id, row.numero);
-        // Solo se avisa de los intentos cuando de verdad hay más de uno, y con
-        // el texto que corresponde: «la mejor de N» si alguna traía nota, o
-        // «N intentos, ninguno con nota» si ninguna la traía.
-        var pistaIntentos = "";
-        if (row.intentos > 1){
-          pistaIntentos = row.conNota > 1
-            ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; se ha tomado la nota más alta">la mejor de ' + row.conNota + ' notas</span>'
-            : (row.conNota === 1
-                ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; solo una traía nota">' + row.intentos + ' intentos, 1 con nota</span>'
-                : '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo y ninguna traía una nota utilizable">' + row.intentos + ' intentos, ninguno con nota</span>');
-        }
         var notaCell = row.estado === "suspenso"
-          ? escapeHtml(String(row.nota)) + pistaIntentos
-          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>' + pistaIntentos;
+          ? escapeHtml(String(row.nota))
+          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>';
         return "<tr>" +
           '<td class="no-print"><input type="checkbox" class="notas-select-check" data-rowkey="' + escapeHtml(key) + '" ' + (notasSeleccion[key] ? "checked" : "") + '></td>' +
           "<td>" + escapeHtml(row.numero) + "</td>" +
@@ -11247,6 +11153,21 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     sanFormMsg.textContent = "Alumnos precargados desde el Cuestionario de notas. Completa el tipo de falta, el fundamento y la medida correctora.";
     sanFormMsg.className = "form-msg ok";
   }
+
+  // ---------------- modo capitán: volver a la compañía sin cerrar sesión ----------------
+  // Si quien ha entrado es un capitán de compañía "dentro" de una sección
+  // (token con capitanCompania, aunque tenga role:admin de esa sección),
+  // se muestra un botón para volver a su panel de capitán sin tener que
+  // cerrar sesión y volver a entrar.
+  fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
+    if (me && me.capitanCompania){
+      var wrap = document.getElementById("capitanBackWrap");
+      wrap.classList.remove("hidden");
+      document.getElementById("capitanBackBtn").addEventListener("click", function(){
+        location.href = "/capitan.html";
+      });
+    }
+  }).catch(function(){});
 
   // ---------------- boot ----------------
   loadRebajesFromStorage();
@@ -11475,5 +11396,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   render();
 })();
 </script>
+<script src="/shared/admin-extras.js"></script>
 </body>
 </html>
