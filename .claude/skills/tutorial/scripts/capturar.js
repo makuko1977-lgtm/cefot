@@ -320,7 +320,36 @@ demo('seccion_refuerzos', false, async ({ p, paso })=>{
   await p.click('#refSaveBtn'); await p.waitForTimeout(1800);
   await verDesde(p, '#refStatRow');
   await paso('#refuerzosTableBody [data-pdfref]', 'Rellenar documento', 'El refuerzo aparece en el listado, un registro por alumno, con su <b>expediente de origen</b>. <b>Rellenar documento</b> genera el ANEXO. Un refuerzo <b>manual</b> tiene <b>Eliminar</b> (quita a ese alumno); uno que viene de una sanción muestra <b>Desde Sanciones</b>: se corrige en esa pestaña.');
+  const [ dlRef ] = await Promise.all([ p.waitForEvent('download', {timeout:15000}).catch(()=>null), p.locator('#refuerzosTableBody [data-pdfref]').first().click() ]);
+  console.log(dlRef ? '   descargado ' + dlRef.suggestedFilename() : '   ** sin descarga del ANEXO');
+  await p.waitForTimeout(1200);
+  await paso('#refuerzosTableBody .fill-badge', 'Documento generado', 'Se descarga el ANEXO en PDF y el refuerzo queda marcado <b>RELLENADO ✎</b>. Pulsando esa etiqueta puedes corregir los datos y volver a generarlo.');
   await paso(null, 'Fin', '¡Hecho! Para un refuerzo voluntario, rellena el formulario de la pestaña <b>Refuerzos</b> directamente.');
+});
+
+// v37: quitar a un alumno de un expediente (se hace solo desde Sanciones).
+// Usa el expediente del 33005 y el 33009, cuyo refuerzo y ANEXO genera «seccion_refuerzos».
+demo('seccion_quitar_alumno', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  await paso('#tabBtnSanciones', 'Pestaña «Sanciones»', 'Para quitar a un alumno de un expediente (por ejemplo, porque se incluyó por error), ve a <b>Sanciones</b>. Es el <b>único sitio</b> desde el que se hace.', {margen:6});
+  await p.click('#tabBtnSanciones'); await p.waitForTimeout(900);
+  await p.fill('#sanSearchInput', 'Hablan durante la clase teórica'); await p.waitForTimeout(700);
+  await verDesde(p, '#sanStatRow');
+  await paso('#sancionesTableBody', 'Un expediente, una fila por alumno', 'Cada alumno del expediente tiene su propia fila. En el ejemplo, el expediente de los alumnos <b>33005</b> y <b>33009</b>.', {margen:3});
+  const btn = '#sancionesTableBody [data-delsan][data-delnum="33009"]';
+  await paso(btn, 'Eliminar', 'Pulsa <b>Eliminar</b> en la fila del alumno que quieres quitar. <b>Solo se quita a ese alumno</b>: los demás siguen en el expediente.');
+  let mensaje = '';
+  p.removeAllListeners('dialog'); p.on('dialog', x=>{ if (!mensaje) mensaje = x.message(); x.accept(); });
+  await p.click(btn); await p.waitForTimeout(1500);
+  console.log('   confirmación:', mensaje.replace(/\n+/g,' | '));
+  const lineas = mensaje.split('\n').map(l=>l.trim()).filter(Boolean);
+  const resumen = lineas.filter(l=>/SEGUIRÁ|refuerzo derivado|volver a generarlo|ANULADO/.test(l)).join(' ');
+  await p.fill('#sanSearchInput', 'Hablan durante la clase teórica'); await p.waitForTimeout(700);
+  await paso('#sancionesTableBody', 'Confirmación y resultado', 'Antes de quitarlo, el navegador pide confirmación y explica qué pasará (en el ejemplo: «' + resumen + '»). Al aceptar, el expediente sigue con el resto de alumnos.', {margen:3});
+  await p.click('#tabBtnRefuerzos'); await p.waitForTimeout(900);
+  await verDesde(p, '#refStatRow');
+  await paso('#refuerzosTableBody .fill-badge', '⚠ REGENERAR', 'También sale del <b>refuerzo derivado</b>. Como su ANEXO ya se había generado, la etiqueta pasa a <b>⚠ REGENERAR</b>: púlsala para rehacer el documento sin ese alumno.');
+  await paso(null, 'Fin', '¡Hecho! Si era el único alumno del expediente, la sanción se elimina por completo. Esta acción no se puede deshacer.');
 });
 
 demo('seccion_actividades', false, async ({ p, paso })=>{
@@ -350,7 +379,7 @@ demo('seccion_consultas', false, async ({ p, paso })=>{
   await entrar(p, 'JEFE33'); await sinAvisos(p);
   await paso('#tabBtnConsultas', 'Pestaña «Consultas»', 'Listados listos para imprimir.', {margen:6});
   await p.click('#tabBtnConsultas'); await p.waitForTimeout(800);
-  await paso('#consTipoSelect', 'Tipo de consulta', 'Elige qué quieres consultar: personal rebajado, en refuerzo o en arresto en un periodo; participantes en una actividad; arrestos con fecha pendiente; trabajos; o un expediente completo. En el ejemplo, la primera.');
+  await paso('#consTipoSelect', 'Tipo de consulta', 'Elige qué quieres consultar: personal rebajado, en refuerzo o en arresto en un periodo; participantes en una actividad; arrestos con fecha pendiente; trabajos; o un expediente completo; o la <b>hoja de seguimiento</b> de un alumno. En el ejemplo, la primera.');
   await p.selectOption('#consTipoSelect', 'estado_periodo'); await p.waitForTimeout(400);
   await paso('#consFechasWrap', 'Periodo', 'Indica la <b>fecha de inicio</b> y la <b>de fin</b> de la consulta.', {margen:4});
   await p.fill('#consFechaIni', mas(0)); await p.fill('#consFechaFin', mas(7)); await p.waitForTimeout(300);
@@ -361,6 +390,25 @@ demo('seccion_consultas', false, async ({ p, paso })=>{
   await arriba(p);
   await paso('#consImprimirBtn', 'Imprimir', '<b>Imprimir</b> saca el resultado en papel o en PDF (según la impresora que elijas).');
   await paso(null, 'Fin', '¡Hecho! En <b>Consulta de expediente</b>, «4» y «004» son el mismo número.');
+});
+
+// v37: hoja de seguimiento del alumno (Consultas).
+demo('seccion_seguimiento', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  await p.click('#tabBtnConsultas'); await p.waitForTimeout(800);
+  await paso('#consTipoSelect', 'Hoja de seguimiento', 'En <b>Consultas</b>, elige <b>Hoja de seguimiento del alumno</b>.');
+  await p.selectOption('#consTipoSelect', 'seguimiento'); await p.waitForTimeout(600);
+  await paso('#segCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y selecciónalo. La hoja se abre sola, sin pulsar «Consultar». En el ejemplo, <b>33018</b>.');
+  await p.fill('#segCadeteInput', '33018'); await p.keyboard.press('Tab'); await p.waitForTimeout(1500);
+  await paso('#segCicloInput', 'Ciclo', 'Escribe el <b>ciclo</b> (por ejemplo, 1º/26). Vale para toda la sección y sale tal cual en la hoja.');
+  await p.fill('#segCicloInput', '1º/26'); await p.keyboard.press('Tab'); await p.waitForTimeout(1000);
+  await paso('#segBody table.seg-sel', 'Sanciones que figuran', 'Aparecen las sanciones del alumno. <b>Marca</b> las que deban figurar y ajusta el texto de las <b>observaciones</b> si hace falta. Lo que edites se guarda; el expediente original no se toca.', {margen:3});
+  await paso('#segBody .seg-hoja', 'Vista previa', 'Debajo se ve la hoja tal como saldrá: protocolo, nombre, ciclo, compañía y sección, y las sanciones marcadas.', {margen:3});
+  await paso('#segDescargarBtn', 'Rellenar documento', '<b>Rellenar documento</b> descarga un <b>PDF editable</b> con la foto del alumno, en el que puedes corregir cada casilla. <b>Imprimir</b> la saca directamente en papel.');
+  const [ dl ] = await Promise.all([ p.waitForEvent('download', {timeout:15000}).catch(()=>null), p.click('#segDescargarBtn') ]);
+  console.log(dl ? '   descargado ' + dl.suggestedFilename() : '   ** sin descarga de la hoja');
+  await p.waitForTimeout(800);
+  await paso(null, 'Fin', '¡Hecho! La próxima vez que abras la hoja de este alumno saldrá como la dejaste.');
 });
 
 demo('seccion_horasua', false, async ({ p, paso })=>{

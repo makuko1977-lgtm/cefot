@@ -112,8 +112,8 @@ Pistas del DOM ya conocidas:
 - Fuentes Google: Public Sans, Space Grotesk, JetBrains Mono.
 - El rol elegido se recuerda en `localStorage` (siempre dentro de try/catch).
 - Debe verse bien en móvil (400 px) y en tema oscuro, sin scroll lateral.
-- Límite del artifact: 16 MB. Con las 21 demos (192 capturas) ocupa 23,4 MB en
-  JPEG y **12,0 MB en WebP 75** (lo que se publica).
+- Límite del artifact: 16 MB. Con las 23 demos (206 capturas) ocupa **13,0 MB en
+  WebP 75**; en la aplicación, `public/manual/` ocupa 9,7 MB.
 
 ## Normas
 
@@ -127,13 +127,15 @@ Pistas del DOM ya conocidas:
 
 ## Estado y pendientes
 
-Hechas las 21 demostraciones (ninguna «Próximamente»), en este orden de grabación:
+Hechas las 23 demostraciones, en este orden de grabación:
 `peloton_parte`, `peloton_multiple`, `peloton_ficha`, `seccion_revisar`,
 `seccion_sancion` (arresto al 33018, su 3.er arresto), `seccion_fijar_fecha`
 (el arresto pendiente del 33007 ratificado en `seccion_revisar`),
 `seccion_amonestacion` (parte del 33012 de `peloton_parte`), `seccion_roster`,
-`seccion_rebajes`, `seccion_refuerzos`, `seccion_actividades`, `seccion_consultas`,
-`seccion_horasua`, `seccion_usuarios`, `seccion_exportar` (importa la copia en
+`seccion_rebajes`, `seccion_refuerzos` (genera el ANEXO), `seccion_quitar_alumno`
+(v37: quita al 33009 del expediente del 33005 → «⚠ REGENERAR» en su refuerzo),
+`seccion_actividades`, `seccion_consultas`, `seccion_seguimiento` (v37: hoja de
+seguimiento del 33018), `seccion_horasua`, `seccion_usuarios`, `seccion_exportar` (importa la copia en
 `legado/seccion3.html`), `capitan_entrar`, `capitan_arresto`, `capitan_protocolo`,
 `capitan_historial`, `estudios_estadisticas`, `peloton_rebref`.
 
