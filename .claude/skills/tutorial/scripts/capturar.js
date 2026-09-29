@@ -265,9 +265,11 @@ demo('seccion_roster', false, async ({ p, paso, recursos })=>{
   await p.click('#tableBody [data-ficha]'); await p.waitForTimeout(1000);
   await paso('#fichaUploadPhotoBtn', 'Foto', '<b>Hacer foto</b> usa la cámara del equipo; <b>Subir foto</b>, una imagen guardada. En el ejemplo, <b>Subir foto</b>.');
   await p.setInputFiles('#fichaUploadPhotoInput', { name:'foto_ficticia.jpg', mimeType:'image/jpeg', buffer: recursos.foto }); await p.waitForTimeout(1500);
-  await paso('#fichaFieldsGrid', 'Datos del alumno', 'Sus datos del roster. Si corriges alguno, pulsa <b>Guardar cambios</b> al final de la ficha.', {margen:4});
+  await paso('#fichaFieldsGrid', 'Datos del alumno', 'Sus datos del roster. Si corriges alguno <b>o cambias la foto</b>, pulsa <b>Guardar cambios</b> al final de la ficha: sin ese paso no se guarda.', {margen:4});
   await paso('#fichaSummary', 'Resumen', 'Resumen de sus <b>rebajes, sanciones y refuerzos</b>, con la alerta por reincidencia si la hay. Este alumno tiene un rebaje total vigente.', {margen:4});
   await paso('#fichaAttachAddBtn', 'Adjuntos', '<b>Añadir archivo…</b> guarda PDF o imágenes en su ficha. <b>Generar PDF</b> saca la ficha en PDF.');
+  await paso('#fichaSaveBtn', 'Guardar cambios', 'Pulsa <b>Guardar cambios</b> para guardar la foto y los datos corregidos. Si cierras la ficha sin pulsarlo, <b>no se guardan</b>.');
+  await p.click('#fichaSaveBtn'); await p.waitForTimeout(1500);
   await p.click('#fichaCloseBtn'); await p.waitForTimeout(500);
   await p.fill('#searchInput', '33018'); await p.waitForTimeout(600);
   await paso('#tableBody [data-historial]', 'Historial', 'Pulsa <b>Historial</b> para ver todo lo registrado del alumno.');
@@ -392,23 +394,35 @@ demo('seccion_consultas', false, async ({ p, paso })=>{
   await paso(null, 'Fin', '¡Hecho! En <b>Consulta de expediente</b>, «4» y «004» son el mismo número.');
 });
 
-// v37: hoja de seguimiento del alumno (Consultas).
-demo('seccion_seguimiento', false, async ({ p, paso })=>{
+demo('seccion_seguimiento', false, async ({ p, paso, recursos })=>{
   await entrar(p, 'JEFE33'); await sinAvisos(p);
+  // Preparación (no se graba): foto ficticia del alumno para que salga en la hoja.
+  const NUM = '33018';
+  await p.fill('#searchInput', NUM); await p.waitForTimeout(600);
+  await p.click('#tableBody [data-ficha]'); await p.waitForTimeout(1000);
+  await p.setInputFiles('#fichaUploadPhotoInput', { name:'foto_ficticia.jpg', mimeType:'image/jpeg', buffer: recursos.foto }); await p.waitForTimeout(1500);
+  await p.click('#fichaSaveBtn'); await p.waitForTimeout(1500);
+  await p.click('#fichaCloseBtn').catch(()=>{}); await p.waitForTimeout(500);
+  await p.fill('#searchInput', ''); await arriba(p);
+
+  await paso('#tabBtnConsultas', 'Pestaña «Consultas»', 'La hoja de seguimiento está en <b>Consultas</b>.', {margen:6});
   await p.click('#tabBtnConsultas'); await p.waitForTimeout(800);
-  await paso('#consTipoSelect', 'Hoja de seguimiento', 'En <b>Consultas</b>, elige <b>Hoja de seguimiento del alumno</b>.');
+  await paso('#consTipoSelect', 'Hoja de seguimiento', 'En el tipo de consulta, elige <b>Hoja de seguimiento del alumno</b>.');
   await p.selectOption('#consTipoSelect', 'seguimiento'); await p.waitForTimeout(600);
-  await paso('#segCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y selecciónalo. La hoja se abre sola, sin pulsar «Consultar». En el ejemplo, <b>33018</b>.');
-  await p.fill('#segCadeteInput', '33018'); await p.keyboard.press('Tab'); await p.waitForTimeout(1500);
-  await paso('#segCicloInput', 'Ciclo', 'Escribe el <b>ciclo</b> (por ejemplo, 1º/26). Vale para toda la sección y sale tal cual en la hoja.');
-  await p.fill('#segCicloInput', '1º/26'); await p.keyboard.press('Tab'); await p.waitForTimeout(1000);
-  await paso('#segBody table.seg-sel', 'Sanciones que figuran', 'Aparecen las sanciones del alumno. <b>Marca</b> las que deban figurar y ajusta el texto de las <b>observaciones</b> si hace falta. Lo que edites se guarda; el expediente original no se toca.', {margen:3});
-  await paso('#segBody .seg-hoja', 'Vista previa', 'Debajo se ve la hoja tal como saldrá: protocolo, nombre, ciclo, compañía y sección, y las sanciones marcadas.', {margen:3});
-  await paso('#segDescargarBtn', 'Rellenar documento', '<b>Rellenar documento</b> descarga un <b>PDF editable</b> con la foto del alumno, en el que puedes corregir cada casilla. <b>Imprimir</b> la saca directamente en papel.');
-  const [ dl ] = await Promise.all([ p.waitForEvent('download', {timeout:15000}).catch(()=>null), p.click('#segDescargarBtn') ]);
-  console.log(dl ? '   descargado ' + dl.suggestedFilename() : '   ** sin descarga de la hoja');
-  await p.waitForTimeout(800);
-  await paso(null, 'Fin', '¡Hecho! La próxima vez que abras la hoja de este alumno saldrá como la dejaste.');
+  await paso('#segCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y <b>selecciónalo de la lista</b>. La hoja se abre sola, sin pulsar «Consultar».');
+  await p.fill('#segCadeteInput', NUM); await p.dispatchEvent('#segCadeteInput', 'input'); await p.waitForTimeout(1500);
+  await paso('#segCicloInput', 'Ciclo', 'Escribe el <b>ciclo</b> (por ejemplo, «1º/26»). Vale para toda la sección y sale en la cabecera de la hoja.');
+  await p.fill('#segCicloInput', '1º/26'); await p.dispatchEvent('#segCicloInput', 'change'); await p.waitForTimeout(900);
+  await verDesde(p, '#segBody', 20);
+  await paso('.seg-sel', 'Sanciones del alumno', 'Salen <b>todas sus sanciones</b>, por fecha. Se muestran marcadas: desmarca las que no deban figurar en la hoja.', {margen:3, sinScroll:true});
+  await p.locator('.seg-check').first().uncheck(); await p.waitForTimeout(900);
+  await verDesde(p, '#segBody', 20);
+  await paso('.seg-obs >> nth=1', 'Observaciones', 'Las observaciones salen del expediente. Puedes <b>reescribirlas</b>: lo que pongas aquí es lo que irá a la hoja; el expediente original no se toca.', {sinScroll:true});
+  await p.locator('.seg-obs').nth(1).fill('Arresto cumplido sin incidencias (texto de ejemplo, ficticio).'); await p.locator('.seg-obs').nth(1).blur(); await p.waitForTimeout(1000);
+  await verDesde(p, '.seg-papel', 12);
+  await paso('.seg-hoja', 'Vista previa', 'Así queda la hoja: protocolo, apellidos y nombre, ciclo, compañía, sección y <b>foto</b>, y una fila por sanción elegida. Si no caben, sigue en otra página.', {margen:2, sinScroll:true});
+  await paso('#segDescargarBtn', 'Rellenar documento', '<b>Rellenar documento</b> descarga la hoja en <b>PDF editable</b>: cada casilla se puede corregir en el propio PDF. <b>Imprimir</b> la saca directamente en apaisado.');
+  await paso(null, 'Fin', '¡Hecho! Lo que marques y escribas <b>se guarda</b>: la próxima vez la hoja sale como la dejaste. Si quitas al alumno de una sanción, esa línea desaparece de su hoja.');
 });
 
 demo('seccion_horasua', false, async ({ p, paso })=>{
