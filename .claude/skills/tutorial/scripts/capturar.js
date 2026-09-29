@@ -363,6 +363,37 @@ demo('seccion_consultas', false, async ({ p, paso })=>{
   await paso(null, 'Fin', '¡Hecho! En <b>Consulta de expediente</b>, «4» y «004» son el mismo número.');
 });
 
+demo('seccion_seguimiento', false, async ({ p, paso, recursos })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  // Preparación (no se graba): foto ficticia del alumno para que salga en la hoja.
+  const NUM = '33018';
+  await p.fill('#searchInput', NUM); await p.waitForTimeout(600);
+  await p.click('#tableBody [data-ficha]'); await p.waitForTimeout(1000);
+  await p.setInputFiles('#fichaUploadPhotoInput', { name:'foto_ficticia.jpg', mimeType:'image/jpeg', buffer: recursos.foto }); await p.waitForTimeout(1500);
+  await p.click('#fichaSaveBtn'); await p.waitForTimeout(1500);
+  await p.click('#fichaCloseBtn').catch(()=>{}); await p.waitForTimeout(500);
+  await p.fill('#searchInput', ''); await arriba(p);
+
+  await paso('#tabBtnConsultas', 'Pestaña «Consultas»', 'La hoja de seguimiento está en <b>Consultas</b>.', {margen:6});
+  await p.click('#tabBtnConsultas'); await p.waitForTimeout(800);
+  await paso('#consTipoSelect', 'Hoja de seguimiento', 'En el tipo de consulta, elige <b>Hoja de seguimiento del alumno</b>.');
+  await p.selectOption('#consTipoSelect', 'seguimiento'); await p.waitForTimeout(600);
+  await paso('#segCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y <b>selecciónalo de la lista</b>. La hoja se abre sola, sin pulsar «Consultar».');
+  await p.fill('#segCadeteInput', NUM); await p.dispatchEvent('#segCadeteInput', 'input'); await p.waitForTimeout(1500);
+  await paso('#segCicloInput', 'Ciclo', 'Escribe el <b>ciclo</b> (por ejemplo, «1º/26»). Vale para toda la sección y sale en la cabecera de la hoja.');
+  await p.fill('#segCicloInput', '1º/26'); await p.dispatchEvent('#segCicloInput', 'change'); await p.waitForTimeout(900);
+  await verDesde(p, '#segBody', 20);
+  await paso('.seg-sel', 'Sanciones del alumno', 'Salen <b>todas sus sanciones</b>, por fecha. Se muestran marcadas: desmarca las que no deban figurar en la hoja.', {margen:3, sinScroll:true});
+  await p.locator('.seg-check').first().uncheck(); await p.waitForTimeout(900);
+  await verDesde(p, '#segBody', 20);
+  await paso('.seg-obs >> nth=1', 'Observaciones', 'Las observaciones salen del expediente. Puedes <b>reescribirlas</b>: lo que pongas aquí es lo que irá a la hoja; el expediente original no se toca.', {sinScroll:true});
+  await p.locator('.seg-obs').nth(1).fill('Arresto cumplido sin incidencias (texto de ejemplo, ficticio).'); await p.locator('.seg-obs').nth(1).blur(); await p.waitForTimeout(1000);
+  await verDesde(p, '.seg-papel', 12);
+  await paso('.seg-hoja', 'Vista previa', 'Así queda la hoja: protocolo, apellidos y nombre, ciclo, compañía, sección y <b>foto</b>, y una fila por sanción elegida. Si no caben, sigue en otra página.', {margen:2, sinScroll:true});
+  await paso('#segDescargarBtn', 'Rellenar documento', '<b>Rellenar documento</b> descarga la hoja en <b>PDF editable</b>: cada casilla se puede corregir en el propio PDF. <b>Imprimir</b> la saca directamente en apaisado.');
+  await paso(null, 'Fin', '¡Hecho! Lo que marques y escribas <b>se guarda</b>: la próxima vez la hoja sale como la dejaste. Si quitas al alumno de una sanción, esa línea desaparece de su hoja.');
+});
+
 demo('seccion_horasua', false, async ({ p, paso })=>{
   await entrar(p, 'JEFE33'); await sinAvisos(p);
   const A = '#cefot2-horas-ua-app ';

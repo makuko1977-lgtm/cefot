@@ -127,12 +127,14 @@ Pistas del DOM ya conocidas:
 
 ## Estado y pendientes
 
-Hechas las 21 demostraciones (ninguna «Próximamente»), en este orden de grabación:
+Hechas las 22 demostraciones (ninguna «Próximamente»), en este orden de grabación:
 `peloton_parte`, `peloton_multiple`, `peloton_ficha`, `seccion_revisar`,
 `seccion_sancion` (arresto al 33018, su 3.er arresto), `seccion_fijar_fecha`
 (el arresto pendiente del 33007 ratificado en `seccion_revisar`),
 `seccion_amonestacion` (parte del 33012 de `peloton_parte`), `seccion_roster`,
 `seccion_rebajes`, `seccion_refuerzos`, `seccion_actividades`, `seccion_consultas`,
+`seccion_seguimiento` (hoja del 33018: le sube antes una foto ficticia y pulsa
+«Guardar cambios» en la ficha, porque en el servidor la foto no se guarda sin él),
 `seccion_horasua`, `seccion_usuarios`, `seccion_exportar` (importa la copia en
 `legado/seccion3.html`), `capitan_entrar`, `capitan_arresto`, `capitan_protocolo`,
 `capitan_historial`, `estudios_estadisticas`, `peloton_rebref`.
