@@ -1651,7 +1651,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="total-toggle-row">
           <div class="ttr-text">
             <div class="t-title">Rebaje total / clase</div>
-            <div class="t-sub">Exime de todas las actividades. Si lo activas, marca automáticamente todas las categorías.</div>
+            <div class="t-sub">Exime de todas las actividades. Si lo activas, marca automáticamente todas las categorías; la <b>cama</b> se puede desmarcar.</div>
           </div>
           <div class="switch" id="rebTotalSwitch" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
         </div>
@@ -2722,6 +2722,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     { key: "formaciones", label: "Formaciones" },
     { key: "cama", label: "Cama" }
   ];
+  // Con «Rebaje total / clase» todas las categorías quedan marcadas y
+  // bloqueadas salvo «Cama», que se puede desmarcar (total, pero con cama).
+  var CATEGORIA_LIBRE_EN_TOTAL = "cama";
+  function sinCamaTxt(r){
+    return (r && r.total && r.categorias && r.categorias.cama === false) ? " (sin cama)" : "";
+  }
 
   // Catálogo de faltas del Régimen del Alumnado (hoja DATOS del Excel
   // original). Se usa para elegir el fundamento legal sin tener que
@@ -5145,7 +5151,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
     if (reb.length){
       lines.push("<div><strong>Últimos rebajes:</strong> " + reb.slice(0,3).map(function(r){
-        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : ""));
+        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : ""));
       }).join(" &nbsp;·&nbsp; ") + "</div>");
     }
 
@@ -5425,7 +5431,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + " · " + r.tipo;
       }));
       drawListBlock("Rebajes:", reb.map(function(r){
-        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : "");
+        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : "");
       }));
 
       page.drawText("Generado el " + formatDateDisplay(todayIso()), { x: margin, y: 40, size: 8, font: fontRegular, color: PDFLib.rgb(0.55,0.55,0.55) });
@@ -5698,7 +5704,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     rebajes.forEach(function(r){
       if (String(r.numero) !== num) return;
       meter("rebaje", r.fechaInicio, r.fechaFin, "Rebaje",
-        (r.total ? "Rebaje total/clase" : "Rebaje") + " · " +
+        (r.total ? "Rebaje total/clase" + sinCamaTxt(r) : "Rebaje") + " · " +
         formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin));
     });
 
@@ -5963,7 +5969,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return '<div class="historial-item">' +
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + estado + '">' + estadoLbl + '</span>' +
-            (r.total ? '<span class="status-pill alerta">Rebaje total/clase</span>' : '') + '</span></div>' +
+            (r.total ? '<span class="status-pill alerta">Rebaje total/clase' + sinCamaTxt(r) + '</span>' : '') + '</span></div>' +
             '<dl><dt>Categorías</dt><dd>' + (cats.length ? escapeHtml(cats.join(", ")) : "—") + '</dd></dl>' +
             '</div>';
         }).join("");
@@ -6070,8 +6076,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   function renderCategoryGrid(){
     rebCategoryGrid.innerHTML = CATEGORY_DEFS.map(function(c){
-      var on = formTotal || formCategoryState[c.key];
-      var locked = formTotal;
+      var libre = c.key === CATEGORIA_LIBRE_EN_TOTAL;
+      var on = (formTotal && !libre) || formCategoryState[c.key];
+      var locked = formTotal && !libre;
       return '<div class="category-item' + (locked ? ' locked' : '') + '" data-cat="' + c.key + '">' +
         '<span class="cat-label">' + escapeHtml(c.label) + '</span>' +
         '<div class="switch' + (on ? ' on' : '') + (locked ? ' disabled' : '') + '" data-cat-switch="' + c.key + '" tabindex="0" role="switch" aria-checked="' + on + '"><div class="knob"></div></div>' +
@@ -6080,8 +6087,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     rebCategoryGrid.querySelectorAll("[data-cat-switch]").forEach(function(el){
       el.addEventListener("click", function(){
-        if (formTotal) return; // locked while total is on
         var key = el.getAttribute("data-cat-switch");
+        if (formTotal && key !== CATEGORIA_LIBRE_EN_TOTAL) return; // bloqueadas con el total (salvo la cama)
         formCategoryState[key] = !formCategoryState[key];
         renderCategoryGrid();
       });
@@ -6311,7 +6318,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var estado = computeEstado(r.fechaInicio, r.fechaFin);
       var chips;
       if (r.total){
-        chips = '<span class="cat-chip total">TOTAL / CLASE</span>';
+        chips = '<span class="cat-chip total">TOTAL / CLASE</span>' + (sinCamaTxt(r) ? '<span class="cat-chip">SIN CAMA</span>' : '');
       } else {
         chips = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; })
           .map(function(c){ return '<span class="cat-chip">' + escapeHtml(c.label) + '</span>'; }).join("");
@@ -8984,7 +8991,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return rangosSolapan(r.fechaInicio, r.fechaFin, fechaIni, fechaFin);
     }).map(function(r){
       var cats = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; }).map(function(c){ return c.label; });
-      var detalle = [r.total ? "Total/clase" : "", cats.join(", ")].filter(Boolean).join(" · ");
+      var detalle = [r.total ? "Total/clase" + sinCamaTxt(r) : "", cats.join(", ")].filter(Boolean).join(" · ");
       return {
         numero: r.numero, ape1: r.ape1, ape2: r.ape2, nombre: r.nombre, peloton: r.peloton,
         desde: r.fechaInicio, hasta: r.fechaFin, detalle: detalle || "—"
@@ -9867,7 +9874,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     rebajes.forEach(function(r){
       meter(r.numero, "rebaje", r.fechaInicio, r.fechaFin,
-        (r.total ? "Rebaje total/clase" : "Rebaje") +
+        (r.total ? "Rebaje total/clase" + sinCamaTxt(r) : "Rebaje") +
         " · " + formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin));
     });
 

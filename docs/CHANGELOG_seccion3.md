@@ -1164,6 +1164,27 @@ genera un derivado de 3 alumnos y un refuerzo manual de 2:
 
 ---
 
+## 2026-10-01 — Rebaje total: la cama se puede desmarcar
+
+**Qué se pidió:** al activar «Rebaje total / clase», poder quitar la
+**cama**.
+
+**Cambio (servidor y HTML local):**
+- Con el total activo, todas las categorías siguen marcadas y bloqueadas
+  **salvo «Cama»**, que sale marcada pero se puede desmarcar. Se guarda como
+  rebaje total con `categorias.cama = false`.
+- Donde se muestra un rebaje total se indica **«(sin cama)»**:
+  - listado de Rebajes (chapa «SIN CAMA»);
+  - ficha e historial del alumno y calendario;
+  - Consultas;
+  - pantalla del capitán;
+  - vista del jefe de pelotón.
+- Los rebajes totales ya guardados no cambian: tenían la cama marcada.
+- Manual PDF (apartado 4) y demostración «Rebajes» del manual interactivo
+  actualizados.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí

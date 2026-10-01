@@ -336,7 +336,7 @@
         '<dt>Medida correctora</dt><dd>' + esc(medidaTxt(s)) + '</dd>' + (s.observaciones ? '<dt>Observaciones</dt><dd>' + esc(s.observaciones) + '</dd>' : "") + '</dl></div>';
     }).join("") : '<div class="dim">Sin sanciones registradas.</div>') + '</div>';
     html += '<div class="hist-sec"><h4>Rebajes (' + h.rebajes.length + ')</h4>' + (h.rebajes.length ? h.rebajes.map(function(r){
-      return '<div class="hist-item"><strong>' + f(r.fechaInicio) + ' a ' + f(r.fechaFin) + '</strong>' + (r.total ? ' <span class="pill rojo">Rebaje total/clase</span>' : "") + '</div>';
+      return '<div class="hist-item"><strong>' + f(r.fechaInicio) + ' a ' + f(r.fechaFin) + '</strong>' + (r.total ? ' <span class="pill rojo">Rebaje total/clase' + ((r.categorias && r.categorias.cama === false) ? ' (sin cama)' : '') + '</span>' : "") + '</div>';
     }).join("") : '<div class="dim">Sin rebajes registrados.</div>') + '</div>';
     html += '<div class="hist-sec"><h4>Refuerzos (' + h.refuerzos.length + ')</h4>' + (h.refuerzos.length ? h.refuerzos.map(function(r){
       return '<div class="hist-item"><strong>' + f(r.fechaInicio) + ' a ' + f(r.fechaFin) + '</strong> · ' + esc(r.tipo || "—") + (r.expediente ? ' · Exp. Nº ' + esc(r.expediente) : "") + '</div>';

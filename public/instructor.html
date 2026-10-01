@@ -1229,7 +1229,7 @@
         rebRefInstrRebajesBody.innerHTML = rebajes.map(function(r){
           return "<tr><td>" + escapeHtml(r.numero) + "</td><td>" + escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre) + "</td><td>" +
             escapeHtml(r.peloton || "—") + "</td><td>" + formatDateDisplay(r.fechaInicio) + "</td><td>" + formatDateDisplay(r.fechaFin) + "</td><td>" +
-            (r.total ? "Total/clase" : "Parcial") + "</td></tr>";
+            (r.total ? "Total/clase" + ((r.categorias && r.categorias.cama === false) ? " (sin cama)" : "") : "Parcial") + "</td></tr>";
         }).join("");
       }
 

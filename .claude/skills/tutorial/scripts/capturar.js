@@ -286,7 +286,7 @@ demo('seccion_rebajes', false, async ({ p, paso })=>{
   await p.fill('#rebCadeteInput', '33020'); await p.keyboard.press('Tab'); await p.waitForTimeout(600);
   await paso('#rebFechaInicio', 'Fechas', 'Indica la <b>fecha de inicio</b> y la <b>de fin</b> (no puede ser anterior a la de inicio).');
   await p.fill('#rebFechaInicio', mas(0)); await p.fill('#rebFechaFin', mas(6)); await p.waitForTimeout(300);
-  await paso('#rebTotalSwitch', 'Rebaje total / clase', 'Si el rebaje es <b>total</b>, activa este interruptor: exime de todas las actividades y las marca solas.', {margen:6});
+  await paso('#rebTotalSwitch', 'Rebaje total / clase', 'Si el rebaje es <b>total</b>, activa este interruptor: exime de todas las actividades y las marca solas. Solo la <b>cama</b> se puede desmarcar; entonces el listado indica «sin cama».', {margen:6});
   await paso('#rebCategoryGrid [data-cat-switch]', 'Actividades de las que queda exento', 'Si es parcial, <b>activa cada actividad</b> de la que queda exento. En el ejemplo, las dos primeras.', {margen:6});
   const sw = p.locator('#rebCategoryGrid [data-cat-switch]');
   await sw.nth(0).click(); await sw.nth(1).click(); await p.waitForTimeout(300);

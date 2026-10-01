@@ -28,7 +28,7 @@ router.get("/estado-periodo", auth.requireAuth, auth.requireRole("admin"), funct
         return {
           numero: r.numero, ape1: r.ape1, ape2: r.ape2, nombre: r.nombre, peloton: r.peloton,
           desde: r.fechaInicio, hasta: r.fechaFin,
-          detalle: [r.total ? "Total/clase" : "", Object.keys(r.categorias || {}).filter(function (k){ return r.categorias[k]; }).join(", ")].filter(Boolean).join(" · ") || "—"
+          detalle: [r.total ? "Total/clase" + ((r.categorias && r.categorias.cama === false) ? " (sin cama)" : "") : "", Object.keys(r.categorias || {}).filter(function (k){ return r.categorias[k]; }).join(", ")].filter(Boolean).join(" · ") || "—"
         };
       })
   );
