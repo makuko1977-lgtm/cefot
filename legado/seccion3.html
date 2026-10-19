@@ -626,14 +626,24 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
      necesita todo el ancho para que quepan los meses de la fase. */
   #historialCard{max-width:760px;}
   #historialCard.ancho{max-width:1360px;}
+  .notas-intentos{display:block;font-size:10.5px;color:var(--text-dim);margin-top:2px;white-space:nowrap;}
   /* ================= HOJA DE SEGUIMIENTO ================= */
-  .seg-sel{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+  /* Reparto fijo por porcentaje: un motivo largo (los que vienen del
+     cuestionario de notas llevan el nombre del archivo entero) ensanchaba la
+     tabla y la sacaba del recuadro. Además hay que devolver white-space a
+     normal, porque la aplicación pone nowrap a todas las celdas de tabla. */
+  .seg-sel{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
   .seg-sel th{background:var(--panel-2);text-align:left;padding:8px 9px;font-size:10.5px;
     letter-spacing:.6px;text-transform:uppercase;color:var(--text-dim);
-    border-bottom:1px solid var(--border-light);}
+    border-bottom:1px solid var(--border-light);position:static;top:auto;}
   .seg-sel td{padding:8px 9px;border-bottom:1px solid #eceee2;vertical-align:top;}
+  .seg-sel th, .seg-sel td{white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
+  .seg-sel td.seg-c-fecha{white-space:nowrap;}
+  .seg-sel tbody tr:last-child td{border-bottom:1px solid #eceee2;}
+  .seg-sel tbody tr:hover{background:transparent;}
   .seg-sel tr.off{opacity:.45;}
-  .seg-sel textarea{width:100%;font-family:inherit;font-size:12.5px;line-height:1.35;
+  .seg-sel textarea{width:100%;max-width:100%;box-sizing:border-box;
+    font-family:inherit;font-size:12.5px;line-height:1.35;
     padding:6px 8px;border-radius:8px;border:1px solid var(--border-light);
     background:var(--panel-2);color:var(--text);resize:vertical;}
   .seg-exp{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
@@ -642,7 +652,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   /* --- el documento, con el formato del archivo original --- */
   .seg-papel{background:#8b8f80;padding:14px;border-radius:10px;margin-top:12px;}
   .seg-hoja{background:#fff;border:1px solid #bbb;padding:20px 24px 22px;
-    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;}
+    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;
+    box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;}
   .seg-hoja:last-child{margin-bottom:0;}
   .seg-h1{display:flex;justify-content:space-between;font-weight:700;font-size:13px;}
   .seg-h1 span{text-decoration:underline;}
@@ -660,20 +671,31 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .seg-foto{width:104px;height:104px;border:1px solid #000;display:flex;align-items:center;
     justify-content:center;font-weight:700;font-size:12px;flex:none;overflow:hidden;}
   .seg-foto img{width:100%;height:100%;object-fit:cover;}
-  .seg-hoja table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px;}
+  /* table-layout:fixed reparte las columnas por el porcentaje declarado y NO
+     deja que un texto largo ensanche la tabla por encima de la hoja. Los
+     porcentajes son los mismos que usa el PDF (62/150/72/72/159 sobre 515),
+     para que la vista previa y el documento cuadren. */
+  .seg-hoja table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:12px;font-size:11px;}
   .seg-hoja th{border:1px solid #000;background:#ccc;font-weight:700;padding:5px 4px;
     text-align:center;font-size:11px;}
   .seg-hoja td{border:1px solid #000;padding:4px 6px;vertical-align:top;}
-  .seg-hoja td.f{text-align:center;white-space:nowrap;width:72px;}
-  .seg-hoja td.m{text-align:center;width:205px;}
-  .seg-hoja td.fir{width:86px;}
-  /* La última columna de las tablas de la aplicación es fija a la derecha
-     (columna de acciones); en la hoja no debe serlo. */
-  .seg-hoja td:last-child, .seg-hoja th:last-child, .seg-sel td:last-child, .seg-sel th:last-child{position:static;box-shadow:none;}
-  .seg-hoja td:last-child, .seg-sel td:last-child{background:transparent;}
-  .seg-acciones .hint{font-size:11.5px;color:var(--text-dim);line-height:1.45;}
-  .seg-hoja td, .seg-sel td{white-space:normal;}
-  .seg-hoja td.f{white-space:nowrap;}
+  /* La aplicación pone white-space:nowrap a TODAS las celdas de tabla; aquí
+     hay que devolverlo a normal o el texto largo no parte y desborda la hoja. */
+  .seg-hoja th, .seg-hoja td{
+    white-space:normal;
+    overflow-wrap:anywhere;      /* parte una palabra larguísima antes que desbordar */
+    word-break:break-word;
+    hyphens:auto;
+    position:static;             /* el th de la app es sticky; aquí no procede */
+  }
+  .seg-hoja td.f{text-align:center;white-space:nowrap;}
+  .seg-hoja td.m{text-align:center;}
+  /* Estas tres reglas globales de la aplicación estropean la hoja: quitan el
+     borde de la última fila, la sombrean al pasar el ratón y hacen la
+     cabecera pegajosa. Aquí es un documento, no un listado. */
+  .seg-hoja tbody tr:last-child td{border-bottom:1px solid #000;}
+  .seg-hoja tbody tr:hover{background:transparent;}
+  .seg-hoja thead th{position:static;top:auto;}
   .seg-pie{margin-top:8px;text-align:right;font-size:10px;color:#555;}
   @media print{
     body.print-seg header.top, body.print-seg #appShell, body.print-seg footer.info,
@@ -1286,6 +1308,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .fecha-coincidencia-selection .field label{font-size:11px;}
   .fecha-coincidencia-selection input{width:100%;box-sizing:border-box;}
+  .fecha-coincidencia-finde{
+    margin-top:10px;
+    border:1px dashed var(--accent2);
+    background:var(--accent2-soft);
+    border-radius:9px;
+    padding:10px;
+  }
+  .fecha-coincidencia-finde .hint{margin:0 0 6px;}
+  .fecha-coincidencia-finde .fecha-coincidencia-selection{margin-top:0;}
   .fecha-coincidencia-step{
     margin-top:8px;
     font-size:11.5px;
@@ -1484,9 +1515,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       </div>
     </div>
     <div id="topActions"></div>
-    <div id="capitanBackWrap" class="hidden"><button class="btn small ghost" id="capitanBackBtn" type="button">Volver a mi compañía</button></div>
     <input type="file" id="backupFileInput" accept=".json" class="hidden" />
-    <input type="file" id="serverBackupFileInput" accept=".json" class="hidden" />
   </header>
 
   <!-- ================= UPLOAD SCREEN ================= -->
@@ -1526,20 +1555,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="hint" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border);">
         ¿Ya tenías datos cargados en otro ordenador o navegador? Los datos se guardan solo en el dispositivo donde
         se cargaron — este archivo no los lleva consigo. Si exportaste una copia de seguridad (botón "Copia de
-        seguridad") desde ese otro dispositivo, impórtala aquí para recuperar todo, sin tener que volver a subir la hoja de
-        cálculo. Solo se AÑADE lo que falte: nunca sustituye ni borra lo que ya tienes cargado.
+        seguridad") desde ese otro dispositivo, impórtala aquí para recuperar todo tal cual estaba, sin tener que
+        volver a subir la hoja de cálculo.
       </div>
       <div class="upload-actions" style="margin-top:8px;">
         <button class="btn ghost" id="uploadImportBackupBtn" type="button">Importar copia de seguridad…</button>
-      </div>
-      <div class="hint" style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border);">
-        ¿Has exportado una copia desde el servidor (botón «Exportar copia», o la copia completa del Súper
-        Administrador, de la que eliges la sección)? Impórtala aquí: se AÑADE lo que aún no
-        tengas en este dispositivo (alumnos, bajas, rebajes, sanciones, refuerzos, actividades y fechas de
-        Horas UA). Nunca sustituye ni borra lo que ya tienes cargado.
-      </div>
-      <div class="upload-actions" style="margin-top:8px;">
-        <button class="btn ghost" id="uploadImportServerBackupBtn" type="button">Importar copia del servidor (añadir)…</button>
       </div>
     </div>
   </section>
@@ -1651,7 +1671,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="total-toggle-row">
           <div class="ttr-text">
             <div class="t-title">Rebaje total / clase</div>
-            <div class="t-sub">Exime de todas las actividades. Si lo activas, marca automáticamente todas las categorías; la <b>cama</b> se puede desmarcar.</div>
+            <div class="t-sub">Exime de todas las actividades. Al activarlo se marcan todas las categorías salvo «Cama», que se elige aparte: quien va a clase no está en cama.</div>
           </div>
           <div class="switch" id="rebTotalSwitch" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
         </div>
@@ -1924,6 +1944,36 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         </div>
         <div class="empty-state hidden" id="sancionesEmptyState">Todavía no se ha registrado ninguna sanción.</div>
       </div>
+
+      <!-- Los refuerzos MANUALES no tienen ninguna sanción detrás, así que no
+           aparecen en la tabla de arriba. Se listan aquí para que todo el
+           borrado de alumnos se haga desde esta misma pestaña. -->
+      <div class="panel-sub" style="margin-top:26px;">
+        <h3 style="margin:0 0 2px;">Refuerzos manuales</h3>
+        Los refuerzos que no vienen de ninguna sanción. Se listan aquí para quitar
+        alumnos desde el mismo sitio que las sanciones. Los que sí vienen de una
+        sanción se quitan desde la tabla de arriba.
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="refManualTable">
+            <thead>
+              <tr>
+                <th><span class="th-label">Exp.</span></th>
+                <th><span class="th-label">Número</span></th>
+                <th><span class="th-label">Alumno</span></th>
+                <th><span class="th-label">Pelotón</span></th>
+                <th><span class="th-label">Inicio</span></th>
+                <th><span class="th-label">Fin</span></th>
+                <th><span class="th-label">Tipo</span></th>
+                <th class="no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="refManualTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="refManualEmptyState">No hay ningún refuerzo manual registrado.</div>
+      </div>
     </div>
 
     <!-- ---------- REFUERZOS PANEL ---------- -->
@@ -2003,7 +2053,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             <div class="field-row">
               <div class="field narrow">
                 <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
-                <input type="time" id="refHoraInicioFinde" value="10:00">
+                <input type="time" id="refHoraInicioFinde" value="09:00">
               </div>
               <div class="field narrow">
                 <label for="refDuracionFinde">Duración fin de semana (horas)</label>
@@ -2722,12 +2772,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     { key: "formaciones", label: "Formaciones" },
     { key: "cama", label: "Cama" }
   ];
-  // Con «Rebaje total / clase» todas las categorías quedan marcadas y
-  // bloqueadas salvo «Cama», que se puede desmarcar (total, pero con cama).
-  var CATEGORIA_LIBRE_EN_TOTAL = "cama";
-  function sinCamaTxt(r){
-    return (r && r.total && r.categorias && r.categorias.cama === false) ? " (sin cama)" : "";
-  }
 
   // Catálogo de faltas del Régimen del Alumnado (hoja DATOS del Excel
   // original). Se usa para elegir el fundamento legal sin tener que
@@ -2794,7 +2838,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   var EXPEDIENTE_COUNTER_KEY = "seccion3_expediente_counter_v1";
   var REFUERZOS_KEY = "seccion3_refuerzos_v1";
-  var MAX_ANEXO_ALUMNOS = 25; // tope de alumnos por corrección múltiple (plantilla PDF)
+  // La plantilla del ANEXO I tiene 25 filas por hoja. NO es un tope de alumnos:
+  // a partir del 26 se añaden hojas de continuación, copiando esa misma página
+  // y renombrando sus campos para que sigan siendo rellenables (ver
+  // anadirHojasAnexo).
+  var ANEXO_FILAS_POR_HOJA = 25;
+  var ANEXO_PAGINA_PLANTILLA = 2;   // índice 0-based del ANEXO I en la plantilla múltiple
 
   // Recordatorio de copia de seguridad: todos los datos viven solo en este
   // navegador, así que si nunca se exporta una copia (o hace mucho que no
@@ -3128,6 +3177,24 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return rangoTieneCoincidencia(caso.alumno.numero, ini, fin, caso.opts);
   }
 
+  // Los dos formularios no entregan lo mismo: el de sanciones pasa filas del
+  // listado tal cual (con las claves de la hoja: NUMERO, APE1, ...) y el de
+  // refuerzos pasa la ficha ya montada (numero, ape1, ...). Sin normalizar,
+  // "alumno.numero" salía vacío para las sanciones y la búsqueda de
+  // coincidencias de arrestos no encontraba nunca nada.
+  function fichaAlumnoParaCaso(a){
+    if (!a) return { numero:"", ape1:"", ape2:"", nombre:"", peloton:"" };
+    if (a.numero != null && a.numero !== "") return a;
+    var k = state.keys || {};
+    return {
+      numero: getVal(a, k.numero),
+      ape1: getVal(a, k.ape1),
+      ape2: getVal(a, k.ape2),
+      nombre: getVal(a, k.nombre),
+      peloton: getVal(a, k.peloton)
+    };
+  }
+
   function casoEscapedAlumno(caso){
     return escapeHtml([caso.alumno.ape1, caso.alumno.ape2].filter(Boolean).join(" ") + ", " + (caso.alumno.nombre || ""));
   }
@@ -3188,6 +3255,29 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var finInput = root.querySelector('.fecha-cal-fin');
     if (iniInput) iniInput.value = caso.ini || "";
     if (finInput) finInput.value = caso.fin || "";
+
+    var findeWrap = root.querySelector('.fecha-coincidencia-finde');
+    if (findeWrap){
+      findeWrap.classList.toggle('hidden', !casoNecesitaFinde(caso));
+      var findeHoraInput = root.querySelector('.fecha-cal-finde-hora');
+      var findeDurInput = root.querySelector('.fecha-cal-finde-dur');
+      if (findeHoraInput){
+        findeHoraInput.value = caso.findeHora || "";
+        findeHoraInput.onchange = function(){
+          caso.findeHora = findeHoraInput.value;
+          setCasoError(caso, "");
+          actualizarFechaCoincidenciaSummary();
+        };
+      }
+      if (findeDurInput){
+        findeDurInput.value = caso.findeDur || "";
+        findeDurInput.oninput = function(){
+          caso.findeDur = findeDurInput.value;
+          setCasoError(caso, "");
+          actualizarFechaCoincidenciaSummary();
+        };
+      }
+    }
     root.querySelectorAll('.fecha-cal-day:not(.disabled)').forEach(function(btn){
       btn.addEventListener('click', function(){
         var iso = btn.getAttribute('data-iso');
@@ -3256,6 +3346,29 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
   }
 
+  // ¿Este caso tiene que pedir horario de fin de semana? Solo si quien abrió
+  // el calendario lo pide (los refuerzos sí, los arrestos no tienen horario)
+  // y el intervalo elegido incluye sábado o domingo.
+  function casoNecesitaFinde(caso){
+    if (!(caso.opts && caso.opts.pedirFinde)) return false;
+    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
+    return rangoTieneFinde(caso.ini, caso.fin);
+  }
+
+  function casoFindeCompleto(caso){
+    if (!casoNecesitaFinde(caso)) return true;
+    if (!caso.findeHora) return false;
+    var d = parseFloat(caso.findeDur);
+    return !!caso.findeDur && !isNaN(d) && d > 0;
+  }
+
+  function casoCompleto(caso){
+    if (!caso.ini || !caso.fin || caso.fin < caso.ini) return false;
+    if (caso.error) return false;
+    if (rangoEstaDentroDeDiasOcupados(caso, caso.ini, caso.fin)) return false;
+    return casoFindeCompleto(caso);
+  }
+
   function setCasoError(caso, msg){
     caso.error = msg || "";
     var root = document.getElementById(caso.domId);
@@ -3285,6 +3398,16 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           '<div class="field"><label>Nueva fecha inicio</label><input type="date" class="fecha-cal-ini"></div>' +
           '<div class="field"><label>Nueva fecha fin</label><input type="date" class="fecha-cal-fin"></div>' +
         '</div>' +
+        // La fecha nueva puede caer en sábado o domingo aunque la original no
+        // lo hiciera. En ese caso hay que marcar aquí el horario de esos días:
+        // el del formulario es el de entre semana y no sirve.
+        '<div class="fecha-coincidencia-finde hidden">' +
+          '<div class="hint" style="margin:0 0 6px;">El nuevo periodo incluye <strong>sábado y/o domingo</strong>: marca el horario de esos días.</div>' +
+          '<div class="fecha-coincidencia-selection" style="margin-top:0;">' +
+            '<div class="field"><label>Hora inicio (sáb. y dom.)</label><input type="time" class="fecha-cal-finde-hora"></div>' +
+            '<div class="field"><label>Duración (horas)</label><input type="text" class="fecha-cal-finde-dur" inputmode="decimal"></div>' +
+          '</div>' +
+        '</div>' +
         '<div class="fecha-coincidencia-step">Selecciona la fecha de inicio y después la fecha de fin.</div>' +
         '<div class="hint error hidden fecha-cal-error"></div>' +
       '</div>';
@@ -3296,11 +3419,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   function actualizarFechaCoincidenciaSummary(){
     var total = fechaCoincidenciaCasosState.length;
-    var completos = 0;
+    var completos = 0, faltaFinde = 0;
     fechaCoincidenciaCasosState.forEach(function(c){
-      if (c.ini && c.fin && c.fin >= c.ini && !c.error && !rangoEstaDentroDeDiasOcupados(c, c.ini, c.fin)) completos++;
+      if (casoCompleto(c)) completos++;
+      else if (casoNecesitaFinde(c) && !casoFindeCompleto(c)) faltaFinde++;
     });
-    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida.";
+    fechaCoincidenciaSummary.textContent = completos + " de " + total + " alumnos con nueva fecha válida." +
+      (faltaFinde ? " Falta el horario de fin de semana de " + faltaFinde + " alumno" + (faltaFinde === 1 ? "" : "s") + "." : "");
     fechaCoincidenciaGuardarBtn.disabled = completos !== total;
   }
 
@@ -3322,6 +3447,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           id: "caso-" + idx + "-" + Date.now(),
           domId: "fecha-caso-" + idx + "-" + Date.now(),
           alumno: caso.alumno,
+          alumnoOriginal: caso.alumnoOriginal || caso.alumno,
           coincidencias: caso.coincidencias,
           originalIni: caso.originalIni,
           originalFin: caso.originalFin,
@@ -3331,7 +3457,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           selecting: "inicio",
           monthYear: base.getFullYear(),
           monthMonth: base.getMonth(),
-          error: ""
+          error: "",
+          // Horario de fin de semana para la NUEVA fecha de este alumno. Se
+          // parte de lo que hubiera en el formulario y, si no había nada,
+          // del estándar; siempre hay que dejarlo marcado.
+          findeHora: (caso.opts && caso.opts.findeHora) || HORA_FINDE_ESTANDAR,
+          findeDur: (caso.opts && caso.opts.findeDur) || DURACION_FINDE_ESTANDAR
         };
       });
       fechaCoincidenciaAlumno.textContent = fechaCoincidenciaCasosState.length === 1
@@ -3348,9 +3479,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var normal = [];
     var casos = [];
     alumnos.forEach(function(alumno){
-      var coincidencias = buscarFechasCoincidentes([alumno.numero], ini, fin, opts);
+      var ficha = fichaAlumnoParaCaso(alumno);
+      var coincidencias = buscarFechasCoincidentes([ficha.numero], ini, fin, opts);
       if (coincidencias.length){
-        casos.push({ alumno: alumno, coincidencias: coincidencias, originalIni: ini, originalFin: fin, opts: opts });
+        casos.push({
+          alumno: ficha, alumnoOriginal: alumno, coincidencias: coincidencias,
+          originalIni: ini, originalFin: fin, opts: opts
+        });
       } else {
         normal.push(alumno);
       }
@@ -3362,7 +3497,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return {
       normal: normal,
       separados: respuesta.map(function(c){
-        return { alumno: c.alumno, ini: c.ini, fin: c.fin };
+        return {
+          alumno: c.alumno, ini: c.ini, fin: c.fin,
+          tieneFinde: !!c.tieneFinde, findeHora: c.findeHora || "", findeDur: c.findeDur || ""
+        };
       })
     };
   }
@@ -3377,6 +3515,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         setCasoError(c, "El intervalo elegido contiene días ocupados. Selecciona otro intervalo.");
         break;
       }
+      if (!casoFindeCompleto(c)){
+        invalid = c;
+        setCasoError(c, "El nuevo periodo cae en fin de semana: marca la hora de inicio y la duración de esos días.");
+        break;
+      }
     }
     if (invalid){
       var root = document.getElementById(invalid.domId);
@@ -3384,7 +3527,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return;
     }
     cerrarFechaCoincidencia(fechaCoincidenciaCasosState.map(function(c){
-      return { alumno:c.alumno, ini:c.ini, fin:c.fin };
+      var conFinde = casoNecesitaFinde(c);
+      return {
+        alumno: c.alumnoOriginal || c.alumno, ini: c.ini, fin: c.fin,
+        tieneFinde: conFinde,
+        findeHora: conFinde ? c.findeHora : "",
+        findeDur: conFinde ? String(c.findeDur || "").trim() : ""
+      };
     }));
   });
   fechaCoincidenciaCancelarBtn.addEventListener("click", function(){ cerrarFechaCoincidencia(null); });
@@ -3410,8 +3559,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var topActions = document.getElementById("topActions");
   var backupFileInput = document.getElementById("backupFileInput");
   var uploadImportBackupBtn = document.getElementById("uploadImportBackupBtn");
-  var serverBackupFileInput = document.getElementById("serverBackupFileInput");
-  var uploadImportServerBackupBtn = document.getElementById("uploadImportServerBackupBtn");
   var brandSub = document.getElementById("brandSub");
   var backupReminderBanner = document.getElementById("backupReminderBanner");
   var backupReminderText = document.getElementById("backupReminderText");
@@ -3700,10 +3847,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function showUpload(){
     uploadScreen.classList.remove("hidden");
     appShell.classList.add("hidden");
-    topActions.innerHTML = '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
-    document.getElementById("logoutBtnTop").addEventListener("click", function(){
-      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
-    });
+    topActions.innerHTML = "";
     applySeccionBranding(null);
   }
 
@@ -3713,21 +3857,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     topActions.innerHTML =
       '<button class="btn small ghost" id="exportBackupBtn">Copia de seguridad</button>' +
       '<button class="btn small ghost" id="importBackupBtn">Importar copia</button>' +
-      '<button class="btn small ghost" id="importServerBackupBtn">Importar copia del servidor (añadir)</button>' +
-      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>' +
-      '<button class="btn small ghost" id="logoutBtnTop">Cerrar sesión</button>';
+      '<button class="btn small ghost" id="reloadBtnTop">Cargar otra hoja</button>';
     document.getElementById("reloadBtnTop").addEventListener("click", confirmReload);
     document.getElementById("exportBackupBtn").addEventListener("click", exportBackup);
     document.getElementById("importBackupBtn").addEventListener("click", function(){
       backupFileInput.value = "";
       backupFileInput.click();
-    });
-    document.getElementById("importServerBackupBtn").addEventListener("click", function(){
-      serverBackupFileInput.value = "";
-      serverBackupFileInput.click();
-    });
-    document.getElementById("logoutBtnTop").addEventListener("click", function(){
-      fetch("/api/auth/logout", { method: "POST" }).then(function(){ location.href = "/login.html"; });
     });
     updateBackupReminder();
   }
@@ -3798,11 +3933,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     backupFileInput.click();
   });
 
-  uploadImportServerBackupBtn.addEventListener("click", function(){
-    serverBackupFileInput.value = "";
-    serverBackupFileInput.click();
-  });
-
   function confirmReload(){
     if (confirm("Esto sustituirá los datos cargados actualmente por los de una nueva hoja. Los rebajes y sanciones ya registrados no se perderán. ¿Continuar?")){
       clearStorage();
@@ -3868,441 +3998,51 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alert("Ese archivo no es una copia de seguridad válida (no es JSON).");
         return;
       }
-      // Si es una copia exportada desde el SERVIDOR, se pasa a su
-      // importación (también aditiva) en vez de rechazarla.
-      if (data && ((typeof data.exportedAt === "string" && Array.isArray(data.roster)) || data.tipo === "cefot2_copia_completa")){
-        try {
-          var dt = new DataTransfer();
-          dt.items.add(file);
-          serverBackupFileInput.files = dt.files;
-          serverBackupFileInput.dispatchEvent(new Event("change"));
-        } catch(err){
-          alert("Este archivo es una copia exportada del servidor. Cárgala con el botón «Importar copia del servidor (añadir)».");
-        }
-        return;
-      }
       if (!data || data.tipo !== "seccion3_backup" || !data.roster){
         alert("Ese archivo no parece ser una copia de seguridad de SECCIÓN 3.");
         return;
       }
-      // Importación ADITIVA (igual que la del servidor): nunca sustituye ni
-      // borra lo que ya hay en este navegador. Solo añade lo que falta:
-      // alumnos y bajas por número, el resto por "id"; las fechas del ciclo
-      // solo se rellenan si aquí están vacías.
-      var bkHeaders = Array.isArray(data.roster.headers) ? data.roster.headers : [];
-      var bkRows = Array.isArray(data.roster.rows) ? data.roster.rows : [];
-      var bkBajas = Array.isArray(data.roster.bajas) ? data.roster.bajas : [];
-      var bkNumKey = resolveRosterKeys(bkHeaders).numero || null;
-      var rosterLocalVacio = !(state.rows && state.rows.length) && !(state.bajas && state.bajas.length);
-
-      var numerosLocales = {};
-      var kNumLocal = (state.keys && state.keys.numero) || null;
-      if (kNumLocal){
-        (state.rows || []).forEach(function(r){ var v = getVal(r, kNumLocal).trim(); if (v) numerosLocales[v] = true; });
-        (state.bajas || []).forEach(function(r){ var v = getVal(r, kNumLocal).trim(); if (v) numerosLocales[v] = true; });
-      }
-      function filtrarNuevosAlumnos(lista){
-        var nuevos = [], omitidos = 0;
-        lista.forEach(function(r){
-          var num = (bkNumKey && r && r[bkNumKey] != null) ? String(r[bkNumKey]).trim() : "";
-          if (!num){ return; }
-          if (numerosLocales[num]){ omitidos++; return; }
-          numerosLocales[num] = true;
-          nuevos.push(r);
-        });
-        return { nuevos: nuevos, omitidos: omitidos };
-      }
-      var mRows = rosterLocalVacio ? { nuevos: bkRows, omitidos: 0 } : filtrarNuevosAlumnos(bkRows);
-      var mBajas = rosterLocalVacio ? { nuevos: bkBajas, omitidos: 0 } : filtrarNuevosAlumnos(bkBajas);
-      var mSanc = mergeListaPorId(sanciones, data.sanciones || []);
-      var mReb = mergeListaPorId(rebajes, data.rebajes || []);
-      var mRef = mergeListaPorId(refuerzos, data.refuerzos || []);
-      var mAct = mergeListaPorId(actividades, data.actividades || []);
-      var omitidosTotal = mRows.omitidos + mBajas.omitidos + mSanc.omitidos + mReb.omitidos + mRef.omitidos + mAct.omitidos;
-
-      var resumen =
-        "Alumnos nuevos: " + mRows.nuevos.length + " (ya existían y se omiten: " + mRows.omitidos + ")\n" +
-        "Bajas nuevas: " + mBajas.nuevos.length + " (ya existían y se omiten: " + mBajas.omitidos + ")\n" +
-        "Rebajes nuevos: " + mReb.nuevos.length + " (ya existían y se omiten: " + mReb.omitidos + ")\n" +
-        "Sanciones nuevas: " + mSanc.nuevos.length + " (ya existían y se omiten: " + mSanc.omitidos + ")\n" +
-        "Refuerzos nuevos: " + mRef.nuevos.length + " (ya existían y se omiten: " + mRef.omitidos + ")\n" +
-        "Actividades nuevas: " + mAct.nuevos.length + " (ya existían y se omiten: " + mAct.omitidos + ")" +
+      var resumen = "Roster: " + ((data.roster.rows && data.roster.rows.length) || 0) + " alumnos\n" +
+        "Bajas: " + ((data.roster.bajas && data.roster.bajas.length) || 0) + "\n" +
+        "Rebajes: " + ((data.rebajes && data.rebajes.length) || 0) + "\n" +
+        "Sanciones: " + ((data.sanciones && data.sanciones.length) || 0) + "\n" +
+        "Refuerzos: " + ((data.refuerzos && data.refuerzos.length) || 0) + "\n" +
+        "Actividades: " + ((data.actividades && data.actividades.length) || 0) +
+        (data.fases ? "\nFechas del ciclo: sí" : "") +
         (data.exportadoEl ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportadoEl).slice(0,10))) : "");
       var ok = confirm(
         "Vas a importar esta copia de seguridad:\n\n" + resumen +
-        "\n\nEsto AÑADE los registros de arriba que todavía no existen en este navegador. " +
-        "NO sustituye ni borra nada de lo que ya tienes aquí (los " + omitidosTotal + " registros que ya existían se dejan tal cual).\n\n¿Continuar?"
+        "\n\nEsto SUSTITUIRÁ todos los datos que tienes ahora mismo en este navegador " +
+        "(roster, rebajes, sanciones, refuerzos y actividades). Esta acción no se puede deshacer.\n\n¿Continuar?"
       );
       if (!ok) return;
 
       try {
-        if (rosterLocalVacio){
-          // Roster vacío: se adopta el de la copia tal cual (no hay nada que perder).
-          state.headers = bkHeaders.slice();
-          state.rows = mRows.nuevos.slice();
-          state.bajas = mBajas.nuevos.slice();
-          if (data.roster.meta) state.meta = data.roster.meta;
-        } else {
-          // Alinea cada fila con las cabeceras locales; las columnas que aquí
-          // no existan se añaden al final.
-          var adaptar = function(r){
-            var row = {};
-            state.headers.forEach(function(h){ row[h] = ""; });
-            Object.keys(r || {}).forEach(function(h){
-              if (h === "_bajaFecha"){ row._bajaFecha = r[h]; return; }
-              var local = findKey(state.headers, [h]);
-              if (!local){ state.headers.push(h); local = h; }
-              row[local] = r[h];
-            });
-            return row;
-          };
-          mRows.nuevos.forEach(function(r){ state.rows.push(adaptar(r)); });
-          state.bajas = state.bajas || [];
-          mBajas.nuevos.forEach(function(r){ state.bajas.push(adaptar(r)); });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.roster));
+        localStorage.setItem(REBAJES_KEY, JSON.stringify(data.rebajes || []));
+        localStorage.setItem(SANCIONES_KEY, JSON.stringify(data.sanciones || []));
+        localStorage.setItem(REFUERZOS_KEY, JSON.stringify(data.refuerzos || []));
+        localStorage.setItem(ACTIVIDADES_KEY, JSON.stringify(data.actividades || []));
+        if (data.fases) localStorage.setItem(FASES_KEY, JSON.stringify(data.fases));
+        if (data.seguimientos) localStorage.setItem(SEGUIMIENTO_KEY, JSON.stringify(data.seguimientos));
+        if (data.expedienteCounter != null){
+          localStorage.setItem(EXPEDIENTE_COUNTER_KEY, String(data.expedienteCounter));
         }
-        state.columns = resolveColumns(state.headers);
-        state.keys = resolveRosterKeys(state.headers);
-        persist();
-
-        rebajes = rebajes.concat(mReb.nuevos); persistRebajes();
-        sanciones = sanciones.concat(mSanc.nuevos); persistSanciones();
-        refuerzos = refuerzos.concat(mRef.nuevos); persistRefuerzos();
-        actividades = actividades.concat(mAct.nuevos); persistActividades();
-
-        // Fechas del ciclo: solo se rellenan las que aquí están vacías.
-        if (data.fases){
-          ["FFMG", "FFE"].forEach(function(f){
-            if (!data.fases[f]) return;
-            ["ini", "fin"].forEach(function(k){
-              if (!fasesCiclo[f][k] && data.fases[f][k]) fasesCiclo[f][k] = data.fases[f][k];
-            });
-          });
-          // El «Ciclo» de la hoja de seguimiento, solo si aquí está vacío.
-          if (!fasesCiclo.ciclo && typeof data.fases.ciclo === "string") fasesCiclo.ciclo = data.fases.ciclo;
-          localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo));
-        }
-
-        // Hojas de seguimiento: solo se añaden los alumnos y las líneas que
-        // aquí no existen; lo que ya se haya editado en este navegador no se toca.
-        if (data.seguimientos && typeof data.seguimientos === "object"){
-          Object.keys(data.seguimientos).forEach(function(num){
-            var otra = data.seguimientos[num];
-            if (!otra || !otra.lineas) return;
-            var mia = seguimientos[num];
-            if (!mia || !mia.lineas){ seguimientos[num] = otra; return; }
-            Object.keys(otra.lineas).forEach(function(id){
-              if (!Object.prototype.hasOwnProperty.call(mia.lineas, id)) mia.lineas[id] = otra.lineas[id];
-            });
-          });
-          persistSeguimientos();
-        }
-
-        // El contador de expedientes nunca retrocede: queda por delante del
-        // mayor entre el local, el de la copia y los expedientes ya fusionados.
-        var maxExp = Math.max(parseInt(localStorage.getItem(EXPEDIENTE_COUNTER_KEY), 10) || 0, parseInt(data.expedienteCounter, 10) || 0);
-        sanciones.concat(refuerzos).forEach(function(r){
-          var n = parseInt(r && r.expediente, 10);
-          if (!isNaN(n) && n > maxExp) maxExp = n;
-        });
-        localStorage.setItem(EXPEDIENTE_COUNTER_KEY, String(maxExp));
+        // La copia importada ya refleja el estado guardado por quien la
+        // exportó: se cuenta como "copia reciente" para no mostrar el
+        // aviso de recordatorio inmediatamente después de importar.
         localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
       } catch(err){
         alert("No se pudo importar la copia de seguridad: " + (err && err.message ? err.message : err));
         return;
       }
-      alert("Copia importada: se han añadido " +
-        (mRows.nuevos.length + mBajas.nuevos.length + mReb.nuevos.length + mSanc.nuevos.length + mRef.nuevos.length + mAct.nuevos.length) +
-        " registros y se han dejado intactos los " + omitidosTotal + " que ya existían. La página se va a recargar.");
+      alert("Copia importada correctamente. La página se va a recargar.");
       location.reload();
     };
     reader.onerror = function(){
       alert("No se pudo leer el archivo seleccionado.");
     };
     reader.readAsText(file);
-  });
-
-  // ---------------- importación ADITIVA de copia del servidor ----------------
-  // Este botón está pensado para la copia que exporta el jefe de sección
-  // desde el servidor (botón «Exportar copia» de admin.html) (formato distinto: exportedAt + roster como Array; el
-  // roster es un objeto {headers,rows,bajas,meta}). Nunca sobrescribe ni
-  // borra nada de lo que ya hay en este dispositivo: solo añade lo que no
-  // exista todavía (alumnos/bajas por "numero", el resto por "id"; Horas UA
-  // por clave del mapa).
-
-  // Alinea un alumno importado (objeto plano con campos numero/ape1/ape2/
-  // nombre/... en minúsculas) con el esquema de cabeceras del roster local,
-  // para que quede exactamente igual de forma que cualquier otra fila de
-  // state.rows / state.bajas. Si el roster local está vacío todavía, se
-  // arranca con las cabeceras conocidas habituales.
-  function buildRowFromImportedAlumno(imp){
-    if (!state.headers || !state.headers.length){
-      state.headers = KNOWN_COLUMNS.map(function(kc){ return kc.keys[0]; });
-    }
-    var FIELD_TO_KNOWN = {
-      numero: ["NUMERO","NÚMERO"], ape1: ["APE1"], ape2: ["APE2"], nombre: ["NOMBRE"],
-      peloton: ["PELOTON","PELOTÓN"], sexo: ["SEXO"], cia: ["CIA"], sec: ["SEC"],
-      dni: ["DNI","DNI_"], telefono: ["TELEFONO","TELÉFONO"], espe: ["ESPE"], destino: ["DESTINO"]
-    };
-    var row = {};
-    state.headers.forEach(function(h){ row[h] = ""; });
-    Object.keys(FIELD_TO_KNOWN).forEach(function(field){
-      if (imp[field] === undefined || imp[field] === null) return;
-      var headerKey = findKey(state.headers, FIELD_TO_KNOWN[field]);
-      if (!headerKey){
-        headerKey = FIELD_TO_KNOWN[field][0];
-        state.headers.push(headerKey);
-        row[headerKey] = "";
-      }
-      row[headerKey] = String(imp[field]);
-    });
-    // cualquier otro campo del import que coincida con una cabecera local ya
-    // existente (por ejemplo columnas propias del centro) se copia también;
-    // el resto de campos "extra" desconocidos se ignoran para no ensuciar
-    // el esquema de columnas.
-    Object.keys(imp).forEach(function(field){
-      if (FIELD_TO_KNOWN.hasOwnProperty(field) || field === "_bajaFecha" || field === "bajaFecha") return;
-      var headerKey = findKey(state.headers, [field]);
-      if (headerKey) row[headerKey] = imp[field] == null ? "" : String(imp[field]);
-    });
-    return row;
-  }
-
-  // Fusiona por "id": añade a localList los elementos de importList cuyo id
-  // no exista ya en localList. No modifica los elementos ya existentes.
-  function mergeListaPorId(localList, importList){
-    var localIds = {};
-    (localList || []).forEach(function(r){ if (r && r.id != null) localIds[r.id] = true; });
-    var nuevos = [], omitidos = 0;
-    (importList || []).forEach(function(r){
-      if (!r || r.id == null) return;
-      if (localIds[r.id]){ omitidos++; return; }
-      localIds[r.id] = true;
-      nuevos.push(r);
-    });
-    return { nuevos: nuevos, omitidos: omitidos };
-  }
-
-  serverBackupFileInput.addEventListener("change", function(){
-    var file = serverBackupFileInput.files && serverBackupFileInput.files[0];
-    if (!file) return;
-    var reader2 = new FileReader();
-    reader2.onload = function(){
-      var data;
-      try {
-        data = JSON.parse(String(reader2.result));
-      } catch(err){
-        alert("Ese archivo no es una copia de seguridad válida (no es JSON).");
-        return;
-      }
-
-      // Copia COMPLETA del Súper Administrador (todas las secciones en un
-      // solo archivo): se pregunta qué sección importar y se sigue igual que
-      // con la copia de una sección (solo añade, nunca sustituye).
-      if (data && data.tipo === "cefot2_copia_completa" && data.secciones && typeof data.secciones === "object"){
-        var idsSecciones = Object.keys(data.secciones).sort();
-        if (!idsSecciones.length){
-          alert("Esta copia completa no contiene ninguna sección.");
-          return;
-        }
-        var propia = currentSeccionInfo ? (currentSeccionInfo.company + "-" + currentSeccionInfo.section) : "";
-        var porDefecto = Math.max(0, idsSecciones.indexOf(propia)) + 1;
-        var lista = idsSecciones.map(function(id, i){
-          var sec = data.secciones[id] || {};
-          var nombreSec = (sec.seccion && sec.seccion.nombre) || id;
-          return (i + 1) + ") " + nombreSec + " — " + ((sec.roster || []).length) + " alumnos, " + ((sec.sanciones || []).length) + " sanciones";
-        }).join("\n");
-        var respuesta = prompt(
-          "Esta es una COPIA COMPLETA con " + idsSecciones.length + " sección(es).\n" +
-          "Escribe el número de la sección que quieres importar en este HTML:\n\n" + lista,
-          String(porDefecto)
-        );
-        if (respuesta === null) return;
-        var idx = parseInt(respuesta, 10) - 1;
-        if (isNaN(idx) || idx < 0 || idx >= idsSecciones.length){
-          alert("Número no válido. No se ha importado nada.");
-          return;
-        }
-        data = data.secciones[idsSecciones[idx]];
-      }
-
-      var esFormatoServidor = !!data && typeof data.exportedAt === "string" && Array.isArray(data.roster);
-      var esFormatoPropio = !!data && data.tipo === "seccion3_backup" && !!data.roster && !Array.isArray(data.roster);
-      if (!esFormatoServidor){
-        if (esFormatoPropio){
-          alert("Este archivo es una copia de seguridad PROPIA de este dispositivo (no del servidor). Usa el botón \"Importar copia\" / \"Importar copia de seguridad…\" para restaurarla.");
-        } else {
-          alert("Ese archivo no es un formato de copia de seguridad reconocible.");
-        }
-        return;
-      }
-
-      var rosterImport = Array.isArray(data.roster) ? data.roster : [];
-      var bajasImport = Array.isArray(data.bajas) ? data.bajas : [];
-      var sancionesImport = Array.isArray(data.sanciones) ? data.sanciones : [];
-      var rebajesImport = Array.isArray(data.rebajes) ? data.rebajes : [];
-      var refuerzosImport = Array.isArray(data.refuerzos) ? data.refuerzos : [];
-      var actividadesImport = Array.isArray(data.actividades) ? data.actividades : [];
-      var horasUaImport = (data.horasUaFechas && typeof data.horasUaFechas === "object") ? data.horasUaFechas : {};
-
-      // -------- calcular qué es nuevo (sin aplicar nada todavía) --------
-      var existingNumeros = {};
-      var kNumero = (state.keys && state.keys.numero) || null;
-      if (kNumero){
-        (state.rows || []).forEach(function(r){ var v = getVal(r, kNumero).trim(); if (v) existingNumeros[v] = true; });
-        (state.bajas || []).forEach(function(r){ var v = getVal(r, kNumero).trim(); if (v) existingNumeros[v] = true; });
-      }
-
-      var nuevosRoster = [], omitidosRoster = 0;
-      rosterImport.forEach(function(imp){
-        var num = (imp && imp.numero != null) ? String(imp.numero).trim() : "";
-        if (!num || existingNumeros[num]){ if (num) omitidosRoster++; return; }
-        existingNumeros[num] = true;
-        nuevosRoster.push(imp);
-      });
-
-      var nuevasBajas = [], omitidasBajas = 0;
-      bajasImport.forEach(function(imp){
-        var num = (imp && imp.numero != null) ? String(imp.numero).trim() : "";
-        if (!num || existingNumeros[num]){ if (num) omitidasBajas++; return; }
-        existingNumeros[num] = true;
-        nuevasBajas.push(imp);
-      });
-
-      var mSanciones = mergeListaPorId(sanciones, sancionesImport);
-      var mRebajes = mergeListaPorId(rebajes, rebajesImport);
-      var mRefuerzos = mergeListaPorId(refuerzos, refuerzosImport);
-      var mActividades = mergeListaPorId(actividades, actividadesImport);
-
-      var horasUaLocal = {};
-      try {
-        var rawUa = localStorage.getItem("cefot2_ua_fechas");
-        if (rawUa) horasUaLocal = JSON.parse(rawUa) || {};
-      } catch(err){ horasUaLocal = {}; }
-      var horasUaNuevas = [], horasUaOmitidas = 0;
-      Object.keys(horasUaImport).forEach(function(key){
-        if (Object.prototype.hasOwnProperty.call(horasUaLocal, key)){ horasUaOmitidas++; return; }
-        horasUaNuevas.push(key);
-      });
-
-      // Aviso de números de expediente repetidos: el servidor y este
-      // dispositivo numeran cada uno por su cuenta, así que una sanción nueva
-      // del servidor puede traer un nº de expediente que aquí ya usa OTRO
-      // parte. No se toca ninguno de los dos; solo se avisa para revisarlo.
-      var expLocales = {};
-      (sanciones || []).forEach(function(r){ if (r && r.expediente != null) expLocales[String(r.expediente)] = true; });
-      var expRepetidos = [];
-      mSanciones.nuevos.forEach(function(r){
-        var e = r && r.expediente != null ? String(r.expediente) : "";
-        if (e && expLocales[e] && expRepetidos.indexOf(e) === -1) expRepetidos.push(e);
-      });
-      expRepetidos.sort(function(a, b){ return Number(a) - Number(b); });
-      var avisoExp = expRepetidos.length
-        ? ("\n\n⚠ ATENCIÓN: " + expRepetidos.length + " sanción(es) del servidor traen un nº de expediente que aquí ya usa otro parte distinto: " +
-           expRepetidos.join(", ") + ". Se añadirán igualmente (no se borra ninguno), pero quedarán dos partes con el mismo número. Revísalos después en la pestaña Sanciones.")
-        : "";
-
-      var totalOmitidos = omitidosRoster + omitidasBajas + mSanciones.omitidos + mRebajes.omitidos + mRefuerzos.omitidos + mActividades.omitidos + horasUaOmitidas;
-
-      var resumen =
-        "Alumnos nuevos en el roster: " + nuevosRoster.length + " (ya existían y se omiten: " + omitidosRoster + ")\n" +
-        "Bajas nuevas: " + nuevasBajas.length + " (ya existían y se omiten: " + omitidasBajas + ")\n" +
-        "Sanciones nuevas: " + mSanciones.nuevos.length + " (ya existían y se omiten: " + mSanciones.omitidos + ")\n" +
-        "Rebajes nuevos: " + mRebajes.nuevos.length + " (ya existían y se omiten: " + mRebajes.omitidos + ")\n" +
-        "Refuerzos nuevos: " + mRefuerzos.nuevos.length + " (ya existían y se omiten: " + mRefuerzos.omitidos + ")\n" +
-        "Actividades nuevas: " + mActividades.nuevos.length + " (ya existían y se omiten: " + mActividades.omitidos + ")\n" +
-        "Fechas de Horas UA nuevas: " + horasUaNuevas.length + " (ya existían y se omiten: " + horasUaOmitidas + ")" +
-        (data.exportedAt ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportedAt).slice(0,10))) : "") +
-        avisoExp;
-
-      var ok = confirm(
-        "Vas a importar esta copia de seguridad del SERVIDOR:\n\n" + resumen +
-        "\n\nEsto AÑADE los registros de arriba que todavía no existen en este dispositivo. " +
-        "NO sustituye ni borra nada de lo que ya tienes aquí (los " + totalOmitidos + " registros que ya existían se dejan tal cual).\n\n¿Continuar?"
-      );
-      if (!ok) return;
-
-      // -------- aplicar --------
-      nuevosRoster.forEach(function(imp){
-        state.rows = state.rows || [];
-        state.rows.push(buildRowFromImportedAlumno(imp));
-      });
-      nuevasBajas.forEach(function(imp){
-        var row = buildRowFromImportedAlumno(imp);
-        row._bajaFecha = (imp && (imp.bajaFecha || imp._bajaFecha)) ? (imp.bajaFecha || imp._bajaFecha) : todayIso();
-        state.bajas = state.bajas || [];
-        state.bajas.push(row);
-      });
-      state.columns = resolveColumns(state.headers);
-      state.keys = resolveRosterKeys(state.headers);
-      persist();
-
-      sanciones = sanciones.concat(mSanciones.nuevos);
-      persistSanciones();
-      rebajes = rebajes.concat(mRebajes.nuevos);
-      persistRebajes();
-      refuerzos = refuerzos.concat(mRefuerzos.nuevos);
-      persistRefuerzos();
-      actividades = actividades.concat(mActividades.nuevos);
-      persistActividades();
-
-      horasUaNuevas.forEach(function(key){ horasUaLocal[key] = horasUaImport[key]; });
-      try { localStorage.setItem("cefot2_ua_fechas", JSON.stringify(horasUaLocal)); }
-      catch(err){ console.warn("No se pudo guardar Horas UA fusionadas", err); }
-
-      // Hojas de seguimiento del servidor: solo se añaden los alumnos y las
-      // líneas que aquí no existen; lo ya editado en este navegador no se toca.
-      // El «Ciclo» solo se rellena si aquí está vacío.
-      if (data.seguimientos && typeof data.seguimientos === "object"){
-        Object.keys(data.seguimientos).forEach(function(num){
-          var otra = data.seguimientos[num];
-          if (!otra || !otra.lineas) return;
-          var mia = seguimientos[num];
-          if (!mia || !mia.lineas){ seguimientos[num] = otra; return; }
-          Object.keys(otra.lineas).forEach(function(id){
-            if (!Object.prototype.hasOwnProperty.call(mia.lineas, id)) mia.lineas[id] = otra.lineas[id];
-          });
-        });
-        persistSeguimientos();
-      }
-      if (!fasesCiclo.ciclo && typeof data.seguimientoCiclo === "string" && data.seguimientoCiclo){
-        fasesCiclo.ciclo = data.seguimientoCiclo;
-        try { localStorage.setItem(FASES_KEY, JSON.stringify(fasesCiclo)); } catch(err){}
-      }
-
-      // El contador de expedientes debe quedar por delante del expediente
-      // más alto ya fusionado (local + recién añadidos), para que ningún
-      // expediente nuevo que se cree después colisione con uno importado.
-      var maxExpediente = 0;
-      sanciones.concat(refuerzos).forEach(function(r){
-        var n = parseInt(r && r.expediente, 10);
-        if (!isNaN(n) && n > maxExpediente) maxExpediente = n;
-      });
-      try {
-        var contadorActual = parseInt(localStorage.getItem(EXPEDIENTE_COUNTER_KEY), 10) || 0;
-        if (maxExpediente > contadorActual){
-          localStorage.setItem(EXPEDIENTE_COUNTER_KEY, String(maxExpediente));
-        }
-      } catch(err){}
-
-      alert(
-        "Se han añadido:\n" +
-        "- Alumnos: " + nuevosRoster.length + "\n" +
-        "- Bajas: " + nuevasBajas.length + "\n" +
-        "- Sanciones: " + mSanciones.nuevos.length + "\n" +
-        "- Rebajes: " + mRebajes.nuevos.length + "\n" +
-        "- Refuerzos: " + mRefuerzos.nuevos.length + "\n" +
-        "- Actividades: " + mActividades.nuevos.length + "\n" +
-        "- Fechas de Horas UA: " + horasUaNuevas.length + "\n\n" +
-        "Se han omitido " + totalOmitidos + " registros que ya existían en este dispositivo." +
-        (expRepetidos.length ? ("\n\n⚠ Expedientes con número repetido para revisar: " + expRepetidos.join(", ")) : "") +
-        "\n\nLa página se va a recargar."
-      );
-      location.reload();
-    };
-    reader2.onerror = function(){
-      alert("No se pudo leer el archivo seleccionado.");
-    };
-    reader2.readAsText(file);
   });
 
   function switchTab(tab){
@@ -5151,7 +4891,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
     if (reb.length){
       lines.push("<div><strong>Últimos rebajes:</strong> " + reb.slice(0,3).map(function(r){
-        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : ""));
+        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : ""));
       }).join(" &nbsp;·&nbsp; ") + "</div>");
     }
 
@@ -5431,7 +5171,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + " · " + r.tipo;
       }));
       drawListBlock("Rebajes:", reb.map(function(r){
-        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : "");
+        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : "");
       }));
 
       page.drawText("Generado el " + formatDateDisplay(todayIso()), { x: margin, y: 40, size: 8, font: fontRegular, color: PDFLib.rgb(0.55,0.55,0.55) });
@@ -5704,7 +5444,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     rebajes.forEach(function(r){
       if (String(r.numero) !== num) return;
       meter("rebaje", r.fechaInicio, r.fechaFin, "Rebaje",
-        (r.total ? "Rebaje total/clase" + sinCamaTxt(r) : "Rebaje") + " · " +
+        (r.total ? "Rebaje total/clase" : "Rebaje") + " · " +
         formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin));
     });
 
@@ -5969,7 +5709,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return '<div class="historial-item">' +
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + estado + '">' + estadoLbl + '</span>' +
-            (r.total ? '<span class="status-pill alerta">Rebaje total/clase' + sinCamaTxt(r) + '</span>' : '') + '</span></div>' +
+            (r.total ? '<span class="status-pill alerta">Rebaje total/clase</span>' : '') + '</span></div>' +
             '<dl><dt>Categorías</dt><dd>' + (cats.length ? escapeHtml(cats.join(", ")) : "—") + '</dd></dl>' +
             '</div>';
         }).join("");
@@ -6005,6 +5745,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + (r.origen === "sancion" ? "alerta" : "vigente") + '">' + (r.origen === "sancion" ? "De sanción" : "Manual") + '</span>' +
             (r.expediente ? '<span class="historial-count">Exp. Nº ' + escapeHtml(String(r.expediente)) + '</span>' : '') +
+            (r.alumnos && r.alumnos.length > 1 ? '<span class="historial-count">Compartido (' + r.alumnos.length + ' alumnos)</span>' : '') +
             '</span></div>' +
             '<dl>' +
             '<dt>Tipo</dt><dd>' + escapeHtml(r.tipo || "—") + '</dd>' +
@@ -6074,12 +5815,25 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   }
   resetCategoryState();
 
+  // «Cama» es la única categoría que NO va implícita en el rebaje total: un
+  // alumno con rebaje total sigue yendo a clase, y quien va a clase no está
+  // en cama. Por eso se queda siempre elegible, aunque el total esté puesto,
+  // y el interruptor de total nunca la toca.
+  var CAT_INDEPENDIENTE = "cama";
+
+  function categoriaBloqueada(key){
+    return formTotal && key !== CAT_INDEPENDIENTE;
+  }
+
   function renderCategoryGrid(){
     rebCategoryGrid.innerHTML = CATEGORY_DEFS.map(function(c){
-      var libre = c.key === CATEGORIA_LIBRE_EN_TOTAL;
-      var on = (formTotal && !libre) || formCategoryState[c.key];
-      var locked = formTotal && !libre;
-      return '<div class="category-item' + (locked ? ' locked' : '') + '" data-cat="' + c.key + '">' +
+      var locked = categoriaBloqueada(c.key);
+      var on = locked ? true : !!formCategoryState[c.key];
+      var titulo = (formTotal && c.key === CAT_INDEPENDIENTE)
+        ? 'El rebaje total no implica cama: márcala solo si además debe guardar cama.'
+        : '';
+      return '<div class="category-item' + (locked ? ' locked' : '') + '" data-cat="' + c.key + '"' +
+        (titulo ? ' title="' + escapeHtml(titulo) + '"' : '') + '>' +
         '<span class="cat-label">' + escapeHtml(c.label) + '</span>' +
         '<div class="switch' + (on ? ' on' : '') + (locked ? ' disabled' : '') + '" data-cat-switch="' + c.key + '" tabindex="0" role="switch" aria-checked="' + on + '"><div class="knob"></div></div>' +
         '</div>';
@@ -6088,7 +5842,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     rebCategoryGrid.querySelectorAll("[data-cat-switch]").forEach(function(el){
       el.addEventListener("click", function(){
         var key = el.getAttribute("data-cat-switch");
-        if (formTotal && key !== CATEGORIA_LIBRE_EN_TOTAL) return; // bloqueadas con el total (salvo la cama)
+        if (categoriaBloqueada(key)) return; // bloqueada mientras el total está puesto
         formCategoryState[key] = !formCategoryState[key];
         renderCategoryGrid();
       });
@@ -6099,11 +5853,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     formTotal = !formTotal;
     rebTotalSwitch.classList.toggle("on", formTotal);
     rebTotalSwitch.setAttribute("aria-checked", String(formTotal));
-    if (formTotal){
-      CATEGORY_DEFS.forEach(function(c){ formCategoryState[c.key] = true; });
-    } else {
-      CATEGORY_DEFS.forEach(function(c){ formCategoryState[c.key] = false; });
-    }
+    CATEGORY_DEFS.forEach(function(c){
+      if (c.key === CAT_INDEPENDIENTE) return;   // «Cama» se decide a mano
+      formCategoryState[c.key] = formTotal;
+    });
     renderCategoryGrid();
   });
 
@@ -6318,7 +6071,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var estado = computeEstado(r.fechaInicio, r.fechaFin);
       var chips;
       if (r.total){
-        chips = '<span class="cat-chip total">TOTAL / CLASE</span>' + (sinCamaTxt(r) ? '<span class="cat-chip">SIN CAMA</span>' : '');
+        chips = '<span class="cat-chip total">TOTAL / CLASE</span>' +
+          // «Cama» no va implícita en el total, así que si la lleva hay que verla.
+          ((r.categorias && r.categorias.cama) ? '<span class="cat-chip">Cama</span>' : '');
       } else {
         chips = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; })
           .map(function(c){ return '<span class="cat-chip">' + escapeHtml(c.label) + '</span>'; }).join("");
@@ -6414,6 +6169,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var sanAlertaTotalFilter = document.getElementById("sanAlertaTotalFilter");
   var sanAlertaFundamentoFilter = document.getElementById("sanAlertaFundamentoFilter");
   var sancionesTableBody = document.getElementById("sancionesTableBody");
+  var refManualTableBody = document.getElementById("refManualTableBody");
+  var refManualEmptyState = document.getElementById("refManualEmptyState");
   var sanSelectAllCheck = document.getElementById("sanSelectAllCheck");
   var sanSeleccionCount = document.getElementById("sanSeleccionCount");
   var sanExportExcelBtn = document.getElementById("sanExportExcelBtn");
@@ -6874,10 +6631,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         sanMultiHint.textContent = "Selecciona al menos un alumno.";
         sanMultiHint.classList.remove("hidden");
         ok = false;
-      } else if (alumnos.length > MAX_ANEXO_ALUMNOS){
-        sanMultiHint.textContent = "Máximo " + MAX_ANEXO_ALUMNOS + " alumnos por expediente múltiple (la plantilla PDF del ANEXO I no admite más). Has seleccionado " + alumnos.length + ".";
-        sanMultiHint.classList.remove("hidden");
-        ok = false;
       } else {
         sanMultiHint.classList.add("hidden");
       }
@@ -7090,35 +6843,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     applyRefuerzoDraft();
   });
 
-  // Punto de enganche para el aviso de partes de pelotón (seccion-avisos.js,
-  // otro <script> aparte que no tiene acceso a las variables de este): en
-  // vez de crear una sanción nueva desde el formulario, arma el borrador de
-  // refuerzo directamente con los datos que ya trae el aviso (la sanción del
-  // jefe de pelotón puede no estar sincronizada todavía en este dispositivo).
-  window.cefotGenerarRefuerzoDesdeSancion = function(aviso){
-    if (!aviso) return;
-    refuerzoDraft = {
-      expediente: aviso.expediente,
-      sancionId: aviso.sancionId,
-      alumnos: aviso.alumnos || [],
-      fecha: aviso.fecha || "",
-      lugar: aviso.lugar || "",
-      hora: aviso.hora || "",
-      profEmpleo: aviso.profEmpleo || "",
-      profNombre: aviso.profNombre || "",
-      profApellidos: aviso.profApellidos || "",
-      profDni: aviso.profDni || "",
-      tipoFalta: aviso.tipoFalta || "",
-      fundamento: aviso.fundamento || "",
-      fundamentoLetra: aviso.fundamentoLetra || "",
-      motivo: aviso.motivo || "",
-      observaciones: aviso.observaciones || ""
-    };
-    switchTab("refuerzos");
-    renderRefuerzosTab();
-    applyRefuerzoDraft();
-  };
-
   function renderSancionesTab(){
     buildSanCadetOptions();
     refreshSanciondatalists();
@@ -7192,6 +6916,53 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     });
   }
 
+  // Tabla de refuerzos MANUALES dentro de la pestaña Sanciones: son los que no
+  // tienen ninguna sanción detrás y, por tanto, no salen en la tabla de arriba.
+  // Desde la v40 todo el borrado de alumnos se hace desde esta pestaña.
+  function renderRefuerzosManualesList(){
+    if (!refManualTableBody) return;
+    var filas = [];
+    refuerzos.forEach(function(r){
+      if (r.origen === "sancion") return;
+      (r.alumnos || []).forEach(function(al){ filas.push({ record: r, alumno: al }); });
+    });
+    filas = filas.sort(function(a, b){
+      return (a.record.expediente || 0) - (b.record.expediente || 0) ||
+             String(a.alumno.ape1 || "").localeCompare(String(b.alumno.ape1 || ""), "es");
+    });
+
+    if (!filas.length){
+      refManualTableBody.innerHTML = "";
+      refManualEmptyState.classList.remove("hidden");
+      return;
+    }
+    refManualEmptyState.classList.add("hidden");
+
+    refManualTableBody.innerHTML = filas.map(function(item){
+      var r = item.record, al = item.alumno;
+      return "<tr>" +
+        '<td><span class="expediente-tag">Nº ' + escapeHtml(String(r.expediente || "—")) + '</span></td>' +
+        "<td>" + escapeHtml(String(al.numero || "—")) + "</td>" +
+        "<td>" + alumnoLineaHtml(al.numero, escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre || "")) + "</td>" +
+        "<td>" + (al.peloton ? '<span class="pelo-badge">' + escapeHtml(al.peloton) + '</span>' : "—") + "</td>" +
+        "<td>" + formatDateDisplay(r.fechaInicio) + "</td>" +
+        "<td>" + formatDateDisplay(r.fechaFin) + "</td>" +
+        "<td>" + escapeHtml(r.tipo || "—") + "</td>" +
+        '<td class="no-print"><button class="btn small danger-ghost" data-delrefman="' + escapeHtml(String(r.id)) +
+          '" data-delrefmannum="' + escapeHtml(String(al.numero)) +
+          '" title="Quita a este alumno del refuerzo manual. Los demás alumnos del expediente no se ven afectados.">Eliminar</button></td>' +
+        "</tr>";
+    }).join("");
+
+    refManualTableBody.querySelectorAll("[data-delrefman]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        if (!quitarAlumnoDeRefuerzo(btn.getAttribute("data-delrefman"), btn.getAttribute("data-delrefmannum"))) return;
+        renderSancionesList();
+        renderRefuerzosList();
+      });
+    });
+  }
+
   function renderSancionesList(){
     var alerts = computeSanctionAlerts();
     var totalExpedientes = uniqueSorted(sanciones.map(function(r){ return String(r.expediente); })).length;
@@ -7220,6 +6991,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       sancionesEmptyState.classList.remove("hidden");
       sancionesEmptyState.textContent = sanciones.length ? "No se han encontrado sanciones con ese filtro." : "Todavía no se ha registrado ninguna sanción.";
       sanSelectAllCheck.checked = false;
+      renderRefuerzosManualesList();
       return;
     }
     sancionesEmptyState.classList.add("hidden");
@@ -7274,6 +7046,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         '<td><button class="btn small danger-ghost" data-delsan="' + r.id + '" data-delnum="' + escapeHtml(String(al.numero)) + '" title="Quita a este alumno del expediente. Los demás alumnos del expediente no se ven afectados.">Eliminar</button></td>' +
         "</tr>";
     }).join("");
+
+    renderRefuerzosManualesList();
 
     sancionesTableBody.querySelectorAll("[data-delsan]").forEach(function(btn){
       btn.addEventListener("click", function(){
@@ -7646,6 +7420,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var dow = d.day();
     return dow === 0 || dow === 6;
   }
+  // Hora de referencia para los días de fin de semana. Es solo el punto de
+  // partida del campo: quien genera el expediente la marca a su criterio, y
+  // el campo no se puede dejar en blanco.
+  var HORA_FINDE_ESTANDAR = "09:00";
+  var DURACION_FINDE_ESTANDAR = "1";
+
   function rangoTieneFinde(inicio, fin){
     return isoDatesInRange(inicio, fin).some(esFinDeSemanaIso);
   }
@@ -7770,7 +7550,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refDuracion.value = record.duracion || "1";
     var tieneFinde = updateRefFindeVisibility();
     if (tieneFinde){
-      refHoraInicioFinde.value = record.horaInicioFinde || "10:00";
+      refHoraInicioFinde.value = record.horaInicioFinde || HORA_FINDE_ESTANDAR;
       refDuracionFinde.value = record.duracionFinde || "1";
     }
     refObservaciones.value = record.observaciones || "";
@@ -7840,7 +7620,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     refTipo.value = "IFM";
     refHoraInicio.value = "09:00";
     refDuracion.value = "1";
-    refHoraInicioFinde.value = "10:00";
+    refHoraInicioFinde.value = HORA_FINDE_ESTANDAR;
     refDuracionFinde.value = "1";
     updateRefFindeVisibility();
     refObservaciones.value = "";
@@ -7886,10 +7666,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       refCadeteHint.classList.add("hidden");
       if (!alumnos.length){
         refMultiHint.textContent = "Selecciona al menos un alumno.";
-        refMultiHint.classList.remove("hidden");
-        ok = false;
-      } else if (alumnos.length > MAX_ANEXO_ALUMNOS){
-        refMultiHint.textContent = "Máximo " + MAX_ANEXO_ALUMNOS + " alumnos por refuerzo múltiple (la plantilla PDF del ANEXO I no admite más). Has seleccionado " + alumnos.length + ".";
         refMultiHint.classList.remove("hidden");
         ok = false;
       } else {
@@ -7948,7 +7724,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alumnos,
         refFechaInicio.value,
         refFechaFin.value,
-        {}
+        {
+          pedirFinde: true,
+          findeHora: (tieneFinde && refHoraInicioFinde.value) || HORA_FINDE_ESTANDAR,
+          findeDur: (tieneFinde && refDuracionFinde.value.trim()) || DURACION_FINDE_ESTANDAR
+        }
       );
       if (!fechaRefResolucion){
         refFormMsg.textContent = "Guardado cancelado.";
@@ -8038,6 +7818,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         separado.alumnos = [item.alumno];
         separado.fechaInicio = item.ini;
         separado.fechaFin = item.fin;
+        // El horario de fin de semana se calcula sobre la fecha NUEVA, no
+        // sobre la del formulario: si la reasignación cae en sábado o domingo
+        // lleva el horario marcado en el calendario, y si deja de caer en fin
+        // de semana se vacía para que no arrastre un horario que ya no aplica.
+        separado.horaInicioFinde = item.tieneFinde ? (item.findeHora || "") : "";
+        separado.duracionFinde = item.tieneFinde ? (item.findeDur || "") : "";
         separado.createdAt = new Date().toISOString();
         separado.editado = false;
         separado.editadoFecha = null;
@@ -8231,12 +8017,15 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       // quitarlo de la sanción se le quita también de aquí y se avisa de que
       // hay que rehacer el documento. Un refuerzo MANUAL no tiene sanción
       // detrás, así que se borra desde aquí mismo.
-      var borrarCell = r.origen === "sancion"
-        ? '<span class="desde-sanciones" title="Este refuerzo viene de la sanción del expediente Nº ' +
-          escapeHtml(String(r.expediente)) + '. Para quitar a un alumno, hazlo desde la pestaña Sanciones: ' +
-          'se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento.">Desde Sanciones</span>'
-        : '<button class="btn small danger-ghost" data-delref="' + r.id + '" data-delrefnum="' + escapeHtml(String(al.numero)) +
-          '" title="Refuerzo manual: quita a este alumno del expediente. Los demás alumnos no se ven afectados.">Eliminar</button>';
+      // Desde la v40 NINGÚN refuerzo se borra desde aquí: los que vienen de una
+      // sanción, desde la tabla de sanciones; los manuales, desde la tabla
+      // «Refuerzos manuales» que hay debajo, en esa misma pestaña.
+      var borrarCell = '<span class="desde-sanciones" title="' + escapeHtml(
+          r.origen === "sancion"
+            ? "Este refuerzo viene de la sanción del expediente Nº " + r.expediente +
+              ". Para quitar a un alumno, hazlo desde la tabla de sanciones: se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento."
+            : "Refuerzo manual. Para quitar a un alumno, hazlo en la pestaña Sanciones, en la tabla «Refuerzos manuales» del final."
+        ) + '">Desde Sanciones</span>';
       return "<tr>" +
         "<td>" + escapeHtml(al.numero) + "</td>" +
         "<td>" + alumnoLineaHtml(al.numero, escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre)) + "</td>" +
@@ -8252,13 +8041,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     renderAvisoDocumentos();
 
-    refuerzosTableBody.querySelectorAll("[data-delref]").forEach(function(btn){
-      btn.addEventListener("click", function(){
-        if (!quitarAlumnoDeRefuerzo(btn.getAttribute("data-delref"), btn.getAttribute("data-delrefnum"))) return;
-        renderRefuerzosList();
-        renderSancionesList();
-      });
-    });
     refuerzosTableBody.querySelectorAll("[data-pdfref]").forEach(function(btn){
       btn.addEventListener("click", function(){
         var id = btn.getAttribute("data-pdfref");
@@ -8337,6 +8119,98 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return out;
   }
 
+  // ---------- ANEXO I: hojas de continuación ----------
+  // La plantilla trae UNA hoja de ANEXO I con 25 filas. Para más alumnos se
+  // copia esa misma página tantas veces como haga falta.
+  //
+  // El detalle delicado: al copiar una página, pdf-lib trae sus anotaciones
+  // (las casillas), pero NO las da de alta en el formulario del documento
+  // destino, así que el lector no las trataría como rellenables. Y si se dan
+  // de alta tal cual, los campos de la hoja 2 se llamarían igual que los de la
+  // hoja 1 y el PDF los consideraría EL MISMO campo: escribir en uno cambiaría
+  // el otro. Por eso aquí se hacen las dos cosas: renombrar («anexo_nombre_3»
+  // de la segunda hoja pasa a «anexo_nombre_28») y dar de alta cada campo en
+  // el formulario final.
+  // IMPORTANTE: las páginas se copian VACÍAS y el texto se escribe después, ya
+  // dentro del documento final. Rellenarlas en el auxiliar parece lo natural,
+  // pero el dibujo de cada casilla apunta a una fuente que vive en el
+  // formulario de ESE documento; al copiar solo la página, el lector no la
+  // encuentra y da «Unknown font tag». Haciéndolo al revés, todas las casillas
+  // —las de la primera hoja y las de las siguientes— comparten la misma fuente
+  // del documento final.
+  async function anadirHojasAnexo(pdfDoc, bytesPlantilla, alumnos, setCampo){
+    var hojas = Math.ceil(alumnos.length / ANEXO_FILAS_POR_HOJA);
+    if (hojas <= 1) return 1;
+
+    var PDFName = PDFLib.PDFName, PDFString = PDFLib.PDFString;
+
+    for (var h = 1; h < hojas; h++){
+      var aux = await PDFLib.PDFDocument.load(bytesPlantilla);
+      var copiadas = await pdfDoc.copyPages(aux, [ANEXO_PAGINA_PLANTILLA]);
+      var pagina = copiadas[0];
+      pdfDoc.addPage(pagina);
+
+      var acro = pdfDoc.getForm().acroForm;
+      var annots = pagina.node.Annots();
+      if (!annots) continue;
+      for (var a = 0; a < annots.size(); a++){
+        var ref = annots.get(a);
+        var dict = pdfDoc.context.lookup(ref);
+        if (!dict || !dict.get) continue;
+        var t = dict.get(PDFName.of("T"));
+        if (!t) continue;                       // no es un campo: se deja
+        var nombre = t.decodeText ? t.decodeText() : String(t.asString ? t.asString() : t);
+        // Dos campos con el mismo nombre serían EL MISMO campo y mostrarían
+        // todos el mismo valor: por eso se renumeran (fila 3 de la hoja 2 pasa
+        // a ser «anexo_nombre_28»).
+        dict.set(PDFName.of("T"), PDFString.of(renombrarCampoAnexo(nombre, h)));
+        dict.set(PDFName.of("P"), pagina.ref);  // la casilla pertenece a esta página
+        acro.addField(ref);                     // y se da de alta en el formulario
+      }
+    }
+
+    // Ya existen las casillas: ahora se escriben los alumnos del 26 en adelante.
+    alumnos.slice(ANEXO_FILAS_POR_HOJA).forEach(function(al, i){
+      var n = ANEXO_FILAS_POR_HOJA + i + 1;
+      setCampo("anexo_nombre_" + n, al.nombre);
+      setCampo("anexo_apellidos_" + n, [al.ape1, al.ape2].filter(Boolean).join(" "));
+      setCampo("anexo_numero_" + n, al.numero);
+    });
+    return hojas;
+  }
+
+  // «anexo_nombre_3» en la hoja h=1 pasa a «anexo_nombre_28» (3 + 25).
+  function renombrarCampoAnexo(nombre, hoja){
+    var m = /^(.*_)(\d+)$/.exec(nombre);
+    if (!m) return nombre + "_h" + (hoja + 1);
+    return m[1] + (parseInt(m[2], 10) + hoja * ANEXO_FILAS_POR_HOJA);
+  }
+
+  // pdf-lib escribe en cada casilla un «/DA» que dice «/Helvetica 9 Tf», pero
+  // la fuente que trae la plantilla en sus recursos se llama «/Helv». El dibujo
+  // ya hecho se ve bien porque lleva la fuente dentro, pero EN CUANTO SE
+  // ESCRIBE dentro del PDF el lector busca «/Helvetica», no la encuentra y cae
+  // a una fuente por defecto. Aquí se da de alta con ese nombre para que
+  // escribir en el documento conserve la letra.
+  async function registrarFuenteDelFormulario(pdfDoc){
+    try {
+      var PDFName = PDFLib.PDFName, PDFDict = PDFLib.PDFDict;
+      var fuente = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      var acro = pdfDoc.getForm().acroForm;
+      var dr = acro.dict.lookup(PDFName.of("DR"));
+      if (!dr){
+        dr = pdfDoc.context.obj({});
+        acro.dict.set(PDFName.of("DR"), dr);
+      }
+      var fuentes = dr.lookup(PDFName.of("Font"));
+      if (!fuentes){
+        fuentes = pdfDoc.context.obj({});
+        dr.set(PDFName.of("Font"), fuentes);
+      }
+      fuentes.set(PDFName.of("Helvetica"), fuente.ref);
+    } catch(e){ /* si la plantilla no lo permite, el documento sigue saliendo */ }
+  }
+
   async function generarDocumentoPDF(record){
     try {
       if (typeof PDFLib === "undefined"){
@@ -8345,9 +8219,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
       var alumnos = record.alumnos || [];
       var multi = alumnos.length > 1;
-      if (multi && alumnos.length > MAX_ANEXO_ALUMNOS){
-        alert("Este expediente tiene " + alumnos.length + " alumnos, más que el máximo admitido por la plantilla del ANEXO I (" + MAX_ANEXO_ALUMNOS + "). Solo se rellenarán los primeros " + MAX_ANEXO_ALUMNOS + ".");
-      }
 
       var b64 = multi ? PDF_TEMPLATE_MULTIPLE_B64 : PDF_TEMPLATE_INDIVIDUAL_B64;
       var binary = atob(b64);
@@ -8425,7 +8296,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         setF("alumno_apellidos", [al.ape1, al.ape2].filter(Boolean).join(" "));
         setF("alumno_numero", al.numero);
       } else {
-        alumnos.slice(0, MAX_ANEXO_ALUMNOS).forEach(function(al, i){
+        alumnos.slice(0, ANEXO_FILAS_POR_HOJA).forEach(function(al, i){
           var n = i + 1;
           setF("anexo_nombre_" + n, al.nombre);
           setF("anexo_apellidos_" + n, [al.ape1, al.ape2].filter(Boolean).join(" "));
@@ -8490,6 +8361,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       setF("res_lugar_fecha", record.lugarFecha || "San Fernando, a ");
       setF("res_jefe_cia", "Fdo: " + (record.jefeCia || ""));
       setF("notif_lugar_fecha", record.lugarFecha || "San Fernando, a ");
+
+      // Alumnos 26 en adelante: hojas de ANEXO I de continuación.
+      if (multi) await anadirHojasAnexo(pdfDoc, bytes, alumnos, setF);
+
+      await registrarFuenteDelFormulario(pdfDoc);
 
       var outBytes = await pdfDoc.save();
       var blob = new Blob([outBytes], { type: "application/pdf" });
@@ -8991,7 +8867,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return rangosSolapan(r.fechaInicio, r.fechaFin, fechaIni, fechaFin);
     }).map(function(r){
       var cats = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; }).map(function(c){ return c.label; });
-      var detalle = [r.total ? "Total/clase" + sinCamaTxt(r) : "", cats.join(", ")].filter(Boolean).join(" · ");
+      var detalle = [r.total ? "Total/clase" : "", cats.join(", ")].filter(Boolean).join(" · ");
       return {
         numero: r.numero, ape1: r.ape1, ape2: r.ape2, nombre: r.nombre, peloton: r.peloton,
         desde: r.fechaInicio, hasta: r.fechaFin, detalle: detalle || "—"
@@ -9874,7 +9750,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     rebajes.forEach(function(r){
       meter(r.numero, "rebaje", r.fechaInicio, r.fechaFin,
-        (r.total ? "Rebaje total/clase" + sinCamaTxt(r) : "Rebaje") +
+        (r.total ? "Rebaje total/clase" : "Rebaje") +
         " · " + formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin));
     });
 
@@ -10305,9 +10181,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       '<div class="seg-foto">' + (alumno.foto
         ? '<img src="' + alumno.foto + '" alt="">'
         : 'FOTO') + '</div></div>' +
-      '<table><thead><tr><th style="width:72px;">FECHA</th><th style="width:205px;">MOTIVO</th>' +
-        '<th style="width:86px;">FIRMA<br>INSTRUCTOR</th><th style="width:86px;">FIRMA<br>AMPT</th>' +
-        '<th>OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<table><thead><tr><th style="width:12%;">FECHA</th><th style="width:29%;">MOTIVO</th>' +
+        '<th style="width:14%;">FIRMA<br>INSTRUCTOR</th><th style="width:14%;">FIRMA<br>AMPT</th>' +
+        '<th style="width:31%;">OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
       '<div class="seg-pie">Página ' + (indice + 1) + ' de ' + total +
         (indice + 1 < total ? ' · continúa en la página siguiente' : '') + '</div>' +
       '</div>';
@@ -10335,15 +10211,17 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (!segLineas.length){
       h.push('<div class="empty-state">Este alumno no tiene ninguna sanción registrada.</div>');
     } else {
-      h.push('<table class="seg-sel"><thead><tr><th></th><th>Fecha</th><th>Exp.</th>' +
-        '<th>Motivo</th><th>Observaciones (editables)</th></tr></thead><tbody>' +
+      h.push('<table class="seg-sel"><thead><tr>' +
+        '<th style="width:4%;"></th><th style="width:11%;">Fecha</th><th style="width:7%;">Exp.</th>' +
+        '<th style="width:33%;">Motivo</th><th style="width:45%;">Observaciones (editables)</th>' +
+        '</tr></thead><tbody>' +
         segLineas.map(function(l, i){
           return '<tr class="' + (l.incluida ? '' : 'off') + '">' +
-            '<td style="width:26px;"><input type="checkbox" class="seg-check" data-i="' + i + '"' +
+            '<td><input type="checkbox" class="seg-check" data-i="' + i + '"' +
               (l.incluida ? ' checked' : '') + '></td>' +
-            '<td style="width:88px;white-space:nowrap;">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
-            '<td style="width:52px;"><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
-            '<td style="width:240px;">' + escapeHtml(l.motivo || "—") + '</td>' +
+            '<td class="seg-c-fecha">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+            '<td><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
+            '<td>' + escapeHtml(l.motivo || "—") + '</td>' +
             '<td><textarea class="seg-obs" data-i="' + i + '" rows="2">' + escapeHtml(l.observaciones || "") + '</textarea></td>' +
           '</tr>';
         }).join("") + '</tbody></table>');
@@ -10973,7 +10851,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // "estado" distingue a quien ha suspendido (tiene nota, por debajo de la
   // mínima) de quien no se ha presentado (no tiene nota utilizable, o ni
   // siquiera aparece en el archivo).
-  function filaResultadoNotas(alumno, estado, nota){
+  function filaResultadoNotas(alumno, estado, nota, intentos, conNota){
     var k = state.keys;
     return {
       numero: getVal(alumno, k.numero),
@@ -10982,7 +10860,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       nombre: getVal(alumno, k.nombre),
       peloton: getVal(alumno, k.peloton),
       estado: estado,
-      nota: nota
+      nota: nota,
+      intentos: intentos || 0,      // veces que aparece en el archivo
+      conNota: conNota || 0         // de esas, cuántas traían una nota utilizable
     };
   }
 
@@ -10996,6 +10876,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var incidencias = [];
       var vistos = {}; // números del listado ya localizados en este archivo
 
+      // Un mismo alumno puede aparecer varias veces en el archivo: son los
+      // sucesivos intentos del ejercicio. Se recogen TODAS sus filas y después
+      // se toma su nota más alta, que es la que cuenta. No hace falta que el
+      // usuario haga nada: es automático al comprobar.
+      var porAlumno = {};
+      var ordenAlumnos = [];
+
       archivo.rows.forEach(function(fila){
         var busq = buscarAlumnoNotas(fila, archivo);
         if (busq.estado === "ambiguo"){
@@ -11007,20 +10894,32 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return;
         }
         var numero = getVal(busq.alumno, k.numero);
-        if (vistos[numero]){
-          incidencias.push({ motivo: "el alumno aparece en más de una fila del archivo; solo se ha tenido en cuenta la primera", fila: fila });
-          return;
+        if (!porAlumno[numero]){
+          porAlumno[numero] = { alumno: busq.alumno, notas: [], intentos: 0 };
+          ordenAlumnos.push(numero);
         }
-        vistos[numero] = true;
+        var reg = porAlumno[numero];
+        reg.intentos++;
         // Cualquier valor que no sea un número utilizable (celda vacía, «NP»,
-        // «No presentado», un guion…) se considera que no ha realizado la prueba.
+        // «No presentado», un guion…) es un intento sin nota aprovechable.
         var nota = parseNota(fila[archivo.colNota]);
-        if (nota == null){
-          resultados.push(filaResultadoNotas(busq.alumno, "no_presentado", null));
+        if (nota != null) reg.notas.push(nota);
+      });
+
+      ordenAlumnos.forEach(function(numero){
+        var reg = porAlumno[numero];
+        vistos[numero] = true;
+        // Sin ninguna nota utilizable en ningún intento: no presentado.
+        if (!reg.notas.length){
+          resultados.push(filaResultadoNotas(reg.alumno, "no_presentado", null, reg.intentos, 0));
           return;
         }
-        if (nota < minima){
-          resultados.push(filaResultadoNotas(busq.alumno, "suspenso", nota));
+        var mejor = reg.notas[0];
+        for (var i = 1; i < reg.notas.length; i++){
+          if (reg.notas[i] > mejor) mejor = reg.notas[i];
+        }
+        if (mejor < minima){
+          resultados.push(filaResultadoNotas(reg.alumno, "suspenso", mejor, reg.intentos, reg.notas.length));
         }
       });
 
@@ -11086,9 +10985,20 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         nNoPresentados + (nNoPresentados === 1 ? " no presentado" : " no presentados");
       var filas = archivo.resultados.map(function(row){
         var key = notasRowKey(archivo.id, row.numero);
+        // Solo se avisa de los intentos cuando de verdad hay más de uno, y con
+        // el texto que corresponde: «la mejor de N» si alguna traía nota, o
+        // «N intentos, ninguno con nota» si ninguna la traía.
+        var pistaIntentos = "";
+        if (row.intentos > 1){
+          pistaIntentos = row.conNota > 1
+            ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; se ha tomado la nota más alta">la mejor de ' + row.conNota + ' notas</span>'
+            : (row.conNota === 1
+                ? '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo; solo una traía nota">' + row.intentos + ' intentos, 1 con nota</span>'
+                : '<span class="notas-intentos" title="Aparece ' + row.intentos + ' veces en el archivo y ninguna traía una nota utilizable">' + row.intentos + ' intentos, ninguno con nota</span>');
+        }
         var notaCell = row.estado === "suspenso"
-          ? escapeHtml(String(row.nota))
-          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>';
+          ? escapeHtml(String(row.nota)) + pistaIntentos
+          : '<span class="status-pill alerta" title="No tiene nota en este archivo o no aparece en él">No presentado</span>' + pistaIntentos;
         return "<tr>" +
           '<td class="no-print"><input type="checkbox" class="notas-select-check" data-rowkey="' + escapeHtml(key) + '" ' + (notasSeleccion[key] ? "checked" : "") + '></td>' +
           "<td>" + escapeHtml(row.numero) + "</td>" +
@@ -11162,21 +11072,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     sanFormMsg.textContent = "Alumnos precargados desde el Cuestionario de notas. Completa el tipo de falta, el fundamento y la medida correctora.";
     sanFormMsg.className = "form-msg ok";
   }
-
-  // ---------------- modo capitán: volver a la compañía sin cerrar sesión ----------------
-  // Si quien ha entrado es un capitán de compañía "dentro" de una sección
-  // (token con capitanCompania, aunque tenga role:admin de esa sección),
-  // se muestra un botón para volver a su panel de capitán sin tener que
-  // cerrar sesión y volver a entrar.
-  fetch("/api/auth/me").then(function(r){ return r.ok ? r.json() : null; }).then(function(me){
-    if (me && me.capitanCompania){
-      var wrap = document.getElementById("capitanBackWrap");
-      wrap.classList.remove("hidden");
-      document.getElementById("capitanBackBtn").addEventListener("click", function(){
-        location.href = "/capitan.html";
-      });
-    }
-  }).catch(function(){});
 
   // ---------------- boot ----------------
   loadRebajesFromStorage();
@@ -11405,6 +11300,5 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   render();
 })();
 </script>
-<script src="/shared/admin-extras.js"></script>
 </body>
 </html>
