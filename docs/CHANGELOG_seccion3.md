@@ -1185,6 +1185,77 @@ genera un derivado de 3 alumnos y un refuerzo manual de 2:
 
 ---
 
+## 2026-10-25 — Servidor actualizado a la v41 del HTML local
+
+`legado/seccion3.html` pasa a ser la v41 entregada (`seccion3_41_campos_1.html`)
+y el servidor (`admin.html`) recibe los mismos cambios de la v38 a la v41.
+
+**Rebaje total y «Cama»** (sustituye a la entrada del 2026-10-01)
+- «Cama» va aparte: el rebaje total marca y bloquea todas las categorías
+  **salvo la cama**, que se elige a mano y empieza apagada.
+- En el listado, un total con cama lleva además la chapa «Cama».
+- Se retira la indicación «(sin cama)» que había puesto el servidor.
+
+**Borrar alumnos, todo desde Sanciones** (v40)
+- Al final de la pestaña Sanciones hay una tabla **«Refuerzos manuales»**,
+  con «Eliminar» por alumno.
+- La pestaña Refuerzos ya no borra nada: todos los refuerzos muestran
+  «Desde Sanciones».
+
+**ANEXO I sin límite de alumnos**
+- Pasados 25 alumnos se añaden hojas de continuación editables (26–50, 51–75…).
+- Se quita el máximo de 25 alumnos de los formularios.
+- El servidor admite hasta 500 alumnos por expediente (antes rechazaba más
+  de 25). Es solo un tope técnico.
+
+**Otros cambios**
+- **Hoja de seguimiento:** reparto fijo de columnas, para que un texto largo
+  no ensanche la tabla.
+- **Campos:** altura mínima uniforme; los campos de fin de semana del refuerzo
+  se recolocan en pantallas estrechas.
+
+**Lo que no está en la v41 (aviso)**
+- La v41 no trae «Importar copia del servidor (añadir)».
+- Su «Importar copia» **sustituye** los datos del navegador en vez de añadir.
+- Por tanto, la copia exportada del servidor, con sus hojas de seguimiento,
+  no se puede cargar en este HTML local hasta volver a incorporar esa
+  importación.
+
+---
+
+## 2026-10-25 — Arresto y refuerzo en las mismas fechas: se complementan
+
+**Qué se pidió:** si un alumno tiene un refuerzo, por ejemplo el 10 de
+noviembre, y se le pone un arresto ese mismo día, la aplicación no lo
+permitía porque la fecha ya estaba ocupada. El arresto tiene prioridad y los
+dos se complementan, así que no hay que mover ninguna fecha.
+
+**Cambio (HTML local y servidor):**
+
+| Coinciden… | Antes | Ahora |
+|---|---|---|
+| Arresto + refuerzo de **estudio** o **IFM** | Pedía otra fecha | **Se permite**, no sale el calendario |
+| Arresto + refuerzo de **entreno** | Pedía otra fecha | Igual que antes |
+| Arresto + arresto | Pedía otra fecha | Igual que antes |
+| Refuerzo + refuerzo | Pedía otra fecha | Igual que antes |
+
+- Vale en las dos direcciones: un arresto sobre un refuerzo ya puesto y un
+  refuerzo de estudio o IFM sobre un arresto ya puesto.
+- Vale al guardar una sanción con arresto, al fijar la fecha de un arresto
+  pendiente, al guardar un refuerzo y al editarlo.
+- Código: `refuerzoCompatibleConArresto()` y la opción `para` de
+  `buscarFechasCoincidentes()`, que indica si se guarda un arresto o el tipo
+  de refuerzo.
+
+**Comprobado:**
+- Con el ejemplo pedido (refuerzo de estudio el 10/11 y arresto el 10/11) se
+  guarda sin pedir otra fecha.
+- Con un refuerzo de entreno sigue saliendo el calendario de coincidencias.
+- Manual PDF (nota de coincidencia de fechas) y demo «Poner una sanción»
+  actualizados.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí

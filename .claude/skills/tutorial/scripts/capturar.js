@@ -104,7 +104,7 @@ demo('peloton_parte', true, async ({ p, paso, firmar })=>{
 
 demo('peloton_multiple', true, async ({ p, paso, firmar })=>{
   await entrar(p, 'PELOTON1');
-  await paso('#modeMultipleBtn', 'Parte para varios alumnos', 'Cuando la misma falta la cometen varios alumnos, pulsa <b>Múltiple</b>: todos quedan en el <b>mismo expediente</b> (hasta 25).', {margen:6});
+  await paso('#modeMultipleBtn', 'Parte para varios alumnos', 'Cuando la misma falta la cometen varios alumnos, pulsa <b>Múltiple</b>: todos quedan en el <b>mismo expediente</b> (sin límite).', {margen:6});
   await p.click('#modeMultipleBtn'); await p.waitForTimeout(400);
   await paso('#multiSearch', 'Busca a los alumnos', 'Escribe el número, apellido o nombre del primer alumno.');
   await p.fill('#multiSearch','33014'); await p.waitForTimeout(900);
@@ -187,7 +187,7 @@ demo('seccion_sancion', false, async ({ p, paso, firmar })=>{
   await sinAvisos(p);
   await paso('#tabBtnSanciones', 'Pestaña «Sanciones»', 'Para poner tú mismo una sanción (sin que te llegue de un jefe de pelotón), abre la pestaña <b>Sanciones</b>.', {margen:6});
   await p.click('#tabBtnSanciones'); await p.waitForTimeout(900);
-  await paso('#sanModeIndividualBtn', 'Individual o múltiple', '<b>Individual</b> para un alumno; <b>Múltiple</b> para varios en el mismo expediente (hasta 25).', {margen:6});
+  await paso('#sanModeIndividualBtn', 'Individual o múltiple', '<b>Individual</b> para un alumno; <b>Múltiple</b> para varios en el mismo expediente (sin límite).', {margen:6});
   await paso('#sanCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y <b>selecciónalo de la lista</b>. Sus datos se rellenan solos.');
   await p.fill('#sanCadeteInput','33018'); await p.keyboard.press('Tab'); await p.waitForTimeout(600);
   await paso('#sanFecha', 'Día, lugar y hora', 'Rellena el <b>día</b>, el <b>lugar</b> y la <b>hora</b>. Opcional: marca «Vincular a un expediente ya cursado» para añadir la falta a un expediente existente.');
@@ -202,7 +202,7 @@ demo('seccion_sancion', false, async ({ p, paso, firmar })=>{
   await p.fill('#sanMotivoInput','No respeta las normas de seguridad en la línea de tiro (hecho ficticio).');
   await paso('#sanMedidaInput', 'Medida correctora', 'Elige la medida. En este ejemplo, <b>Arresto</b>.');
   await p.selectOption('#sanMedidaInput','Arresto'); await p.waitForTimeout(400);
-  await paso('#sanArrestoModoToggle', 'Fechas del arresto', '<b>Fecha conocida</b>: indica inicio y fin (los días se calculan solos). <b>Pendiente</b>: se guarda sin fecha y se fija después en el listado. <b>Un arresto que pones tú llega directamente al capitán.</b>', {margen:6});
+  await paso('#sanArrestoModoToggle', 'Fechas del arresto', '<b>Fecha conocida</b>: indica inicio y fin (los días se calculan solos). <b>Pendiente</b>: se guarda sin fecha y se fija después en el listado. <b>Un arresto que pones tú llega directamente al capitán.</b> Si esas fechas coinciden con un <b>refuerzo de estudio o IFM</b> del alumno, no hay que cambiarlas: se complementan.', {margen:6});
   await p.fill('#sanArrestoFechaIni', mas(2)); await p.fill('#sanArrestoFechaFin', mas(3)); await p.waitForTimeout(300);
   await paso('#sanSaveBtn', 'Guarda la sanción', 'Pulsa <b>Guardar sanción</b>.');
   await p.click('#sanSaveBtn'); await p.waitForTimeout(1200);
@@ -288,7 +288,7 @@ demo('seccion_rebajes', false, async ({ p, paso })=>{
   await p.fill('#rebCadeteInput', '33020'); await p.keyboard.press('Tab'); await p.waitForTimeout(600);
   await paso('#rebFechaInicio', 'Fechas', 'Indica la <b>fecha de inicio</b> y la <b>de fin</b> (no puede ser anterior a la de inicio).');
   await p.fill('#rebFechaInicio', mas(0)); await p.fill('#rebFechaFin', mas(6)); await p.waitForTimeout(300);
-  await paso('#rebTotalSwitch', 'Rebaje total / clase', 'Si el rebaje es <b>total</b>, activa este interruptor: exime de todas las actividades y las marca solas. Solo la <b>cama</b> se puede desmarcar; entonces el listado indica «sin cama».', {margen:6});
+  await paso('#rebTotalSwitch', 'Rebaje total / clase', 'Si el rebaje es <b>total</b>, activa este interruptor: exime de todas las actividades y las marca solas. La <b>cama</b> va aparte: el total no la marca y se elige a mano.', {margen:6});
   await paso('#rebCategoryGrid [data-cat-switch]', 'Actividades de las que queda exento', 'Si es parcial, <b>activa cada actividad</b> de la que queda exento. En el ejemplo, las dos primeras.', {margen:6});
   const sw = p.locator('#rebCategoryGrid [data-cat-switch]');
   await sw.nth(0).click(); await sw.nth(1).click(); await p.waitForTimeout(300);
@@ -321,7 +321,7 @@ demo('seccion_refuerzos', false, async ({ p, paso })=>{
   await paso('#refSaveBtn', 'Guardar refuerzo', 'Pulsa <b>Guardar refuerzo</b>. Si coincide con otro arresto o refuerzo del alumno, la aplicación lo avisa.');
   await p.click('#refSaveBtn'); await p.waitForTimeout(1800);
   await verDesde(p, '#refStatRow');
-  await paso('#refuerzosTableBody [data-pdfref]', 'Rellenar documento', 'El refuerzo aparece en el listado, un registro por alumno, con su <b>expediente de origen</b>. <b>Rellenar documento</b> genera el ANEXO. Un refuerzo <b>manual</b> tiene <b>Eliminar</b> (quita a ese alumno); uno que viene de una sanción muestra <b>Desde Sanciones</b>: se corrige en esa pestaña.');
+  await paso('#refuerzosTableBody [data-pdfref]', 'Rellenar documento', 'El refuerzo aparece en el listado, un registro por alumno, con su <b>expediente de origen</b>. <b>Rellenar documento</b> genera el ANEXO. Aquí no se borra: para quitar a un alumno se va a <b>Sanciones</b> (los refuerzos manuales tienen su tabla al final de esa pestaña).');
   const [ dlRef ] = await Promise.all([ p.waitForEvent('download', {timeout:15000}).catch(()=>null), p.locator('#refuerzosTableBody [data-pdfref]').first().click() ]);
   console.log(dlRef ? '   descargado ' + dlRef.suggestedFilename() : '   ** sin descarga del ANEXO');
   await p.waitForTimeout(1200);

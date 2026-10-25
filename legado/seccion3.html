@@ -294,6 +294,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
   .tabbar{
     display:flex;
+    flex-wrap:wrap;
     gap:6px;
     border-bottom:1px solid var(--border);
     margin-bottom:22px;
@@ -791,6 +792,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   .field input[type=text],
   .field input[type=date],
+  .field input[type=time],
+  .field input[type=number],
   .field input[type=search],
   .field select,
   .field textarea{
@@ -804,6 +807,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     width:100%;
     font-family:inherit;
   }
+  .field input[type=text],
+  .field input[type=date],
+  .field input[type=time],
+  .field input[type=number],
+  .field input[type=search],
+  .field select{min-height:42px;}
   .field select{appearance:auto;}
   .field textarea{resize:vertical;min-height:44px;}
   .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--accent);}
@@ -812,7 +821,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   .field .hint.warn{color:var(--warn);}
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
-  .field-row .field.narrow{flex:0 0 110px;}
+  .field-row .field.narrow{flex:0 0 140px;}
+  /* Fila de la franja de fin de semana: campos cómodos y que se reordenan
+     en pantallas estrechas en vez de encogerse. */
+  .finde-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .finde-row .field{flex:0 1 240px;min-width:200px;}
 
   .cadet-preview{
     display:none;
@@ -2050,13 +2063,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
           <div class="field hidden" id="refFindeWrap" style="grid-column:1/-1;">
             <div class="hint" style="margin-bottom:6px;">El periodo incluye sábado y/o domingo: indica el horario específico para esos días (distinto del de entre semana).</div>
-            <div class="field-row">
-              <div class="field narrow">
-                <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
+            <div class="finde-row">
+              <div class="field">
+                <label for="refHoraInicioFinde">Hora inicio (sáb. y dom.)</label>
                 <input type="time" id="refHoraInicioFinde" value="09:00">
               </div>
-              <div class="field narrow">
-                <label for="refDuracionFinde">Duración fin de semana (horas)</label>
+              <div class="field">
+                <label for="refDuracionFinde">Duración (horas)</label>
                 <input type="text" id="refDuracionFinde" value="1" inputmode="decimal">
               </div>
             </div>
@@ -3078,6 +3091,17 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return !va.fin.isBefore(vb.ini, "day") && !vb.fin.isBefore(va.ini, "day");
   }
 
+  // Un ARRESTO y un REFUERZO de estudio o de IFM pueden caer en las mismas
+  // fechas: no chocan, se complementan (el arresto tiene prioridad y el
+  // refuerzo se cumple dentro de él), así que no hay que mover ninguno.
+  // Arresto con arresto, refuerzo con refuerzo y arresto con refuerzo de
+  // ENTRENO siguen contando como coincidencia. `opts.para` dice qué se está
+  // guardando: "arresto" o el tipo del refuerzo (IFM, ESTUDIO, ENTRENO).
+  var TIPOS_REFUERZO_COMPATIBLES_CON_ARRESTO = ["ESTUDIO", "IFM"];
+  function refuerzoCompatibleConArresto(tipo){
+    return TIPOS_REFUERZO_COMPATIBLES_CON_ARRESTO.indexOf(String(tipo || "").trim().toUpperCase()) !== -1;
+  }
+
   function buscarFechasCoincidentes(numeros, ini, fin, opts){
     opts = opts || {};
     var out = [];
@@ -3085,6 +3109,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     refuerzos.forEach(function(r){
       if (opts.excludeRefuerzoId && r.id === opts.excludeRefuerzoId) return;
+      if (opts.para === "arresto" && refuerzoCompatibleConArresto(r.tipo)) return;
       if (!rangosSolapan(ini, fin, r.fechaInicio, r.fechaFin)) return;
       (r.alumnos || []).forEach(function(al){
         if (numeros.indexOf(al.numero) === -1) return;
@@ -3100,6 +3125,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     sanciones.forEach(function(r){
       if (opts.excludeSancionId && r.id === opts.excludeSancionId) return;
+      if (opts.para && opts.para !== "arresto" && refuerzoCompatibleConArresto(opts.para)) return;
       if (r.medidaCorrectora !== "Arresto" || r.arrestoPendiente) return;
       if (!rangosSolapan(ini, fin, r.arrestoFechaIni, r.arrestoFechaFin)) return;
       (r.alumnos || []).forEach(function(al){
@@ -6731,7 +6757,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (sanMedidaInput.value !== "Arresto" || sanArrestoModo !== "fecha") return true;
     var k = state.keys;
     var numeros = alumnos.map(function(row){ return getVal(row, k.numero); });
-    return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, {});
+    return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, { para: "arresto" });
   }
 
   sanSaveBtn.addEventListener("click", async function(){
@@ -6748,7 +6774,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         alumnos,
         sanArrestoFechaIni.value,
         sanArrestoFechaFin.value,
-        {}
+        { para: "arresto" }
       );
       if (!fechaResolucion){
         sanFormMsg.textContent = "Guardado cancelado.";
@@ -7079,7 +7105,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         var r = sanciones.filter(function(x){ return x.id === id; })[0];
         if (!r) return;
         var numerosArresto = (r.alumnos || []).map(function(al){ return al.numero; });
-        if (!confirmarFechaSinCoincidencia(numerosArresto, ini, fin, { excludeSancionId: r.id })){
+        if (!confirmarFechaSinCoincidencia(numerosArresto, ini, fin, { excludeSancionId: r.id, para: "arresto" })){
           return; // el usuario prefiere elegir otra fecha: no se guarda nada, el mini-formulario queda como estaba
         }
         var dIni = new Date(ini + "T00:00:00"), dFin = new Date(fin + "T00:00:00");
@@ -7725,6 +7751,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         refFechaInicio.value,
         refFechaFin.value,
         {
+          para: refTipo.value,
           pedirFinde: true,
           findeHora: (tieneFinde && refHoraInicioFinde.value) || HORA_FINDE_ESTANDAR,
           findeDur: (tieneFinde && refDuracionFinde.value.trim()) || DURACION_FINDE_ESTANDAR
@@ -7737,7 +7764,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
     } else {
       var refNumeros = alumnos.map(function(al){ return al.numero; });
-      if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId })){
+      if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId, para: refTipo.value })){
         refFormMsg.textContent = "Guardado cancelado: cambia la fecha antes de continuar.";
         refFormMsg.className = "form-msg error";
         return;

@@ -293,6 +293,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   .tabbar{
     display:flex;
+    flex-wrap:wrap;
     gap:6px;
     border-bottom:1px solid var(--border);
     margin-bottom:22px;
@@ -505,6 +506,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   }
   .field input[type=text],
   .field input[type=date],
+  .field input[type=time],
+  .field input[type=number],
   .field input[type=search],
   .field select,
   .field textarea{
@@ -518,6 +521,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     width:100%;
     font-family:inherit;
   }
+  .field input[type=text],
+  .field input[type=date],
+  .field input[type=time],
+  .field input[type=number],
+  .field input[type=search],
+  .field select{min-height:42px;}
   .field select{appearance:auto;}
   .field textarea{resize:vertical;min-height:44px;}
   .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--accent);}
@@ -526,7 +535,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   .field .hint.warn{color:var(--warn);}
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;}
-  .field-row .field.narrow{flex:0 0 110px;}
+  .field-row .field.narrow{flex:0 0 140px;}
+  /* Fila de la franja de fin de semana: campos cómodos y que se reordenan
+     en pantallas estrechas en vez de encogerse. */
+  .finde-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .finde-row .field{flex:0 1 240px;min-width:200px;}
 
   .cadet-preview{
     display:none;
@@ -961,13 +974,21 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   }
   .fill-badge:hover{filter:brightness(0.95);}
   /* ================= HOJA DE SEGUIMIENTO ================= */
-  .seg-sel{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+  /* Reparto fijo por porcentaje: un motivo largo (los que vienen del
+     cuestionario de notas llevan el nombre del archivo entero) ensanchaba la
+     tabla y la sacaba del recuadro. Además hay que devolver white-space a
+     normal, porque la aplicación pone nowrap a todas las celdas de tabla. */
+  .seg-sel{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
   .seg-sel th{background:var(--panel-2);text-align:left;padding:8px 9px;font-size:10.5px;
     letter-spacing:.6px;text-transform:uppercase;color:var(--text-dim);
-    border-bottom:1px solid var(--border-light);}
+    border-bottom:1px solid var(--border-light);position:static;top:auto;}
   .seg-sel td{padding:8px 9px;border-bottom:1px solid #eceee2;vertical-align:top;}
+  .seg-sel th, .seg-sel td{white-space:normal;overflow-wrap:anywhere;word-break:break-word;}
+  .seg-sel td.seg-c-fecha{white-space:nowrap;}
+  .seg-sel tbody tr:last-child td{border-bottom:1px solid #eceee2;}
   .seg-sel tr.off{opacity:.45;}
-  .seg-sel textarea{width:100%;font-family:inherit;font-size:12.5px;line-height:1.35;
+  .seg-sel textarea{width:100%;max-width:100%;box-sizing:border-box;
+    font-family:inherit;font-size:12.5px;line-height:1.35;
     padding:6px 8px;border-radius:8px;border:1px solid var(--border-light);
     background:var(--panel-2);color:var(--text);resize:vertical;}
   .seg-exp{font-family:var(--font-mono);font-size:11px;color:var(--text-dim);}
@@ -976,7 +997,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   /* --- el documento, con el formato del archivo original --- */
   .seg-papel{background:#8b8f80;padding:14px;border-radius:10px;margin-top:12px;}
   .seg-hoja{background:#fff;border:1px solid #bbb;padding:20px 24px 22px;
-    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;}
+    font-family:Arial,Helvetica,sans-serif;color:#000;margin-bottom:14px;
+    box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;}
   .seg-hoja:last-child{margin-bottom:0;}
   .seg-h1{display:flex;justify-content:space-between;font-weight:700;font-size:13px;}
   .seg-h1 span{text-decoration:underline;}
@@ -994,13 +1016,31 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   .seg-foto{width:104px;height:104px;border:1px solid #000;display:flex;align-items:center;
     justify-content:center;font-weight:700;font-size:12px;flex:none;overflow:hidden;}
   .seg-foto img{width:100%;height:100%;object-fit:cover;}
-  .seg-hoja table{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px;}
+  /* table-layout:fixed reparte las columnas por el porcentaje declarado y NO
+     deja que un texto largo ensanche la tabla por encima de la hoja. Los
+     porcentajes son los mismos que usa el PDF (62/150/72/72/159 sobre 515),
+     para que la vista previa y el documento cuadren. */
+  .seg-hoja table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:12px;font-size:11px;}
   .seg-hoja th{border:1px solid #000;background:#ccc;font-weight:700;padding:5px 4px;
     text-align:center;font-size:11px;}
   .seg-hoja td{border:1px solid #000;padding:4px 6px;vertical-align:top;}
-  .seg-hoja td.f{text-align:center;white-space:nowrap;width:72px;}
-  .seg-hoja td.m{text-align:center;width:205px;}
-  .seg-hoja td.fir{width:86px;}
+  /* La aplicación pone white-space:nowrap a TODAS las celdas de tabla; aquí
+     hay que devolverlo a normal o el texto largo no parte y desborda la hoja. */
+  .seg-hoja th, .seg-hoja td{
+    white-space:normal;
+    overflow-wrap:anywhere;      /* parte una palabra larguísima antes que desbordar */
+    word-break:break-word;
+    hyphens:auto;
+    position:static;             /* el th de la app es sticky; aquí no procede */
+  }
+  .seg-hoja td.f{text-align:center;white-space:nowrap;}
+  .seg-hoja td.m{text-align:center;}
+  /* Estas tres reglas globales de la aplicación estropean la hoja: quitan el
+     borde de la última fila, la sombrean al pasar el ratón y hacen la
+     cabecera pegajosa. Aquí es un documento, no un listado. */
+  .seg-hoja tbody tr:last-child td{border-bottom:1px solid #000;}
+  .seg-hoja tbody tr:hover{background:transparent;}
+  .seg-hoja thead th{position:static;top:auto;}
   /* La última columna de las tablas de la aplicación es fija a la derecha
      (columna de acciones); en la hoja no debe serlo. */
   .seg-hoja td:last-child, .seg-hoja th:last-child, .seg-sel td:last-child, .seg-sel th:last-child{position:static;box-shadow:none;}
@@ -1359,7 +1399,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         <div class="total-toggle-row">
           <div class="ttr-text">
             <div class="t-title">Rebaje total / clase</div>
-            <div class="t-sub">Exime de todas las actividades. Si lo activas, marca automáticamente todas las categorías; la <b>cama</b> se puede desmarcar.</div>
+            <div class="t-sub">Exime de todas las actividades. Al activarlo se marcan todas las categorías salvo «Cama», que se elige aparte: quien va a clase no está en cama.</div>
           </div>
           <div class="switch" id="rebTotalSwitch" role="switch" aria-checked="false" tabindex="0"><div class="knob"></div></div>
         </div>
@@ -1622,6 +1662,36 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         </div>
         <div class="empty-state hidden" id="sancionesEmptyState">Todavía no se ha registrado ninguna sanción.</div>
       </div>
+
+      <!-- Los refuerzos MANUALES no tienen ninguna sanción detrás, así que no
+           aparecen en la tabla de arriba. Se listan aquí para que todo el
+           borrado de alumnos se haga desde esta misma pestaña. -->
+      <div class="panel-sub" style="margin-top:26px;">
+        <h3 style="margin:0 0 2px;">Refuerzos manuales</h3>
+        Los refuerzos que no vienen de ninguna sanción. Se listan aquí para quitar
+        alumnos desde el mismo sitio que las sanciones. Los que sí vienen de una
+        sanción se quitan desde la tabla de arriba.
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="refManualTable">
+            <thead>
+              <tr>
+                <th><span class="th-label">Exp.</span></th>
+                <th><span class="th-label">Número</span></th>
+                <th><span class="th-label">Alumno</span></th>
+                <th><span class="th-label">Pelotón</span></th>
+                <th><span class="th-label">Inicio</span></th>
+                <th><span class="th-label">Fin</span></th>
+                <th><span class="th-label">Tipo</span></th>
+                <th class="no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="refManualTableBody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="refManualEmptyState">No hay ningún refuerzo manual registrado.</div>
+      </div>
     </div>
 
     <!-- ---------- REFUERZOS PANEL ---------- -->
@@ -1696,13 +1766,13 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
           <div class="field hidden" id="refFindeWrap" style="grid-column:1/-1;">
             <div class="hint" style="margin-bottom:6px;">El periodo incluye sábado y/o domingo: indica el horario específico para esos días (distinto del de entre semana).</div>
-            <div class="field-row">
-              <div class="field narrow">
-                <label for="refHoraInicioFinde">Hora inicio (sábado y domingo)</label>
+            <div class="finde-row">
+              <div class="field">
+                <label for="refHoraInicioFinde">Hora inicio (sáb. y dom.)</label>
                 <input type="time" id="refHoraInicioFinde" value="10:00">
               </div>
-              <div class="field narrow">
-                <label for="refDuracionFinde">Duración fin de semana (horas)</label>
+              <div class="field">
+                <label for="refDuracionFinde">Duración (horas)</label>
                 <input type="text" id="refDuracionFinde" value="1" inputmode="decimal">
               </div>
             </div>
@@ -2473,12 +2543,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     { key: "formaciones", label: "Formaciones" },
     { key: "cama", label: "Cama" }
   ];
-  // Con «Rebaje total / clase» todas las categorías quedan marcadas y
-  // bloqueadas salvo «Cama», que se puede desmarcar (total, pero con cama).
-  var CATEGORIA_LIBRE_EN_TOTAL = "cama";
-  function sinCamaTxt(r){
-    return (r && r.total && r.categorias && r.categorias.cama === false) ? " (sin cama)" : "";
-  }
 
   // Catálogo de faltas del Régimen del Alumnado (hoja DATOS del Excel
   // original). Se usa para elegir el fundamento legal sin tener que
@@ -2550,7 +2614,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   var EXPEDIENTE_COUNTER_KEY = "seccion3_expediente_counter_v1";
   var REFUERZOS_KEY = "seccion3_refuerzos_v1";
-  var MAX_ANEXO_ALUMNOS = 25; // tope de alumnos por corrección múltiple (plantilla PDF)
+  // La plantilla del ANEXO I tiene 25 filas por hoja. NO es un tope de alumnos:
+  // a partir del 26 se añaden hojas de continuación, copiando esa misma página
+  // y renombrando sus campos para que sigan siendo rellenables (ver
+  // anadirHojasAnexo).
+  var ANEXO_FILAS_POR_HOJA = 25;
+  var ANEXO_PAGINA_PLANTILLA = 2;   // índice 0-based del ANEXO I en la plantilla múltiple
 
   function apartadoLetra(index){
     // 0 -> a, 1 -> b, ... 25 -> z, 26 -> aa ...
@@ -2740,6 +2809,17 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return !va.fin.isBefore(vb.ini, "day") && !vb.fin.isBefore(va.ini, "day");
   }
 
+  // Un ARRESTO y un REFUERZO de estudio o de IFM pueden caer en las mismas
+  // fechas: no chocan, se complementan (el arresto tiene prioridad y el
+  // refuerzo se cumple dentro de él), así que no hay que mover ninguno.
+  // Arresto con arresto, refuerzo con refuerzo y arresto con refuerzo de
+  // ENTRENO siguen contando como coincidencia. `opts.para` dice qué se está
+  // guardando: "arresto" o el tipo del refuerzo (IFM, ESTUDIO, ENTRENO).
+  var TIPOS_REFUERZO_COMPATIBLES_CON_ARRESTO = ["ESTUDIO", "IFM"];
+  function refuerzoCompatibleConArresto(tipo){
+    return TIPOS_REFUERZO_COMPATIBLES_CON_ARRESTO.indexOf(String(tipo || "").trim().toUpperCase()) !== -1;
+  }
+
   function buscarFechasCoincidentes(numeros, ini, fin, opts){
     opts = opts || {};
     var out = [];
@@ -2747,6 +2827,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     refuerzos.forEach(function(r){
       if (opts.excludeRefuerzoId && r.id === opts.excludeRefuerzoId) return;
+      if (opts.para === "arresto" && refuerzoCompatibleConArresto(r.tipo)) return;
       if (!rangosSolapan(ini, fin, r.fechaInicio, r.fechaFin)) return;
       (r.alumnos || []).forEach(function(al){
         if (numeros.indexOf(al.numero) === -1) return;
@@ -2762,6 +2843,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     sanciones.forEach(function(r){
       if (opts.excludeSancionId && r.id === opts.excludeSancionId) return;
+      if (opts.para && opts.para !== "arresto" && refuerzoCompatibleConArresto(opts.para)) return;
       if (r.medidaCorrectora !== "Arresto" || r.arrestoPendiente) return;
       if (!rangosSolapan(ini, fin, r.arrestoFechaIni, r.arrestoFechaFin)) return;
       (r.alumnos || []).forEach(function(al){
@@ -4493,7 +4575,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     }
     if (reb.length){
       lines.push("<div><strong>Últimos rebajes:</strong> " + reb.slice(0,3).map(function(r){
-        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : ""));
+        return escapeHtml(formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : ""));
       }).join(" &nbsp;·&nbsp; ") + "</div>");
     }
 
@@ -4812,7 +4894,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + " · " + r.tipo;
       }));
       drawListBlock("Rebajes:", reb.map(function(r){
-        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" + sinCamaTxt(r) : "");
+        return formatDateDisplay(r.fechaInicio) + " a " + formatDateDisplay(r.fechaFin) + (r.total ? " · Rebaje total/clase" : "");
       }));
 
       page.drawText("Generado el " + formatDateDisplay(todayIso()), { x: margin, y: 40, size: 8, font: fontRegular, color: PDFLib.rgb(0.55,0.55,0.55) });
@@ -5071,7 +5153,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           return '<div class="historial-item">' +
             '<div class="row1"><strong>' + formatDateDisplay(r.fechaInicio) + ' a ' + formatDateDisplay(r.fechaFin) + '</strong>' +
             '<span class="tags"><span class="status-pill ' + estado + '">' + estadoLbl + '</span>' +
-            (r.total ? '<span class="status-pill alerta">Rebaje total/clase' + sinCamaTxt(r) + '</span>' : '') + '</span></div>' +
+            (r.total ? '<span class="status-pill alerta">Rebaje total/clase</span>' : '') + '</span></div>' +
             '<dl><dt>Categorías</dt><dd>' + (cats.length ? escapeHtml(cats.join(", ")) : "—") + '</dd></dl>' +
             '</div>';
         }).join("");
@@ -5159,12 +5241,25 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   }
   resetCategoryState();
 
+  // «Cama» es la única categoría que NO va implícita en el rebaje total: un
+  // alumno con rebaje total sigue yendo a clase, y quien va a clase no está
+  // en cama. Por eso se queda siempre elegible, aunque el total esté puesto,
+  // y el interruptor de total nunca la toca.
+  var CAT_INDEPENDIENTE = "cama";
+
+  function categoriaBloqueada(key){
+    return formTotal && key !== CAT_INDEPENDIENTE;
+  }
+
   function renderCategoryGrid(){
     rebCategoryGrid.innerHTML = CATEGORY_DEFS.map(function(c){
-      var libre = c.key === CATEGORIA_LIBRE_EN_TOTAL;
-      var on = (formTotal && !libre) || formCategoryState[c.key];
-      var locked = formTotal && !libre;
-      return '<div class="category-item' + (locked ? ' locked' : '') + '" data-cat="' + c.key + '">' +
+      var locked = categoriaBloqueada(c.key);
+      var on = locked ? true : !!formCategoryState[c.key];
+      var titulo = (formTotal && c.key === CAT_INDEPENDIENTE)
+        ? 'El rebaje total no implica cama: márcala solo si además debe guardar cama.'
+        : '';
+      return '<div class="category-item' + (locked ? ' locked' : '') + '" data-cat="' + c.key + '"' +
+        (titulo ? ' title="' + escapeHtml(titulo) + '"' : '') + '>' +
         '<span class="cat-label">' + escapeHtml(c.label) + '</span>' +
         '<div class="switch' + (on ? ' on' : '') + (locked ? ' disabled' : '') + '" data-cat-switch="' + c.key + '" tabindex="0" role="switch" aria-checked="' + on + '"><div class="knob"></div></div>' +
         '</div>';
@@ -5173,7 +5268,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     rebCategoryGrid.querySelectorAll("[data-cat-switch]").forEach(function(el){
       el.addEventListener("click", function(){
         var key = el.getAttribute("data-cat-switch");
-        if (formTotal && key !== CATEGORIA_LIBRE_EN_TOTAL) return; // bloqueadas con el total (salvo la cama)
+        if (categoriaBloqueada(key)) return; // bloqueada mientras el total está puesto
         formCategoryState[key] = !formCategoryState[key];
         renderCategoryGrid();
       });
@@ -5184,11 +5279,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     formTotal = !formTotal;
     rebTotalSwitch.classList.toggle("on", formTotal);
     rebTotalSwitch.setAttribute("aria-checked", String(formTotal));
-    if (formTotal){
-      CATEGORY_DEFS.forEach(function(c){ formCategoryState[c.key] = true; });
-    } else {
-      CATEGORY_DEFS.forEach(function(c){ formCategoryState[c.key] = false; });
-    }
+    CATEGORY_DEFS.forEach(function(c){
+      if (c.key === CAT_INDEPENDIENTE) return;   // «Cama» se decide a mano
+      formCategoryState[c.key] = formTotal;
+    });
     renderCategoryGrid();
   });
 
@@ -5423,7 +5517,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       var estado = computeEstado(r.fechaInicio, r.fechaFin);
       var chips;
       if (r.total){
-        chips = '<span class="cat-chip total">TOTAL / CLASE</span>' + (sinCamaTxt(r) ? '<span class="cat-chip">SIN CAMA</span>' : '');
+        chips = '<span class="cat-chip total">TOTAL / CLASE</span>' +
+          // «Cama» no va implícita en el total, así que si la lleva hay que verla.
+          ((r.categorias && r.categorias.cama) ? '<span class="cat-chip">Cama</span>' : '');
       } else {
         chips = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; })
           .map(function(c){ return '<span class="cat-chip">' + escapeHtml(c.label) + '</span>'; }).join("");
@@ -5517,6 +5613,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var sanFiltroMotivo = document.getElementById("sanFiltroMotivo");
   var sanFiltroMedida = document.getElementById("sanFiltroMedida");
   var sancionesTableBody = document.getElementById("sancionesTableBody");
+  var refManualTableBody = document.getElementById("refManualTableBody");
+  var refManualEmptyState = document.getElementById("refManualEmptyState");
   var sancionesEmptyState = document.getElementById("sancionesEmptyState");
 
   var sanSelectedCadete = null;
@@ -5958,10 +6056,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         sanMultiHint.textContent = "Selecciona al menos un alumno.";
         sanMultiHint.classList.remove("hidden");
         ok = false;
-      } else if (alumnos.length > MAX_ANEXO_ALUMNOS){
-        sanMultiHint.textContent = "Máximo " + MAX_ANEXO_ALUMNOS + " alumnos por expediente múltiple (la plantilla PDF del ANEXO I no admite más). Has seleccionado " + alumnos.length + ".";
-        sanMultiHint.classList.remove("hidden");
-        ok = false;
       } else {
         sanMultiHint.classList.add("hidden");
       }
@@ -6019,7 +6113,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (sanMedidaInput.value === "Arresto" && sanArrestoModo === "fecha" && sanArrestoFechaIni.value && sanArrestoFechaFin.value){
       var k = state.keys;
       var numeros = alumnos.map(function(row){ return getVal(row, k.numero); });
-      return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, {});
+      return confirmarFechaSinCoincidencia(numeros, sanArrestoFechaIni.value, sanArrestoFechaFin.value, { para: "arresto" });
     }
     return true;
   }
@@ -6127,7 +6221,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var resolucionFechas = { normal: alumnos, separados: [] };
     if (esArrestoConFecha){
       resolucionFechas = await resolverCoincidenciasPorAlumno(
-        alumnos, sanArrestoFechaIni.value, sanArrestoFechaFin.value, {}, alumnoInfoFromRow
+        alumnos, sanArrestoFechaIni.value, sanArrestoFechaFin.value, { para: "arresto" }, alumnoInfoFromRow
       );
       if (!resolucionFechas){
         sanFormMsg.textContent = "Guardado cancelado.";
@@ -6340,6 +6434,51 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (idx !== -1 && refuerzo) refuerzos[idx] = refuerzo;
   }
 
+  // Tabla de refuerzos MANUALES dentro de la pestaña Sanciones: son los que no
+  // tienen ninguna sanción detrás y, por tanto, no salen en la tabla de arriba.
+  // Desde la v40 todo el borrado de alumnos se hace desde esta pestaña.
+  function renderRefuerzosManualesList(){
+    if (!refManualTableBody) return;
+    var filas = [];
+    refuerzos.forEach(function(r){
+      if (r.origen === "sancion") return;
+      (r.alumnos || []).forEach(function(al){ filas.push({ record: r, alumno: al }); });
+    });
+    filas = filas.sort(function(a, b){
+      return (a.record.expediente || 0) - (b.record.expediente || 0) ||
+             String(a.alumno.ape1 || "").localeCompare(String(b.alumno.ape1 || ""), "es");
+    });
+
+    if (!filas.length){
+      refManualTableBody.innerHTML = "";
+      refManualEmptyState.classList.remove("hidden");
+      return;
+    }
+    refManualEmptyState.classList.add("hidden");
+
+    refManualTableBody.innerHTML = filas.map(function(item){
+      var r = item.record, al = item.alumno;
+      return "<tr>" +
+        '<td><span class="expediente-tag">Nº ' + escapeHtml(String(r.expediente || "—")) + '</span></td>' +
+        "<td>" + escapeHtml(String(al.numero || "—")) + "</td>" +
+        "<td>" + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre || "") + "</td>" +
+        "<td>" + (al.peloton ? '<span class="pelo-badge">' + escapeHtml(al.peloton) + '</span>' : "—") + "</td>" +
+        "<td>" + formatDateDisplay(r.fechaInicio) + "</td>" +
+        "<td>" + formatDateDisplay(r.fechaFin) + "</td>" +
+        "<td>" + escapeHtml(r.tipo || "—") + "</td>" +
+        '<td class="no-print"><button class="btn small danger-ghost" data-delrefman="' + escapeHtml(String(r.id)) +
+          '" data-delrefmannum="' + escapeHtml(String(al.numero)) +
+          '" title="Quita a este alumno del refuerzo manual. Los demás alumnos del expediente no se ven afectados.">Eliminar</button></td>' +
+        "</tr>";
+    }).join("");
+
+    refManualTableBody.querySelectorAll("[data-delrefman]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        quitarAlumnoDeRefuerzo(btn.getAttribute("data-delrefman"), btn.getAttribute("data-delrefmannum"));
+      });
+    });
+  }
+
   function quitarAlumnoDeSancion(sancionId, numero){
     var record = sanciones.filter(function(r){ return String(r.id) === String(sancionId); })[0];
     if (!record) return;
@@ -6423,6 +6562,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       if (!res.ok){ alert((res.data && res.data.error) || "No se ha podido quitar al alumno del refuerzo."); return; }
       aplicarRefuerzoDevuelto(refuerzoId, res.data.eliminado, res.data.refuerzo);
       renderRefuerzosList();
+      renderRefuerzosManualesList();
     }).catch(function(){
       alert("Error de conexión con el servidor.");
     });
@@ -6701,6 +6841,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       sancionesTableBody.innerHTML = "";
       sancionesEmptyState.classList.remove("hidden");
       sancionesEmptyState.textContent = sanciones.length ? "No se han encontrado sanciones con ese filtro." : "Todavía no se ha registrado ninguna sanción.";
+      renderRefuerzosManualesList();
       return;
     }
     sancionesEmptyState.classList.add("hidden");
@@ -6777,6 +6918,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         if (record) abrirGenerarRefuerzoModal(record);
       });
     });
+    renderRefuerzosManualesList();
+
     sancionesTableBody.querySelectorAll("[data-delsan]").forEach(function(btn){
       btn.addEventListener("click", function(){ quitarAlumnoDeSancion(btn.getAttribute("data-delsan"), btn.getAttribute("data-delnum")); });
     });
@@ -6794,7 +6937,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         var r = sanciones.filter(function(x){ return x.id === id; })[0];
         if (!r) return;
         var numerosArresto = (r.alumnos || []).map(function(al){ return al.numero; });
-        if (!confirmarFechaSinCoincidencia(numerosArresto, ini, fin, { excludeSancionId: r.id })){
+        if (!confirmarFechaSinCoincidencia(numerosArresto, ini, fin, { excludeSancionId: r.id, para: "arresto" })){
           return; // el usuario prefiere elegir otra fecha: no se guarda nada, el mini-formulario queda como estaba
         }
         btn.disabled = true;
@@ -7343,10 +7486,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         refMultiHint.textContent = "Selecciona al menos un alumno.";
         refMultiHint.classList.remove("hidden");
         ok = false;
-      } else if (alumnos.length > MAX_ANEXO_ALUMNOS){
-        refMultiHint.textContent = "Máximo " + MAX_ANEXO_ALUMNOS + " alumnos por refuerzo múltiple (la plantilla PDF del ANEXO I no admite más). Has seleccionado " + alumnos.length + ".";
-        refMultiHint.classList.remove("hidden");
-        ok = false;
       } else {
         refMultiHint.classList.add("hidden");
       }
@@ -7404,7 +7543,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var resolucionFechasRef = { normal: alumnos, separados: [] };
     if (!esEdicion){
       resolucionFechasRef = await resolverCoincidenciasPorAlumno(
-        alumnos, refFechaInicio.value, refFechaFin.value, {}, alumnoInfoIdentity
+        alumnos, refFechaInicio.value, refFechaFin.value, { para: refTipo.value }, alumnoInfoIdentity
       );
       if (!resolucionFechasRef){
         refFormMsg.textContent = "Guardado cancelado.";
@@ -7413,7 +7552,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
     } else {
       var refNumeros = alumnos.map(function(al){ return al.numero; });
-      if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId })){
+      if (!confirmarFechaSinCoincidencia(refNumeros, refFechaInicio.value, refFechaFin.value, { excludeRefuerzoId: editingRefuerzoId, para: refTipo.value })){
         return; // el usuario prefiere elegir otra fecha
       }
     }
@@ -7642,12 +7781,15 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       // viene de una sanción, ese sitio es la pestaña Sanciones (al quitarlo
       // de la sanción se le quita también de aquí). Un refuerzo MANUAL no
       // tiene sanción detrás, así que se corrige desde aquí mismo.
-      var borrarCell = r.origen === "sancion"
-        ? '<span class="desde-sanciones" title="Este refuerzo viene de la sanción del expediente Nº ' +
-          escapeHtml(String(r.expediente)) + '. Para quitar a un alumno, hazlo desde la pestaña Sanciones: ' +
-          'se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento.">Desde Sanciones</span>'
-        : '<button class="btn small danger-ghost" data-delref="' + r.id + '" data-delrefnum="' + escapeHtml(String(al.numero)) +
-          '" title="Refuerzo manual: quita a este alumno del expediente. Los demás alumnos no se ven afectados.">Eliminar</button>';
+      // Desde la v40 NINGÚN refuerzo se borra desde aquí: los que vienen de una
+      // sanción, desde la tabla de sanciones; los manuales, desde la tabla
+      // «Refuerzos manuales» del final de la pestaña Sanciones.
+      var borrarCell = '<span class="desde-sanciones" title="' + escapeHtml(
+          r.origen === "sancion"
+            ? "Este refuerzo viene de la sanción del expediente Nº " + r.expediente +
+              ". Para quitar a un alumno, hazlo desde la tabla de sanciones: se le quitará también de este refuerzo y se avisará de que hay que rehacer el documento."
+            : "Refuerzo manual. Para quitar a un alumno, hazlo en la pestaña Sanciones, en la tabla «Refuerzos manuales» del final."
+        ) + '">Desde Sanciones</span>';
       return "<tr>" +
         "<td>" + escapeHtml(al.numero) + "</td>" +
         "<td>" + escapeHtml([al.ape1, al.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(al.nombre) + "</td>" +
@@ -7661,9 +7803,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "</tr>";
     }).join("");
 
-    refuerzosTableBody.querySelectorAll("[data-delref]").forEach(function(btn){
-      btn.addEventListener("click", function(){ quitarAlumnoDeRefuerzo(btn.getAttribute("data-delref"), btn.getAttribute("data-delrefnum")); });
-    });
     renderAvisoDocumentos();
     refuerzosTableBody.querySelectorAll("[data-pdfref]").forEach(function(btn){
       btn.addEventListener("click", function(){
@@ -7747,6 +7886,98 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     return out;
   }
 
+  // ---------- ANEXO I: hojas de continuación ----------
+  // La plantilla trae UNA hoja de ANEXO I con 25 filas. Para más alumnos se
+  // copia esa misma página tantas veces como haga falta.
+  //
+  // El detalle delicado: al copiar una página, pdf-lib trae sus anotaciones
+  // (las casillas), pero NO las da de alta en el formulario del documento
+  // destino, así que el lector no las trataría como rellenables. Y si se dan
+  // de alta tal cual, los campos de la hoja 2 se llamarían igual que los de la
+  // hoja 1 y el PDF los consideraría EL MISMO campo: escribir en uno cambiaría
+  // el otro. Por eso aquí se hacen las dos cosas: renombrar («anexo_nombre_3»
+  // de la segunda hoja pasa a «anexo_nombre_28») y dar de alta cada campo en
+  // el formulario final.
+  // IMPORTANTE: las páginas se copian VACÍAS y el texto se escribe después, ya
+  // dentro del documento final. Rellenarlas en el auxiliar parece lo natural,
+  // pero el dibujo de cada casilla apunta a una fuente que vive en el
+  // formulario de ESE documento; al copiar solo la página, el lector no la
+  // encuentra y da «Unknown font tag». Haciéndolo al revés, todas las casillas
+  // —las de la primera hoja y las de las siguientes— comparten la misma fuente
+  // del documento final.
+  async function anadirHojasAnexo(pdfDoc, bytesPlantilla, alumnos, setCampo){
+    var hojas = Math.ceil(alumnos.length / ANEXO_FILAS_POR_HOJA);
+    if (hojas <= 1) return 1;
+
+    var PDFName = PDFLib.PDFName, PDFString = PDFLib.PDFString;
+
+    for (var h = 1; h < hojas; h++){
+      var aux = await PDFLib.PDFDocument.load(bytesPlantilla);
+      var copiadas = await pdfDoc.copyPages(aux, [ANEXO_PAGINA_PLANTILLA]);
+      var pagina = copiadas[0];
+      pdfDoc.addPage(pagina);
+
+      var acro = pdfDoc.getForm().acroForm;
+      var annots = pagina.node.Annots();
+      if (!annots) continue;
+      for (var a = 0; a < annots.size(); a++){
+        var ref = annots.get(a);
+        var dict = pdfDoc.context.lookup(ref);
+        if (!dict || !dict.get) continue;
+        var t = dict.get(PDFName.of("T"));
+        if (!t) continue;                       // no es un campo: se deja
+        var nombre = t.decodeText ? t.decodeText() : String(t.asString ? t.asString() : t);
+        // Dos campos con el mismo nombre serían EL MISMO campo y mostrarían
+        // todos el mismo valor: por eso se renumeran (fila 3 de la hoja 2 pasa
+        // a ser «anexo_nombre_28»).
+        dict.set(PDFName.of("T"), PDFString.of(renombrarCampoAnexo(nombre, h)));
+        dict.set(PDFName.of("P"), pagina.ref);  // la casilla pertenece a esta página
+        acro.addField(ref);                     // y se da de alta en el formulario
+      }
+    }
+
+    // Ya existen las casillas: ahora se escriben los alumnos del 26 en adelante.
+    alumnos.slice(ANEXO_FILAS_POR_HOJA).forEach(function(al, i){
+      var n = ANEXO_FILAS_POR_HOJA + i + 1;
+      setCampo("anexo_nombre_" + n, al.nombre);
+      setCampo("anexo_apellidos_" + n, [al.ape1, al.ape2].filter(Boolean).join(" "));
+      setCampo("anexo_numero_" + n, al.numero);
+    });
+    return hojas;
+  }
+
+  // «anexo_nombre_3» en la hoja h=1 pasa a «anexo_nombre_28» (3 + 25).
+  function renombrarCampoAnexo(nombre, hoja){
+    var m = /^(.*_)(\d+)$/.exec(nombre);
+    if (!m) return nombre + "_h" + (hoja + 1);
+    return m[1] + (parseInt(m[2], 10) + hoja * ANEXO_FILAS_POR_HOJA);
+  }
+
+  // pdf-lib escribe en cada casilla un «/DA» que dice «/Helvetica 9 Tf», pero
+  // la fuente que trae la plantilla en sus recursos se llama «/Helv». El dibujo
+  // ya hecho se ve bien porque lleva la fuente dentro, pero EN CUANTO SE
+  // ESCRIBE dentro del PDF el lector busca «/Helvetica», no la encuentra y cae
+  // a una fuente por defecto. Aquí se da de alta con ese nombre para que
+  // escribir en el documento conserve la letra.
+  async function registrarFuenteDelFormulario(pdfDoc){
+    try {
+      var PDFName = PDFLib.PDFName, PDFDict = PDFLib.PDFDict;
+      var fuente = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+      var acro = pdfDoc.getForm().acroForm;
+      var dr = acro.dict.lookup(PDFName.of("DR"));
+      if (!dr){
+        dr = pdfDoc.context.obj({});
+        acro.dict.set(PDFName.of("DR"), dr);
+      }
+      var fuentes = dr.lookup(PDFName.of("Font"));
+      if (!fuentes){
+        fuentes = pdfDoc.context.obj({});
+        dr.set(PDFName.of("Font"), fuentes);
+      }
+      fuentes.set(PDFName.of("Helvetica"), fuente.ref);
+    } catch(e){ /* si la plantilla no lo permite, el documento sigue saliendo */ }
+  }
+
   async function generarDocumentoPDF(record){
     try {
       if (typeof PDFLib === "undefined"){
@@ -7755,9 +7986,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
       var alumnos = record.alumnos || [];
       var multi = alumnos.length > 1;
-      if (multi && alumnos.length > MAX_ANEXO_ALUMNOS){
-        alert("Este expediente tiene " + alumnos.length + " alumnos, más que el máximo admitido por la plantilla del ANEXO I (" + MAX_ANEXO_ALUMNOS + "). Solo se rellenarán los primeros " + MAX_ANEXO_ALUMNOS + ".");
-      }
 
       var b64 = multi ? PDF_TEMPLATE_MULTIPLE_B64 : PDF_TEMPLATE_INDIVIDUAL_B64;
       var binary = atob(b64);
@@ -7835,7 +8063,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         setF("alumno_apellidos", [al.ape1, al.ape2].filter(Boolean).join(" "));
         setF("alumno_numero", al.numero);
       } else {
-        alumnos.slice(0, MAX_ANEXO_ALUMNOS).forEach(function(al, i){
+        alumnos.slice(0, ANEXO_FILAS_POR_HOJA).forEach(function(al, i){
           var n = i + 1;
           setF("anexo_nombre_" + n, al.nombre);
           setF("anexo_apellidos_" + n, [al.ape1, al.ape2].filter(Boolean).join(" "));
@@ -7896,6 +8124,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       setF("res_lugar_fecha", record.lugarFecha || "San Fernando, a ");
       setF("res_jefe_cia", "Fdo: " + (record.jefeCia || ""));
       setF("notif_lugar_fecha", record.lugarFecha || "San Fernando, a ");
+
+      // Alumnos 26 en adelante: hojas de ANEXO I de continuación.
+      if (multi) await anadirHojasAnexo(pdfDoc, bytes, alumnos, setF);
+
+      await registrarFuenteDelFormulario(pdfDoc);
 
       var outBytes = await pdfDoc.save();
       var blob = new Blob([outBytes], { type: "application/pdf" });
@@ -8726,7 +8959,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       return rangosSolapan(r.fechaInicio, r.fechaFin, fechaIni, fechaFin);
     }).map(function(r){
       var cats = CATEGORY_DEFS.filter(function(c){ return r.categorias && r.categorias[c.key]; }).map(function(c){ return c.label; });
-      var detalle = [r.total ? "Total/clase" + sinCamaTxt(r) : "", cats.join(", ")].filter(Boolean).join(" · ");
+      var detalle = [r.total ? "Total/clase" : "", cats.join(", ")].filter(Boolean).join(" · ");
       return {
         numero: r.numero, ape1: r.ape1, ape2: r.ape2, nombre: r.nombre, peloton: r.peloton,
         desde: r.fechaInicio, hasta: r.fechaFin, detalle: detalle || "—"
@@ -8966,9 +9199,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       '<div class="seg-foto">' + (alumno.foto
         ? '<img src="' + alumno.foto + '" alt="">'
         : 'FOTO') + '</div></div>' +
-      '<table><thead><tr><th style="width:72px;">FECHA</th><th style="width:205px;">MOTIVO</th>' +
-        '<th style="width:86px;">FIRMA<br>INSTRUCTOR</th><th style="width:86px;">FIRMA<br>AMPT</th>' +
-        '<th>OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<table><thead><tr><th style="width:12%;">FECHA</th><th style="width:29%;">MOTIVO</th>' +
+        '<th style="width:14%;">FIRMA<br>INSTRUCTOR</th><th style="width:14%;">FIRMA<br>AMPT</th>' +
+        '<th style="width:31%;">OBSERVACIONES</th></tr></thead><tbody>' + filas + '</tbody></table>' +
       '<div class="seg-pie">Página ' + (indice + 1) + ' de ' + total +
         (indice + 1 < total ? ' · continúa en la página siguiente' : '') + '</div>' +
       '</div>';
@@ -8996,15 +9229,17 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (!segLineas.length){
       h.push('<div class="empty-state">Este alumno no tiene ninguna sanción registrada.</div>');
     } else {
-      h.push('<table class="seg-sel"><thead><tr><th></th><th>Fecha</th><th>Exp.</th>' +
-        '<th>Motivo</th><th>Observaciones (editables)</th></tr></thead><tbody>' +
+      h.push('<table class="seg-sel"><thead><tr>' +
+        '<th style="width:4%;"></th><th style="width:11%;">Fecha</th><th style="width:7%;">Exp.</th>' +
+        '<th style="width:33%;">Motivo</th><th style="width:45%;">Observaciones (editables)</th>' +
+        '</tr></thead><tbody>' +
         segLineas.map(function(l, i){
           return '<tr class="' + (l.incluida ? '' : 'off') + '">' +
-            '<td style="width:26px;"><input type="checkbox" class="seg-check" data-i="' + i + '"' +
+            '<td><input type="checkbox" class="seg-check" data-i="' + i + '"' +
               (l.incluida ? ' checked' : '') + '></td>' +
-            '<td style="width:88px;white-space:nowrap;">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
-            '<td style="width:52px;"><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
-            '<td style="width:240px;">' + escapeHtml(l.motivo || "—") + '</td>' +
+            '<td class="seg-c-fecha">' + escapeHtml(formatDateDisplay(l.fecha)) + '</td>' +
+            '<td><span class="seg-exp">Nº ' + escapeHtml(String(l.expediente)) + '</span></td>' +
+            '<td>' + escapeHtml(l.motivo || "—") + '</td>' +
             '<td><textarea class="seg-obs" data-i="' + i + '" rows="2">' + escapeHtml(l.observaciones || "") + '</textarea></td>' +
           '</tr>';
         }).join("") + '</tbody></table>');

@@ -8,6 +8,7 @@ const arrestos = require("../lib/arrestos.js");
 const quitarAlumno = require("../lib/quitarAlumno.js");
 
 const router = express.Router();
+const MAX_ALUMNOS_EXPEDIENTE = 500;
 
 function nextExpediente(req){
   req.db.expedienteCounter = (req.db.expedienteCounter || 0) + 1;
@@ -71,7 +72,9 @@ router.post("/", auth.requireAuth, function (req, res){
 
   const alumnos = resolveAlumnos(req, b.alumnos);
   if (!alumnos.length) errores.push("No se ha reconocido ningún alumno.");
-  if (alumnos.length > 25) errores.push("Máximo 25 alumnos por expediente múltiple.");
+  // Desde la v41 no hay tope de 25: el ANEXO I añade hojas de continuación.
+  // Solo se deja un límite técnico para rechazar envíos anómalos.
+  if (alumnos.length > MAX_ALUMNOS_EXPEDIENTE) errores.push("Demasiados alumnos en un mismo expediente (máximo " + MAX_ALUMNOS_EXPEDIENTE + ").");
 
   const medida = b.medidaCorrectora ? String(b.medidaCorrectora) : "";
   if (medida && catalog.MEDIDA_OPTIONS.indexOf(medida) === -1) errores.push("Medida correctora inválida.");
