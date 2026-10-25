@@ -1214,12 +1214,21 @@ y el servidor (`admin.html`) recibe los mismos cambios de la v38 a la v41.
 - **Campos:** altura mínima uniforme; los campos de fin de semana del refuerzo
   se recolocan en pantallas estrechas.
 
-**Lo que no está en la v41 (aviso)**
-- La v41 no trae «Importar copia del servidor (añadir)».
-- Su «Importar copia» **sustituye** los datos del navegador en vez de añadir.
-- Por tanto, la copia exportada del servidor, con sus hojas de seguimiento,
-  no se puede cargar en este HTML local hasta volver a incorporar esa
-  importación.
+**Importaciones del HTML local (vuelven a ser solo de añadir)**
+- La v41 entregada no traía «Importar copia del servidor (añadir)» y su
+  «Importar copia» **sustituía** los datos del navegador.
+- Se han vuelto a incorporar las dos, sin tocar nada más (en esos tramos la
+  v41 era idéntica a la v37):
+  - «Importar copia del servidor (añadir)», en la pantalla de carga y en la
+    barra superior.
+  - «Importar copia», que vuelve a ser **aditiva**: solo añade lo que falta,
+    nunca sustituye ni borra.
+- Las dos añaden también las hojas de seguimiento (solo alumnos y líneas
+  que falten) y el «Ciclo» si está vacío.
+- Comprobado:
+  - Importar dos veces la misma copia del servidor no duplica nada.
+  - Reimportar la copia local añade 0 registros.
+  - Lo editado en local no se pisa.
 
 ---
 
