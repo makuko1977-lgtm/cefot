@@ -28,6 +28,7 @@ function sanitizeRosterRow(row, prev){
     if (prev._adjuntos && prev._adjuntos.length) out._adjuntos = prev._adjuntos;
     if (prev._cuestionario) out._cuestionario = prev._cuestionario;
     if (prev._cuestionarioFecha) out._cuestionarioFecha = prev._cuestionarioFecha;
+    if (prev._reposicion) out._reposicion = prev._reposicion;
   }
   return out;
 }
@@ -81,6 +82,9 @@ router.post("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan,
   const existingByNumero = {};
   req.db.roster.forEach(function (r){ existingByNumero[String(r.numero)] = r; });
 
+  // v48 · «Cargar otra hoja»: se fusiona con lo que ya hay, sin perder nada.
+  if (req.body.fusionar === true) return fusionarHoja(req, res, rows, existingByNumero);
+
   const nuevo = rows
     .map(function (r){ return sanitizeRosterRow(r, existingByNumero[String(r.numero)]); })
     .filter(function (r){ return r.numero; });
@@ -98,6 +102,125 @@ router.post("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan,
       req.db.compania + "ª Compañía / Sección " + req.db.seccion + " — revisa que no sea el listado de otra sección.";
   }
   res.json(respuesta);
+});
+
+function respuestaConAviso(req, base, filas){
+  const chequeo = contarNumerosFueraDeSeccion(filas, req.db.compania, req.db.seccion);
+  if (chequeo.total > 0 && chequeo.fuera > 0){
+    base.aviso = chequeo.fuera + " de " + chequeo.total + " número(s) de protocolo de esta hoja no corresponden a " +
+      req.db.compania + "ª Compañía / Sección " + req.db.seccion + " — revisa que no sea el listado de otra sección.";
+  }
+  return base;
+}
+
+//  · Alumno que viene en la hoja y estaba en la sección: se actualiza con los
+//    datos de la hoja y conserva lo suyo (foto, adjuntos, cuestionario,
+//    reposición).
+//  · Alumno que viene en la hoja y está en Bajas: sigue en Bajas.
+//  · Alumno de la sección que no viene en la hoja: se mantiene.
+function fusionarHoja(req, res, rows, existingByNumero){
+  db.ensureRosterShape(req.db);
+  const enBajas = {};
+  req.db.bajas.forEach(function (r){ enBajas[String(r.numero)] = true; });
+  const vienen = {}, filas = [];
+  let actualizados = 0, nuevos = 0, siguenBaja = 0;
+  rows.forEach(function (r){
+    const fila = sanitizeRosterRow(r, existingByNumero[String(r && r.numero)]);
+    const n = fila.numero;
+    if (!n || vienen[n]) return;
+    if (enBajas[n]){ siguenBaja++; return; }
+    vienen[n] = true;
+    if (existingByNumero[n]) actualizados++; else nuevos++;
+    filas.push(fila);
+  });
+  if (!filas.length && !siguenBaja) return res.status(400).json({ error: "La hoja no trae ningún alumno con número." });
+  const mantenidos = req.db.roster.filter(function (r){ return !vienen[String(r.numero)]; });
+
+  req.db.roster = filas.concat(mantenidos);
+  req.db.rosterUpdatedAt = new Date().toISOString();
+  req.db.rosterUpdatedBy = req.user.dni;
+  db.save();
+
+  res.json(respuestaConAviso(req, {
+    ok: true, total: req.db.roster.length, rosterUpdatedAt: req.db.rosterUpdatedAt,
+    resumen: {
+      actualizados: actualizados, nuevos: nuevos, mantenidos: mantenidos.length,
+      mantenidosRepo: mantenidos.filter(function (r){ return r._reposicion; }).length,
+      siguenBaja: siguenBaja, bajas: req.db.bajas.length,
+      fotos: req.db.roster.filter(function (r){ return r._foto; }).length
+    }
+  }, filas));
+}
+
+// v48 · «Añadir por reposición»: añade alumnos que se incorporan más tarde.
+// Nunca cambia ni borra nada: quien ya está en la sección o en Bajas se salta.
+router.post("/reposicion", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  db.ensureRosterShape(req.db);
+  const b = req.body || {};
+  const filas = Array.isArray(b.filas) ? b.filas : null;
+  const fecha = String(b.fecha || "");
+  if (!filas || !filas.length) return res.status(400).json({ error: "No hay alumnos que añadir." });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return res.status(400).json({ error: "Falta la fecha de reposición." });
+  const existe = {};
+  req.db.roster.concat(req.db.bajas).forEach(function (r){ existe[String(r.numero)] = true; });
+  const ahora = new Date().toISOString();
+  const anadidos = [], saltados = [];
+  filas.forEach(function (r){
+    const fila = sanitizeRosterRow(r || {}, null);
+    if (!fila.numero) return;
+    if (existe[fila.numero]){ saltados.push(fila.numero); return; }
+    existe[fila.numero] = true;
+    fila._reposicion = { fecha: fecha, anadidoEl: ahora, archivo: String(b.archivo || "").slice(0, 200), obs: String(b.obs || "").slice(0, 500) };
+    req.db.roster.push(fila);
+    anadidos.push(fila);
+  });
+  if (anadidos.length){
+    req.db.rosterUpdatedAt = ahora;
+    req.db.rosterUpdatedBy = req.user.dni;
+    db.save();
+  }
+  res.json(respuestaConAviso(req, { ok: true, anadidos: rosterParaCliente(req, anadidos), saltados: saltados }, anadidos));
+});
+
+// v48 · Cuestionario de inicio de curso (QR): guarda las respuestas
+// adjuntadas. Solo añade: un alumno sin respuesta la recibe entera; uno que
+// ya tenía solo gana las preguntas que antes no venían. Nunca se sustituye.
+const CUEST_MAX_PREGUNTAS = 200;
+const CUEST_MAX_TEXTO = 4000;
+router.patch("/cuestionarios", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+  const entrada = req.body && req.body.respuestas;
+  if (!entrada || typeof entrada !== "object" || Array.isArray(entrada)){
+    return res.status(400).json({ error: "Faltan las respuestas." });
+  }
+  const guardados = [], noEncontrados = [];
+  Object.keys(entrada).forEach(function (numero){
+    const row = req.db.roster.find(function (r){ return String(r.numero) === String(numero); });
+    const e = entrada[numero] || {};
+    const datos = e.datos;
+    if (!row){ noEncontrados.push(numero); return; }
+    if (!datos || typeof datos !== "object" || Array.isArray(datos)) return;
+    const limpio = {};
+    Object.keys(datos).slice(0, CUEST_MAX_PREGUNTAS).forEach(function (p){
+      const pregunta = String(p).slice(0, 500);
+      const v = String(datos[p] == null ? "" : datos[p]).slice(0, CUEST_MAX_TEXTO);
+      if (pregunta && v !== "") limpio[pregunta] = v;
+    });
+    if (!Object.keys(limpio).length) return;
+    const previo = row._cuestionario && Object.keys(row._cuestionario).length ? row._cuestionario : null;
+    if (!previo){
+      row._cuestionario = limpio;
+      row._cuestionarioFecha = /^\d{4}-\d{2}-\d{2}$/.test(String(e.fecha || "")) ? e.fecha : new Date().toISOString().slice(0, 10);
+      guardados.push(String(row.numero));
+      return;
+    }
+    let anadidas = 0;
+    Object.keys(limpio).forEach(function (p){
+      if (!Object.prototype.hasOwnProperty.call(previo, p) && Object.keys(previo).length < CUEST_MAX_PREGUNTAS){ previo[p] = limpio[p]; anadidas++; }
+    });
+    if (anadidas) guardados.push(String(row.numero));
+  });
+  if (guardados.length) db.save();
+  res.json({ ok: true, guardados: guardados, noEncontrados: noEncontrados });
 });
 
 // Da de baja a un alumno: lo mueve de `roster` a `bajas` (no se borra nada

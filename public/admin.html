@@ -294,6 +294,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   .tabbar{
     display:flex;
     flex-wrap:wrap;
+    flex-wrap:wrap;
     gap:6px;
     border-bottom:1px solid var(--border);
     margin-bottom:22px;
@@ -361,6 +362,212 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   .toolbar input[type=search]{min-width:230px;flex:1;}
   .toolbar input[type=search]:focus, .toolbar select:focus{border-color:var(--accent);}
   .toolbar .spacer{flex:1;}
+  .roster-print-only{display:none;}
+
+  /* ---- Reposición ---- */
+  .repo-archivo{font-size:13px; font-weight:600; color:var(--text);}
+  .repo-archivo.vacio{color:var(--text-dim); font-weight:400;}
+  .repo-colcheck{font-size:12.5px; padding:8px 10px; border-radius:8px; margin:10px 0 6px;}
+  .repo-colcheck.ok{background:var(--accent-soft); color:var(--accent-bright);}
+  .repo-colcheck.warn{background:#f6e7d4; color:#8a5a14;}
+  .repo-colcheck.err{background:#f6dcdc; color:#9b2c2c;}
+  #repoPreview{max-height:46vh; overflow:auto;}
+  .repo-tabla{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .repo-tabla th{
+    position:sticky; top:0; text-align:left; font-size:11px; letter-spacing:.4px; text-transform:uppercase;
+    color:var(--text-dim); padding:7px 8px; background:var(--panel-2); border-bottom:1px solid var(--border);
+  }
+  .repo-tabla td{padding:6px 8px; border-bottom:1px solid var(--border-light);}
+  .repo-pill{display:inline-flex; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .repo-pill.ok{background:var(--accent-soft); color:var(--accent-bright);}
+  .repo-pill.no{background:#f6e7d4; color:#8a5a14;}
+  .repo-pill.err{background:#f6dcdc; color:#9b2c2c;}
+  .repo-chapa{
+    display:inline-block; margin-top:4px; padding:1px 7px; border-radius:999px;
+    font-size:10.5px; font-weight:700; background:#e9e1f5; color:#5b3d8a; white-space:nowrap;
+  }
+  .consulta-table.consulta-repo tbody td{white-space:normal;}
+  .rp-cols-head{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:14px 0 8px;}
+  .rp-cols-head .acciones{display:flex; gap:6px;}
+  .rp-cols{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:6px 12px; margin-bottom:12px;}
+  .rp-cols label{
+    display:flex; align-items:center; gap:7px; cursor:pointer; font-size:13px;
+    padding:6px 9px; border:1px solid var(--border-light); border-radius:8px; background:var(--panel-2);
+  }
+  .rp-cols label:hover{border-color:var(--accent);}
+
+  /* ---------- Programas semanales y Pérdida de horas (v45) ---------- */
+  .ps-carga{display:flex; gap:14px; flex-wrap:wrap; align-items:stretch; margin-top:12px;}
+  .ps-drop{flex:1; min-width:240px; border:2px dashed var(--border-light); border-radius:12px; padding:16px; text-align:center; background:var(--panel-2);}
+  .ps-drop.drag{border-color:var(--accent); background:var(--accent-soft);}
+  .ps-secinfo{flex:0 1 330px; min-width:220px; background:var(--panel-2); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:12.5px; color:var(--text-dim);}
+  .ps-secinfo b{display:block; font-size:20px; color:var(--text); margin:2px 0;}
+  .ps-lbl{display:block; font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+  .ps-dim{color:var(--text-dim); font-size:12.5px;}
+  .ps-msg{border-radius:10px; padding:9px 12px; margin-top:10px; font-size:13.5px; overflow-wrap:anywhere;}
+  .ps-msg.ok{background:var(--accent-soft); color:var(--accent-bright);}
+  .ps-msg.mal{background:var(--danger-soft); color:var(--danger);}
+  .ps-tw{overflow-x:auto;}
+  .ps-tabla{border-collapse:collapse; width:100%; font-size:13.5px; min-width:720px;}
+  .ps-tabla th, .ps-tabla td{border-bottom:1px solid var(--border); padding:8px; text-align:left; vertical-align:top; white-space:normal;}
+  .ps-tabla td .ps-pill{white-space:nowrap;}
+  .ps-tabla th{background:var(--panel-2); font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-dim);}
+  .ps-tabla tr.ps-abierta td{background:#fffaf0;}
+  .ps-arch{overflow-wrap:anywhere; word-break:break-word; max-width:240px;}
+  .ps-tabla td.ps-acc{white-space:nowrap;}
+  .ps-pill{display:inline-block; padding:1px 7px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; margin:1px 2px 1px 0;}
+  .ps-ifm, .ps-ok{background:var(--accent-soft); color:var(--accent-bright);}
+  .ps-car{background:#dff0ea; color:#1f6650;}
+  .ps-man{background:#e9e1f5; color:#5b3d8a;}
+  .ps-warn{background:var(--warn-soft); color:var(--warn);}
+  .ps-det{padding:10px 2px 4px;}
+  .ps-det h4{margin:0 0 4px; font-size:14px;}
+  .ps-dias{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin-top:8px;}
+  @media (max-width:760px){ .ps-dias{grid-template-columns:1fr;} }
+  .ps-dia{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:8px; min-width:0;}
+  .ps-cab{font-weight:700; font-size:13px; margin-bottom:6px; display:flex; justify-content:space-between; gap:6px;}
+  .ps-celda{border:1px solid var(--border); border-radius:8px; padding:6px 7px; margin-bottom:6px; font-size:12px; background:#fafaf6; white-space:normal;}
+  .ps-celda.ifm{background:var(--accent-soft); border-color:#b9d29f;}
+  .ps-celda.car{background:#dff0ea; border-color:#a9d6c4;}
+  .ps-celda.cambiada{box-shadow:inset 3px 0 0 #5b3d8a;}
+  .ps-hora{font-weight:700; font-size:11.5px; color:var(--text-dim);}
+  .ps-txt{display:block; margin:2px 0 4px; overflow-wrap:anywhere; word-break:break-word;}
+  .ps-celda label{display:flex; gap:6px; align-items:center; font-size:11.5px; font-weight:700; color:var(--text-dim); cursor:pointer;}
+  .ps-todas{font-size:10.5px; font-weight:700; color:var(--warn);}
+  .ph-aviso{font-size:13px; margin-top:10px; color:var(--text-dim);}
+  .ph-aviso:empty{display:none;}
+  .ph-aviso.warn{color:var(--warn);}
+  .ph-aviso.error{color:var(--danger);}
+  .ph-cabecera{font-weight:700; font-size:15px; margin:4px 0 12px;}
+  .ph-grupo{font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin:0 0 6px;}
+  #phResultado .stat-row{margin-bottom:14px;}
+  .stat-card.ph-ok .num{color:var(--accent-bright);}
+  .stat-card.ph-mal .num{color:var(--danger);}
+  .ph-cols{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px;}
+  .ph-cols > .panel{margin-bottom:0;}
+  @media (max-width:760px){ .ph-cols{grid-template-columns:1fr;} }
+  #phResultado > .panel{margin-top:14px;}
+  .ph-item{display:flex; gap:10px; align-items:flex-start; padding:9px 10px; border:1px solid var(--border); border-radius:10px; margin-bottom:7px; background:var(--panel);}
+  label.ph-item{cursor:pointer;}
+  label.ph-item:hover{border-color:var(--accent);}
+  .ph-item input{margin-top:3px; width:17px; height:17px; flex:0 0 auto;}
+  .ph-item.marcado, .ph-item.no{background:#fbf0ef; border-color:#e3b9b9;}
+  .ph-item.si{background:#f2f7ec; border-color:#c9dbb6;}
+  .ph-t{font-weight:700; font-size:14px;}
+  .ph-h{margin-left:auto; font-weight:700; font-size:13px; white-space:nowrap; text-align:right;}
+  .ph-rojo{color:var(--danger);}
+  .ph-no{background:var(--danger-soft); color:var(--danger);}
+  .ph-gris{background:var(--panel-2); color:var(--text-dim);}
+  .ph-act{background:#e9e1f5; color:#5b3d8a;}
+  .ph-cal{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)) 128px; gap:6px; margin-top:8px;}
+  .ph-hd{font-size:11px; font-weight:700; color:var(--text-dim); text-align:center; text-transform:uppercase;}
+  .ph-dia{background:var(--panel); border:1px solid var(--border); border-radius:9px; min-height:64px; padding:5px 6px; font-size:11px; min-width:0; overflow-wrap:anywhere;}
+  .ph-dia .ps-pill{white-space:normal;}
+  .ph-dia.reb{background:#fbf0ef;}
+  .ph-dia.sinprog{background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 6px,var(--panel-2) 6px,var(--panel-2) 12px);}
+  .ph-dia.fuera{opacity:.45;}
+  .ph-n{font-weight:700; font-size:12px; display:block;}
+  .ph-wd{display:none;}
+  .ph-sem{border-radius:9px; padding:6px 8px; font-size:11.5px; background:var(--panel-2); border:1px solid var(--border);}
+  .ph-sem b{font-size:13px; display:block;}
+  .ph-sem .ph-rojo{display:block; font-weight:700;}
+  @media (max-width:700px){
+    .ph-cal{grid-template-columns:1fr; gap:5px;}
+    .ph-hd{display:none;}
+    .ph-wd{display:inline;}
+    .ph-dia{min-height:0; display:flex; flex-wrap:wrap; align-items:center; gap:3px 4px; font-size:12px;}
+    .ph-dia .ph-n{display:inline-block; min-width:78px;}
+    .ph-sem{margin-bottom:8px;}
+  }
+  /* Hoja vertical con nombre propio: la app tiene otras reglas @page apaisadas. */
+  @page perdida { size: A4 portrait; margin: 10mm; }
+  @media print{
+    body.print-perdida{background:#fff; page: perdida;}
+    body.print-perdida #appShell{padding:0 !important; margin:0 !important; max-width:none !important;}
+    body.print-perdida .stat-card{padding:8px 12px !important;}
+    body.print-perdida .stat-card .num{font-size:17px !important;}
+    body.print-perdida #phResultado .stat-row{gap:8px !important; margin-bottom:8px !important;}
+    body.print-perdida #phResultado .panel{padding:10px 12px !important; margin-top:8px !important;}
+    body.print-perdida .ph-item{padding:5px 8px !important; margin-bottom:4px !important;}
+    body.print-perdida .ph-dia{min-height:48px !important;}
+    body.print-perdida header.top,
+    body.print-perdida #uploadScreen,
+    body.print-perdida footer.info,
+    body.print-perdida #appShell > .tabbar,
+    body.print-perdida #appShell > *:not(#perdidaPanel),
+    body.print-perdida .ph-noprint,
+    body.print-perdida #fichaModal,
+    body.print-perdida #historialModal{display:none !important;}
+    body.print-perdida #phResultado .panel, body.print-perdida .stat-card{box-shadow:none !important; break-inside:avoid;}
+    body.print-perdida .ph-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
+    body.print-perdida .ph-item .ps-pill{white-space:normal;}
+    body.print-perdida .ph-cal{grid-template-columns:repeat(5,minmax(0,1fr)) 110px !important;}
+    body.print-perdida .ph-sem{grid-column:auto !important;}
+    body.print-perdida .ph-hd:nth-child(6){display:block !important;}
+    body.print-perdida *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  }
+
+  /* ---------- Cuestionario de inicio de curso (v47) ---------- */
+  .cuest-intro{font-size:14px; margin:4px 0 16px;}
+  .cuest-intro ol{margin:6px 0 0; padding-left:20px;}
+  .cuest-intro li{margin:3px 0;}
+  .cuest-cargar{display:flex; gap:12px; align-items:center; flex-wrap:wrap;}
+  .cuest-res{border-radius:10px; padding:10px 13px; margin-top:12px; font-size:13.5px; overflow-wrap:anywhere;}
+  .cuest-res b.t{display:block; margin-bottom:3px;}
+  .cuest-res ul{margin:4px 0 0; padding-left:18px;}
+  .cuest-res.ok{background:var(--accent-soft); color:var(--accent-bright);}
+  .cuest-res.warn{background:var(--warn-soft); color:var(--warn);}
+  .cuest-res.mal{background:var(--danger-soft); color:var(--danger);}
+  .cuest-fila{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin:18px 0 8px;}
+  .cuest-pill{display:inline-block; padding:1px 8px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .cuest-pill.no{background:var(--danger-soft); color:var(--danger);}
+  .cuest-pill.si{background:var(--accent-soft); color:var(--accent-bright);}
+
+  /* Hoja apaisada sólo para el listado del Roster (9 columnas no caben en vertical). */
+  @page roster { size: A4 landscape; margin: 11mm; }
+  @media print{
+    body.print-roster{ page: roster; background:#fff; }
+    body.print-roster header.top,
+    body.print-roster #uploadScreen,
+    body.print-roster footer.info,
+    body.print-roster #appShell > .tabbar,
+    body.print-roster #appShell > *:not(#rosterPanel),
+    body.print-roster #rosterPanel > *:not(#rosterPrintHeader):not(.table-wrap),
+    body.print-roster #fichaModal,
+    body.print-roster #historialModal,
+    body.print-roster #cuestModal,
+    body.print-roster #rosterPrintModal,
+    body.print-roster .no-print{display:none !important;}
+    body.print-roster .roster-print-only{display:block !important;}
+    body.print-roster .table-wrap,
+    body.print-roster .table-scroll{
+      max-height:none !important; overflow:visible !important;
+      border:0 !important; background:#fff !important; box-shadow:none !important;
+    }
+    body.print-roster #rosterTable{width:100% !important; border-collapse:collapse !important;}
+    body.print-roster #rosterTable thead{display:table-header-group;}
+    body.print-roster #rosterTable tr{break-inside:avoid; page-break-inside:avoid;}
+    body.print-roster #rosterTable th,
+    body.print-roster #rosterTable td{
+      white-space:normal !important; border:1px solid #999 !important;
+      padding:3px 5px !important; font-size:9.5pt !important; background:#fff !important;
+    }
+    body.print-roster #rosterTable thead th{
+      background:#e8efdc !important; color:#000 !important; position:static !important;
+      font-size:8.5pt !important; letter-spacing:.3px;
+    }
+    body.print-roster #rosterTable tbody tr:last-child td{border-bottom:1px solid #999 !important;}
+    body.print-roster .pelo-badge{background:none !important; color:#000 !important; border:0 !important; padding:0 !important;}
+    /* Mismo tamaño que las fotos de los informes de Consultas (84 px), para
+       que en papel se distinga a cada alumno. */
+    body.print-roster .roster-avatar{width:84px !important; height:84px !important; border-width:1px !important;}
+    body.print-roster .repo-chapa{background:none !important; color:#000 !important; border:1px solid #999; font-size:7.5pt;}
+    body.print-roster .roster-print-head{border-bottom:2px solid #2E4A21; padding-bottom:6px; margin-bottom:10px;}
+    body.print-roster .roster-print-head .rp-unidad{font-size:8.5pt; letter-spacing:1.2px; color:#444; text-transform:uppercase;}
+    body.print-roster .roster-print-head .rp-tit{font-size:16pt; font-weight:700; color:#2E4A21; margin:2px 0 4px;}
+    body.print-roster .roster-print-head .rp-lin{font-size:9pt; color:#222; margin:1px 0;}
+    body.print-roster .roster-print-head .rp-lin b{color:#000;}
+  }
   .meta-note{
     font-size:12px;
     color:var(--text-dim);
@@ -451,6 +658,29 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     width:112px; height:112px; border-radius:50%;
     border:1px dashed var(--border-light); background:var(--panel-2);
   }
+  /* ---- Fotografía del alumno, reutilizable en todas las pestañas ---- */
+  .alu-foto{
+    border-radius:50%; object-fit:cover; display:block; flex:none;
+    border:1px solid var(--border-light); background:var(--panel-2);
+  }
+  .alu-foto-ini{
+    border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    flex:none; border:1px solid var(--border-light); background:var(--panel-2);
+    color:var(--muted); font-weight:700; letter-spacing:.5px; line-height:1;
+  }
+  /* Todas del mismo tamaño que el retrato del listado Roster: 112 px. */
+  .alu-foto-xs,.alu-foto-ini.alu-foto-xs,
+  .alu-foto-sm,.alu-foto-ini.alu-foto-sm,
+  .alu-foto-md,.alu-foto-ini.alu-foto-md,
+  .alu-foto-lg,.alu-foto-ini.alu-foto-lg{width:84px;height:84px;font-size:26px;}
+  .alu-linea{display:inline-flex;align-items:center;gap:8px;min-width:0;vertical-align:middle;}
+  .alu-linea-txt{min-width:0;}
+  @media (max-width:640px){
+    .alu-foto-xs,.alu-foto-ini.alu-foto-xs,
+    .alu-foto-sm,.alu-foto-ini.alu-foto-sm,
+    .alu-foto-md,.alu-foto-ini.alu-foto-md,
+    .alu-foto-lg,.alu-foto-ini.alu-foto-lg{width:64px;height:64px;font-size:20px;}
+  }
   .table-scroll{max-height:60vh;overflow:auto;}
   .empty-state{
     padding:50px 20px;
@@ -508,6 +738,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   .field input[type=date],
   .field input[type=time],
   .field input[type=number],
+  .field input[type=time],
+  .field input[type=number],
   .field input[type=search],
   .field select,
   .field textarea{
@@ -521,6 +753,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     width:100%;
     font-family:inherit;
   }
+  .field input[type=text],
+  .field input[type=date],
+  .field input[type=time],
+  .field input[type=number],
+  .field input[type=search],
+  .field select{min-height:42px;}
   .field input[type=text],
   .field input[type=date],
   .field input[type=time],
@@ -1308,6 +1546,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       <button type="button" id="tabBtnActividades">Actividades</button>
       <button type="button" id="tabBtnConsultas">Consultas</button>
       <button type="button" id="tabBtnNotas">Cuestionario de notas</button>
+      <button type="button" id="tabBtnProgramas">Programas semanales</button>
+      <button type="button" id="tabBtnPerdida">Pérdida de horas</button>
       <button type="button" id="tabBtnHorasUa">Horas UA</button>
       <button type="button" id="tabBtnUsuarios">Usuarios</button>
     </div>
@@ -1330,6 +1570,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         <button type="button" class="btn small ghost" id="rosterImportPhotosBtn">Importar fotos…</button>
         <input type="file" id="rosterImportPhotosInput" accept="image/*" multiple class="hidden" />
         <button type="button" class="btn small ghost" id="rosterCuestBtn">Cuestionario inicio de curso…</button>
+        <button type="button" class="btn small ghost" id="rosterImprimirBtn" title="Imprime el listado tal y como está filtrado, con las columnas que elijas">Imprimir listado…</button>
+        <button type="button" class="btn small ghost" id="rosterReposicionBtn" title="Añade alumnos desde un Excel sin cambiar nada de lo ya cargado">Añadir por reposición…</button>
       </div>
 
       <div id="rosterAdvPanel" class="adv-filters hidden">
@@ -1348,6 +1590,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             <option value="rebaje">Con rebaje vigente</option>
             <option value="sancion">Con sanción</option>
             <option value="sin-rebaje">Sin rebaje vigente</option>
+            <option value="reposicion">Por reposición</option>
           </select>
         </div>
         <button type="button" class="btn small ghost" id="rosterClearFilters">Limpiar filtros</button>
@@ -1356,6 +1599,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       <p class="combo-formula hidden" id="rosterComboFormula"></p>
 
       <div class="meta-note" id="metaNote"></div>
+
+      <!-- Sólo se ve al imprimir el listado: unidad, título, filtros, total y fecha. -->
+      <div id="rosterPrintHeader" class="roster-print-only"></div>
 
       <div class="table-wrap">
         <div class="table-scroll">
@@ -1527,6 +1773,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               <select id="sanEmpleo">
                 <option value="">—</option>
                 <option value="CAP">CAP</option>
+                <option value="TTE">TTE</option>
                 <option value="BG">BG</option>
                 <option value="SGT1">SGT1</option>
                 <option value="SGTO">SGTO</option>
@@ -1814,6 +2061,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               <select id="refEmpleo">
                 <option value="">—</option>
                 <option value="CAP">CAP</option>
+                <option value="TTE">TTE</option>
                 <option value="BG">BG</option>
                 <option value="SGT1">SGT1</option>
                 <option value="SGTO">SGTO</option>
@@ -1995,6 +2243,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
               <option value="trabajos">Sanciones de trabajo: hechos, pendientes y vencidos</option>
               <option value="expediente">Consulta de expediente (informe completo)</option>
               <option value="seguimiento">Hoja de seguimiento del alumno</option>
+              <option value="reposiciones">Reposiciones: alumnos añadidos y su fecha de reposición</option>
             </select>
           </div>
         </div>
@@ -2051,6 +2300,19 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
             <label for="consFechaFin">Fecha fin de la consulta</label>
             <input type="date" id="consFechaFin">
           </div>
+        </div>
+        <div class="hidden" id="consRepoWrap" style="margin-top:4px;">
+          <div class="field-row">
+            <div class="field">
+              <label for="consRepoDesde">Repuestos desde (opcional)</label>
+              <input type="date" id="consRepoDesde">
+            </div>
+            <div class="field">
+              <label for="consRepoHasta">Hasta (opcional)</label>
+              <input type="date" id="consRepoHasta">
+            </div>
+          </div>
+          <div class="hint" style="margin:6px 0 12px; font-size:12px; color:var(--text-dim);">Cuenta la fecha de reposición, no el día en que se cargó el Excel. Sin fechas salen todas.</div>
         </div>
         <div class="hint error hidden" id="consFechaHint">Indica la fecha de inicio y fin de la consulta (la fecha de fin debe ser igual o posterior a la de inicio).</div>
 
@@ -2143,6 +2405,64 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         <div id="notasResultados"></div>
       </div>
 
+    </div>
+
+
+    <!-- ---------- PROGRAMAS SEMANALES (v45) ---------- -->
+    <div id="programasPanel" class="hidden">
+      <div class="panel corner-accent">
+        <h3>Programas semanales</h3>
+        <div class="panel-sub">Carga el programa de cada semana en hoja de cálculo Excel (.xlsx), uno o varios a la vez. La aplicación lee en qué días y franjas tiene IFM la sección. Dos franjas seguidas de IFM cuentan 1 h (la otra es la ducha) y la «CARRERA DE COMPAÑÍA» cuenta como 1 h de IFM.</div>
+        <div class="ps-carga">
+          <div class="ps-drop" id="psDrop">
+            <b>Arrastra aquí los programas</b><br>
+            <span class="ps-dim">Hojas de cálculo Excel (.xlsx) · se pueden cargar varias semanas a la vez</span><br>
+            <button type="button" class="btn primary" id="psElegirBtn" style="margin-top:10px;">Elegir archivos…</button>
+            <input type="file" id="psFileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+          </div>
+          <div class="ps-secinfo" id="psSecInfo"></div>
+        </div>
+        <div id="psMsgs"></div>
+      </div>
+      <div class="stat-row" id="psStats"></div>
+      <div class="panel">
+        <h3>Semanas cargadas</h3>
+        <div class="panel-sub">Pulsa «Ver» para revisar lo leído de una semana y corregir a mano una celda con «Cuenta como IFM». Del archivo solo se guarda lo leído, no el archivo.</div>
+        <div class="empty-state" id="psVacio">Todavía no hay ningún programa cargado.</div>
+        <div class="ps-tw hidden" id="psTablaWrap">
+          <table class="ps-tabla">
+            <thead><tr><th>Semana</th><th>Archivo</th><th>IFM de la sección</th><th>Horas</th><th>Estado</th><th></th></tr></thead>
+            <tbody id="psTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---------- PÉRDIDA DE HORAS (v45) ---------- -->
+    <div id="perdidaPanel" class="hidden">
+      <div class="panel corner-accent ph-noprint">
+        <h3>Pérdida de horas</h3>
+        <div class="panel-sub">Selecciona el alumno: su sección sale del 2º dígito de su número. Las horas de IFM salen de los programas semanales; las actividades, de la pestaña Actividades.</div>
+        <div class="field-grid">
+          <div class="field" style="grid-column:1/-1;">
+            <label for="phCadeteInput">Alumno</label>
+            <input type="text" id="phCadeteInput" list="phCadeteList" placeholder="Escribe el número, apellidos o nombre..." autocomplete="off">
+            <datalist id="phCadeteList"></datalist>
+            <div class="cadet-preview" id="phCadetePreview"></div>
+            <div class="hint error hidden" id="phCadeteHint">No se reconoce ningún alumno con ese texto. Selecciónalo de la lista.</div>
+          </div>
+          <div class="field">
+            <label for="phDesde">Desde</label>
+            <input type="date" id="phDesde">
+          </div>
+          <div class="field">
+            <label for="phHasta">Hasta</label>
+            <input type="date" id="phHasta">
+          </div>
+        </div>
+        <div class="ph-aviso" id="phAviso"></div>
+      </div>
+      <div id="phResultado" class="hidden"></div>
     </div>
 
     <!-- ---------- USUARIOS PANEL ---------- -->
@@ -2397,6 +2717,64 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   </div>
 
   <!-- ---------- CUESTIONARIO INICIO DE CURSO (modal) ---------- -->
+  <div id="rosterPrintModal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width:600px;">
+      <div class="modal-header">
+        <h3>Imprimir listado</h3>
+        <button type="button" class="modal-close" id="rosterPrintCloseBtn">&times;</button>
+      </div>
+      <div class="hint" id="rosterPrintResumen"></div>
+      <div class="rp-cols-head">
+        <strong>Columnas a imprimir</strong>
+        <span class="acciones">
+          <button type="button" class="btn small ghost" id="rosterPrintTodas">Todas</button>
+          <button type="button" class="btn small ghost" id="rosterPrintNinguna">Ninguna</button>
+        </span>
+      </div>
+      <div class="rp-cols" id="rosterPrintCols"></div>
+      <div class="hint error hidden" id="rosterPrintHint">Marca al menos una columna.</div>
+      <div class="form-actions">
+        <button type="button" class="btn primary" id="rosterPrintGo">Imprimir</button>
+        <button type="button" class="btn ghost" id="rosterPrintCancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="repoModal" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width:860px;">
+      <div class="modal-header">
+        <h3>Añadir alumnos por reposición</h3>
+        <button type="button" class="modal-close" id="repoCloseBtn">&times;</button>
+      </div>
+      <div class="hint" style="margin-bottom:12px;">Elige un Excel con las mismas columnas que el listado. Los alumnos se <strong>añaden</strong> al listado actual: nada de lo que ya está cargado se cambia ni se borra, y si un número ya existe —en la sección o en Bajas— esa fila se salta.</div>
+      <div class="field-grid" style="margin-bottom:6px;">
+        <div class="field">
+          <label>Archivo</label>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:42px;">
+            <button type="button" class="btn small ghost" id="repoElegirBtn">Elegir Excel…</button>
+            <span class="repo-archivo vacio" id="repoArchivo">Ningún archivo elegido</span>
+          </div>
+          <input type="file" id="repoFileInput" accept=".xlsx,.xls,.ods,.csv" class="hidden">
+        </div>
+        <div class="field">
+          <label for="repoFecha">Fecha de reposición</label>
+          <input type="date" id="repoFecha">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label for="repoObs">Observaciones (opcional)</label>
+          <input type="text" id="repoObs" placeholder="p. ej. reposición tras la baja de dos alumnos">
+        </div>
+      </div>
+      <div class="repo-colcheck hidden" id="repoColCheck"></div>
+      <div id="repoPreview"></div>
+      <div class="form-actions" style="margin-top:16px;">
+        <button type="button" class="btn primary" id="repoAnadirBtn" disabled>Añadir alumnos</button>
+        <button type="button" class="btn ghost" id="repoCancelBtn">Cerrar</button>
+        <span class="form-msg" id="repoMsg"></span>
+      </div>
+    </div>
+  </div>
+
   <div id="cuestModal" class="modal-overlay hidden">
     <div class="modal-card" style="max-width:820px;">
       <div class="modal-header">
@@ -2404,44 +2782,37 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         <button type="button" class="modal-close" id="cuestCloseBtn">&times;</button>
       </div>
 
-      <div class="hint" style="margin-bottom:14px;">
-        Paso 1: crea el formulario (Google Forms) con las preguntas de la ficha personal y pega aquí su enlace.
-        Paso 2: envía el enlace por WhatsApp a cada alumno (uno a uno; WhatsApp no permite el envío automático).
-        Paso 3: cuando tengas respuestas, impórtalas para adjuntarlas a la ficha de cada alumno.
+      <div class="cuest-intro">
+        El formulario de la ficha personal ya está creado en Google Forms. Los alumnos lo rellenan con el móvil escaneando su <b>código QR</b>; no hay que enviarles nada.
+        <ol>
+          <li>Cuando haya respuestas, en Google Forms: pestaña «Respuestas» → «Ver en Hojas de cálculo» → Archivo → Descargar → Microsoft Excel (.xlsx).</li>
+          <li>Carga aquí ese archivo. Cada respuesta se adjunta a la ficha de su alumno por el <b>número de protocolo</b>.</li>
+          <li>Se puede volver a cargar las veces que haga falta (por ejemplo, la misma hoja con más respuestas): <b>solo se añade lo nuevo</b>. Lo que ya estaba guardado no se sustituye ni se sobrescribe.</li>
+        </ol>
       </div>
 
-      <div class="field" style="margin-bottom:16px;">
-        <label for="cuestUrlInput">Enlace del formulario (Google Forms u otro)</label>
-        <input type="text" id="cuestUrlInput" placeholder="https://forms.gle/..." />
+      <div class="cuest-cargar">
+        <button type="button" class="btn primary" id="cuestImportBtn">Cargar hoja de respuestas…</button>
+        <input type="file" id="cuestImportInput" accept=".ods,.xlsx,.xls,.csv" class="hidden" />
+        <span class="hint" style="margin:0;">.xlsx, .ods o .csv · debe tener la pregunta «Número de protocolo»</span>
       </div>
+      <div id="cuestResultado"></div>
 
-      <div class="field" style="margin-bottom:16px;">
-        <label for="cuestMensajeInput">Mensaje de WhatsApp (usa {nombre} y {enlace} como comodines)</label>
-        <textarea id="cuestMensajeInput" rows="3"></textarea>
+      <div class="cuest-fila">
+        <h4 style="margin:0;">Alumnos de la sección</h4>
+        <div class="mode-toggle" id="cuestFiltro">
+          <button type="button" class="mode-btn active" data-cfiltro="pendientes">Pendientes <span id="cuestNPend"></span></button>
+          <button type="button" class="mode-btn" data-cfiltro="hechos">Hechos <span id="cuestNHechos"></span></button>
+          <button type="button" class="mode-btn" data-cfiltro="todos">Todos <span id="cuestNTodos"></span></button>
+        </div>
       </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h4 style="margin:0;">Enviar a cada alumno</h4>
-        <span class="hint" id="cuestListSummary" style="margin:0;"></span>
-      </div>
-      <div id="cuestListWrap" class="table-wrap" style="max-height:260px; overflow:auto; margin-bottom:22px;">
+      <div id="cuestListWrap" class="table-wrap" style="max-height:300px; overflow:auto;">
         <table>
-          <thead><tr><th>Número</th><th>Alumno</th><th>Teléfono</th><th></th></tr></thead>
+          <thead><tr><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Cuestionario</th></tr></thead>
           <tbody id="cuestListBody"></tbody>
         </table>
       </div>
-
-      <hr style="border:none; border-top:1px solid var(--border); margin:18px 0;">
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h4 style="margin:0;">Importar respuestas recibidas</h4>
-        <button type="button" class="btn small primary" id="cuestImportBtn">Importar hoja de respuestas…</button>
-        <input type="file" id="cuestImportInput" accept=".ods,.xlsx,.xls,.csv" class="hidden" />
-      </div>
-      <div class="hint">
-        Descarga las respuestas del formulario como hoja de cálculo (en Google Forms: pestaña "Respuestas" → icono de Sheets → Archivo → Descargar → Microsoft Excel) y súbela aquí.
-        Debe incluir una columna con el número de expediente/protocolo del alumno para poder emparejar cada respuesta con su ficha.
-      </div>
+      <div class="hint" style="margin-top:8px;">Las respuestas de cada alumno se ven en su ficha.</div>
     </div>
   </div>
 
@@ -2505,9 +2876,6 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var STORAGE_KEY = "seccion3_roster_v1";
   var REBAJES_KEY = "seccion3_rebajes_v1";
   var SANCIONES_KEY = "seccion3_sanciones_v1";
-  var CUEST_URL_KEY = "seccion3_cuest_url_v1";
-  var CUEST_MSG_KEY = "seccion3_cuest_msg_v1";
-  var CUEST_MSG_DEFAULT = "Hola {nombre}, para tu ficha personal de inicio de curso necesitamos que rellenes este formulario: {enlace}\n\nRecuerda escribir tu número de expediente al principio. ¡Gracias!";
 
   // Columnas "conocidas" del roster (a partir de la hoja SECCION_3) y su
   // etiqueta de visualización. Cualquier otra columna presente en el
@@ -3302,6 +3670,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var tabBtnConsultas = document.getElementById("tabBtnConsultas");
   var tabBtnNotas = document.getElementById("tabBtnNotas");
   var tabBtnHorasUa = document.getElementById("tabBtnHorasUa");
+  var tabBtnProgramas = document.getElementById("tabBtnProgramas");
+  var tabBtnPerdida = document.getElementById("tabBtnPerdida");
+  var programasPanel = document.getElementById("programasPanel");
+  var perdidaPanel = document.getElementById("perdidaPanel");
   var tabBtnUsuarios = document.getElementById("tabBtnUsuarios");
   var rosterPanel = document.getElementById("rosterPanel");
   var rebajesPanel = document.getElementById("rebajesPanel");
@@ -3325,6 +3697,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var rosterAdvPanel = document.getElementById("rosterAdvPanel");
   var sexoFilter = document.getElementById("sexoFilter");
   var situacionFilter = document.getElementById("situacionFilter");
+  var rosterFiltradoActual = []; // filas que se ven ahora en la tabla (para imprimir)
   var rosterClearFilters = document.getElementById("rosterClearFilters");
   var rosterFilterChips = document.getElementById("rosterFilterChips");
   var rosterComboFormula = document.getElementById("rosterComboFormula");
@@ -3343,9 +3716,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var rosterCuestBtn = document.getElementById("rosterCuestBtn");
   var cuestModal = document.getElementById("cuestModal");
   var cuestCloseBtn = document.getElementById("cuestCloseBtn");
-  var cuestUrlInput = document.getElementById("cuestUrlInput");
-  var cuestMensajeInput = document.getElementById("cuestMensajeInput");
-  var cuestListSummary = document.getElementById("cuestListSummary");
+  var cuestResultado = document.getElementById("cuestResultado");
+  var cuestFiltroWrap = document.getElementById("cuestFiltro");
   var cuestListBody = document.getElementById("cuestListBody");
   var cuestImportBtn = document.getElementById("cuestImportBtn");
   var cuestImportInput = document.getElementById("cuestImportInput");
@@ -3410,11 +3782,27 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         var parsedKeys = resolveRosterKeys(parsed.headers);
         var normalized = normalizeRosterRows(parsed.rows, parsedKeys);
         setStatus("Enviando roster al servidor…", "busy");
-        replaceRosterOnServer(normalized).then(function(res){
+        // Siempre se fusiona con lo que ya haya en el servidor (aunque se haya
+        // recargado la página tras «Cargar otra hoja»): nunca se pierde nadie.
+        rosterAntesDeRecargar = false;
+        fusionarRosterEnServidor(normalized).then(function(res){
           if (!res.ok){
             setStatus(res.data.error || "No se ha podido guardar el roster en el servidor.", "error");
             loadBtn.disabled = false;
             return;
+          }
+          if (res.data.resumen){
+            // Fusionado en el servidor: se recarga el listado tal como ha quedado.
+            return fetchRosterFromServer().then(function(){
+              state.meta = { fileName: pendingFile.name, sheetName: parsed.sheetName, loadedAt: res.data.rosterUpdatedAt, count: state.rows.length };
+              setStatus("Cargado correctamente (" + res.data.total + " alumnos en la sección, guardado en el servidor).", "ok");
+              renderRoster();
+              renderRebajesTab();
+              renderSancionesTab();
+              showApp();
+              alert(textoResumenRecarga(res.data.resumen));
+              if (res.data.aviso){ alert("Aviso: " + res.data.aviso); }
+            });
           }
           applyRosterRows(normalized);
           state.meta = {
@@ -3626,6 +4014,26 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // para no romper nada mientras siga sin usarse.
   function persist(){ return true; }
 
+  // Cuestionario de inicio de curso (v48): guarda en el servidor las
+  // respuestas adjuntadas. El servidor solo añade (alumno sin respuesta o
+  // preguntas que antes no venían); nunca sustituye lo ya guardado.
+  function guardarCuestionariosEnServidor(rows){
+    var respuestas = {};
+    rows.forEach(function(row){
+      respuestas[String(row.numero)] = { datos: row._cuestionario || {}, fecha: row._cuestionarioFecha || todayIso() };
+    });
+    return fetch("/api/roster/cuestionarios", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ respuestas: respuestas })
+    }).then(function(r){ return r.json().then(function(data){
+      if (!r.ok) alert("No se han podido guardar las respuestas del cuestionario en el servidor: " + (data.error || r.status));
+      return { ok: r.ok, data: data };
+    }); }).catch(function(){
+      alert("No se han podido guardar las respuestas del cuestionario: sin conexión con el servidor.");
+    });
+  }
+
   // ---------------- screens ----------------
   function showUpload(){
     uploadScreen.classList.remove("hidden");
@@ -3657,8 +4065,42 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     });
   }
 
+  // v48 · «Cargar otra hoja» ya no sustituye el listado: se fusiona en el
+  // servidor (routes/roster.js, POST con fusionar) para no perder fotos,
+  // adjuntos, cuestionarios, bajas ni reposiciones.
+  //  · Alumno que viene en la hoja y estaba en la sección: se actualiza con
+  //    los datos de la hoja y conserva lo suyo (foto, archivos…).
+  //  · Alumno que viene en la hoja y está en Bajas: sigue en Bajas.
+  //  · Alumno de la sección que no viene en la hoja: se mantiene.
+  var rosterAntesDeRecargar = false;
+
+  function fusionarRosterEnServidor(rows){
+    return fetch("/api/roster", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ roster: rows, fusionar: true })
+    }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); });
+  }
+
+  function textoResumenRecarga(r){
+    var t = "Hoja nueva cargada. No se ha perdido nada:\n\n";
+    t += "• Actualizados con los datos de la hoja: " + r.actualizados + " (conservan su foto y sus archivos).\n";
+    if (r.nuevos) t += "• Nuevos que traía la hoja: " + r.nuevos + ".\n";
+    if (r.mantenidos) t += "• Se mantienen " + r.mantenidos + " que no venían en la hoja" +
+      (r.mantenidosRepo ? " (" + r.mantenidosRepo + " de ellos por reposición)" : "") +
+      ". Si alguno ya no está en la sección, dale de baja.\n";
+    if (r.siguenBaja) t += "• " + r.siguenBaja + (r.siguenBaja === 1 ? " de la hoja está dado de baja y sigue en Bajas" : " de la hoja están dados de baja y siguen en Bajas") +
+      " (para devolver a alguien a la sección, usa «Reincorporar»).\n";
+    t += "• Bajas conservadas: " + r.bajas + ". Alumnos de la sección con foto: " + r.fotos + ".";
+    return t;
+  }
+
   function confirmReload(){
-    if (confirm("Esto sustituirá el roster guardado en el servidor por el de una nueva hoja, para todos los usuarios. Los rebajes, sanciones y refuerzos ya registrados no se perderán. ¿Continuar?")){
+    if (confirm("Vas a cargar una hoja nueva.\n\n" +
+        "No se pierde nada: los alumnos que vengan en la hoja se actualizan con sus datos y conservan su foto y sus archivos; " +
+        "los que no vengan se mantienen en la sección; las bajas y los alumnos repuestos siguen como están. " +
+        "Rebajes, sanciones, refuerzos y actividades no se tocan.\n\n¿Continuar?")){
+      rosterAntesDeRecargar = true;
       state = { headers: [], rows: [], columns: [], meta: null, keys: {} };
       pendingFile = null;
       fileChipWrap.innerHTML = "";
@@ -3715,6 +4157,10 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     tabBtnConsultas.classList.toggle("active", tab === "consultas");
     tabBtnNotas.classList.toggle("active", tab === "notas");
     tabBtnHorasUa.classList.toggle("active", tab === "horas-ua");
+    tabBtnProgramas.classList.toggle("active", tab === "programas");
+    tabBtnPerdida.classList.toggle("active", tab === "perdida");
+    programasPanel.classList.toggle("hidden", tab !== "programas");
+    perdidaPanel.classList.toggle("hidden", tab !== "perdida");
     tabBtnUsuarios.classList.toggle("active", tab === "usuarios");
     rosterPanel.classList.toggle("hidden", tab !== "roster");
     rebajesPanel.classList.toggle("hidden", tab !== "rebajes");
@@ -3738,6 +4184,639 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   tabBtnConsultas.addEventListener("click", function(){ switchTab("consultas"); });
   tabBtnNotas.addEventListener("click", function(){ switchTab("notas"); });
   tabBtnHorasUa.addEventListener("click", function(){ switchTab("horas-ua"); });
+  tabBtnProgramas.addEventListener("click", function(){ switchTab("programas"); renderProgramas(); fetchProgramas().then(renderProgramas); });
+  tabBtnPerdida.addEventListener("click", function(){ switchTab("perdida"); prepararPerdida(); fetchProgramas().then(prepararPerdida); });
+
+  // =====================================================================
+  // PROGRAMAS SEMANALES y PÉRDIDA DE HORAS (v45)
+  // ---------------------------------------------------------------------
+  // Los programas semanales (Excel) se leen celda a celda usando las celdas
+  // combinadas del propio archivo. De cada programa se guarda lo leído:
+  // fechas de la semana y, por cada celda de la MATERIA, día, secciones que
+  // cubre, franja (inicio-fin) y texto. Nunca el archivo.
+  //  · IFM: celdas que dicen «IFM» o «CARRERA DE COMPAÑÍA». Las franjas
+  //    seguidas forman un bloque y cada bloque vale 1 h (la otra es la ducha).
+  //  · La sección de cada alumno sale de su número de protocolo (2º dígito).
+  // =====================================================================
+  var PROGRAMAS_KEY = "seccion3_programas_v1";
+  // Servidor: la lista se guarda en el servidor (routes/programas.js), no en
+  // el navegador. Se carga al entrar y al abrir las pestañas que la usan.
+  var programasSemanales = [];
+  function fetchProgramas(){
+    return fetch("/api/programas").then(function(r){ return r.ok ? r.json() : { programas: programasSemanales }; })
+      .then(function(data){ programasSemanales = Array.isArray(data.programas) ? data.programas : []; })
+      .catch(function(){});
+  }
+  function persistProgramas(){
+    fetch("/api/programas", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ programas: programasSemanales })
+    }).then(function(r){
+      if (!r.ok) return r.json().then(function(d){ alert("No se han podido guardar los programas semanales en el servidor: " + (d.error || r.status)); });
+    }).catch(function(){ alert("No se han podido guardar los programas semanales: sin conexión con el servidor."); });
+    return true;
+  }
+
+  var PS_ROMANOS = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+  var PS_MESES = { ENE:1, FEB:2, MAR:3, ABR:4, MAY:5, JUN:6, JUL:7, AGO:8, SEP:9, SET:9, OCT:10, NOV:11, DIC:12 };
+  var PS_DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+
+  function psPad(n){ return (n < 10 ? "0" : "") + n; }
+  function psIso(y, m, d){ return y + "-" + psPad(m) + "-" + psPad(d); }
+  function psSumaDias(iso, n){
+    var p = iso.split("-").map(Number), t = Date.UTC(p[0], p[1] - 1, p[2]) + n * 86400000, d = new Date(t);
+    return psIso(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate());
+  }
+  function psDiaSemana(iso){ var p = iso.split("-").map(Number); return new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay(); } // 0 = domingo
+  function psLunes(iso){ var w = psDiaSemana(iso); return psSumaDias(iso, w === 0 ? -6 : 1 - w); }
+  function psHora(m){ return psPad(Math.floor(m / 60)) + ":" + psPad(m % 60); }
+  function psHoraCorta(m){ return psPad(Math.floor(m / 60)) + (m % 60 ? ":" + psPad(m % 60) : ""); }
+  function psFd(iso){ var p = iso.split("-"); return p[2] + "/" + p[1]; }
+  function psHorasTexto(min){ var h = Math.round(min / 6) / 10; return String(h).replace(".", ",") + " h"; }
+
+  // Sección del alumno: 2º dígito de su número de protocolo (33003 -> III).
+  function seccionDeNumero(numero){
+    var m = /^([1-9])([1-9])\d+/.exec(String(numero == null ? "" : numero).trim());
+    return m ? { cia: m[1], sec: m[2], sc: PS_ROMANOS[+m[2]] } : null;
+  }
+  function seccionDelListado(){
+    var i = (typeof computeSeccionInfo === "function") ? computeSeccionInfo() : null;
+    return i ? { cia: i.company, sec: i.section, sc: PS_ROMANOS[+i.section] } : null;
+  }
+
+  // «18 AL 22MAY26», «01AL05JUN26», «DEL 18 AL 22 MAYO DE 2026», «29 MAY AL 02 JUN 2026»
+  function psSemanaDesdeTexto(texto){
+    var t = " " + stripAccents(texto).replace(/[^0-9A-ZÑ]+/g, " ") + " ";
+    var re = /(\d{1,2})\s*([A-Z]{3,})?\s*AL\s*(\d{1,2})\s*(?:DE\s*)?([A-Z]{3,})\s*(?:DE\s*)?(\d{2,4})(?=\D)/g, m;
+    while ((m = re.exec(t))){
+      var mes2 = PS_MESES[m[4].slice(0, 3)];
+      var mes1 = m[2] ? PS_MESES[m[2].slice(0, 3)] : mes2;
+      if (!mes1 || !mes2) continue;
+      var anio = +m[5]; if (anio < 100) anio += 2000;
+      var d1 = +m[1], d2 = +m[3];
+      if (d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31) continue;
+      var ini = psIso(mes1 > mes2 ? anio - 1 : anio, mes1, d1), fin = psIso(anio, mes2, d2);
+      return { ini: ini, fin: fin };
+    }
+    return null;
+  }
+
+  function psTipo(texto){
+    var t = stripAccents(texto);
+    if (/(^|[^A-Z])I\.?F\.?M\.?([^A-Z]|$)/.test(t)) return "ifm";
+    if (/CARRERA\s+DE\s+COMPA/.test(t)) return "car";
+    return "";
+  }
+  function psParseHora(s){
+    s = s.replace(/[:.h]/g, "");
+    if (s.length === 3) s = "0" + s;
+    if (!/^\d{4}$/.test(s)) return null;
+    var h = +s.slice(0, 2), mi = +s.slice(2);
+    return (h > 24 || mi > 59) ? null : h * 60 + mi;
+  }
+
+  // ---------- lector de Excel ----------
+  function leerProgramaXlsx(buffer, nombreArchivo){
+    // cellStyles: para saber qué filas están ocultas (no salen en el papel)
+    var wb = XLSX.read(new Uint8Array(buffer), { type: "array", cellStyles: true });
+    var hoja = null, cab = null;
+    for (var si = 0; si < wb.SheetNames.length && !hoja; si++){
+      var ws0 = wb.Sheets[wb.SheetNames[si]];
+      if (!ws0 || !ws0["!ref"]) continue;
+      var rg0 = XLSX.utils.decode_range(ws0["!ref"]);
+      for (var r0 = rg0.s.r; r0 <= Math.min(rg0.e.r, rg0.s.r + 60) && !hoja; r0++){
+        for (var c0 = rg0.s.c; c0 <= Math.min(rg0.e.c, rg0.s.c + 30); c0++){
+          var cel0 = ws0[XLSX.utils.encode_cell({ r: r0, c: c0 })];
+          if (cel0 && /^HORARI/.test(stripAccents(cel0.w != null ? cel0.w : cel0.v))){ hoja = ws0; cab = { r: r0, c: c0 }; break; }
+        }
+      }
+    }
+    if (!hoja) return { ok: false, error: "no tiene la columna «HORARIO»: no parece un programa semanal." };
+    var ws = hoja, rg = XLSX.utils.decode_range(ws["!ref"]);
+    function txt(r, c){
+      var cel = ws[XLSX.utils.encode_cell({ r: r, c: c })];
+      if (!cel) return "";
+      var v = cel.w != null ? cel.w : cel.v;
+      return v == null ? "" : String(v).replace(/\s+/g, " ").trim();
+    }
+    // celdas combinadas: cada casilla apunta a su rango
+    var rangoDe = {};
+    (ws["!merges"] || []).forEach(function(m){
+      for (var r = m.s.r; r <= m.e.r; r++) for (var c = m.s.c; c <= m.e.c; c++) rangoDe[r + "," + c] = m;
+    });
+    function rango(r, c){ return rangoDe[r + "," + c] || { s: { r: r, c: c }, e: { r: r, c: c } }; }
+    var filasOcultas = {};
+    (ws["!rows"] || []).forEach(function(info, i){ if (info && info.hidden) filasOcultas[i] = true; });
+    function todoOculto(R){ for (var r = R.s.r; r <= R.e.r; r++) if (!filasOcultas[r]) return false; return true; }
+
+    // columnas de sección («I SC» … «V SC»)
+    var secciones = [], filaCab = cab.r;
+    for (var r1 = cab.r; r1 <= Math.min(rg.e.r, cab.r + 4); r1++){
+      for (var c1 = rg.s.c; c1 <= rg.e.c; c1++){
+        var mm = /^(I|II|III|IV|V|VI|VII|VIII|IX)\s*\.?\s*SC$/.exec(stripAccents(txt(r1, c1)));
+        if (!mm) continue;
+        var rr = rango(r1, c1);
+        if (rr.s.r !== r1 || rr.s.c !== c1) continue;
+        secciones.push({ sc: mm[1], c0: rr.s.c, c1: rr.e.c });
+        filaCab = Math.max(filaCab, rr.e.r);
+      }
+    }
+    if (!secciones.length) return { ok: false, error: "no se encuentran las columnas de sección (I SC, II SC…)." };
+    secciones.sort(function(a, b){ return a.c0 - b.c0; });
+    var cMin = secciones[0].c0, cMax = secciones[secciones.length - 1].c1;
+
+    // fechas de la semana: nombre del archivo y título
+    var titulo = "";
+    for (var r2 = rg.s.r; r2 < cab.r; r2++) for (var c2 = rg.s.c; c2 <= rg.e.c; c2++){ var t2 = txt(r2, c2); if (t2) titulo += " " + t2; }
+    var semNombre = psSemanaDesdeTexto(nombreArchivo || "");
+    var mt = /DEL\s+\d{1,2}.{0,30}?\d{4}/.exec(stripAccents(titulo));
+    var semTitulo = mt ? psSemanaDesdeTexto(mt[0]) : null;
+    var semana = semNombre || semTitulo;
+    if (!semana) return { ok: false, error: "no aparecen las fechas de la semana ni en el nombre del archivo ni en el título del programa." };
+    var avisos = [];
+    if (semNombre && semTitulo && (semNombre.ini !== semTitulo.ini || semNombre.fin !== semTitulo.fin)){
+      avisos.push("las fechas del nombre (" + psFd(semNombre.ini) + "–" + psFd(semNombre.fin) + ") y del título (" + psFd(semTitulo.ini) + "–" + psFd(semTitulo.fin) + ") no coinciden; se usan las del nombre");
+    }
+
+    // franjas (columna HORARIO) y días (columnas a su izquierda)
+    var franjas = [], dias = [];
+    for (var r3 = filaCab + 1; r3 <= rg.e.r; r3++){
+      var rh = rango(r3, cab.c);
+      if (rh.s.r === r3 && rh.s.c === cab.c && !todoOculto(rh)){
+        var mh = /^(\d{1,2}[:.h]?\d{2})\s*-\s*(\d{1,2}[:.h]?\d{2})/.exec(txt(r3, cab.c).replace(/\s+/g, ""));
+        if (mh){
+          var a = psParseHora(mh[1]), b = psParseHora(mh[2]);
+          if (a != null && b != null && b > a) franjas.push({ r0: rh.s.r, r1: rh.e.r, ini: a, fin: b });
+        }
+      }
+      for (var c3 = rg.s.c; c3 < cab.c; c3++){
+        var rd = rango(r3, c3);
+        if (rd.s.r !== r3 || rd.s.c !== c3 || todoOculto(rd)) continue;
+        var md = /^([LMXJVSD])\s*-?\s*(\d{1,2})$/.exec(stripAccents(txt(r3, c3)).replace(/\s+/g, ""));
+        if (md) dias.push({ r0: rd.s.r, r1: rd.e.r, letra: md[1], n: +md[2] });
+      }
+    }
+    if (!franjas.length) return { ok: false, error: "no se encuentran franjas horarias en la columna «HORARIO»." };
+    if (!dias.length) return { ok: false, error: "no se encuentran los días (L-18, M-19…) a la izquierda del horario." };
+    var LETRAS = "DLMXJVS";
+    dias.forEach(function(d){
+      for (var k = 0; k < 7; k++){
+        var f = psSumaDias(semana.ini, k);
+        if (+f.slice(8) === d.n){ d.fecha = f; break; }
+      }
+      if (!d.fecha) avisos.push("el día «" + d.letra + "-" + d.n + "» no cae en la semana " + psFd(semana.ini) + "–" + psFd(semana.fin));
+      else if (LETRAS.charAt(psDiaSemana(d.fecha)) !== d.letra) avisos.push("«" + d.letra + "-" + d.n + "» no corresponde a ese día de la semana");
+    });
+
+    // celdas de la MATERIA
+    var vistas = {}, celdas = [];
+    for (var r4 = filaCab + 1; r4 <= rg.e.r; r4++){
+      for (var c4 = cMin; c4 <= cMax; c4++){
+        var R = rango(r4, c4), key = R.s.r + "," + R.s.c;
+        if (vistas[key]) continue;
+        vistas[key] = true;
+        var texto = txt(R.s.r, R.s.c);
+        if (!texto || todoOculto(R)) continue;
+        var scs = secciones.filter(function(s){ return s.c1 >= R.s.c && s.c0 <= R.e.c; }).map(function(s){ return s.sc; });
+        var fr = franjas.filter(function(f){ return f.r0 <= R.e.r && f.r1 >= R.s.r; });
+        var ds = dias.filter(function(d){ return d.fecha && d.r0 <= R.e.r && d.r1 >= R.s.r; });
+        if (!scs.length || !fr.length) continue;
+        if (ds.length !== 1){ avisos.push("celda «" + texto.slice(0, 30) + "»: no se sabe a qué día corresponde"); continue; }
+        celdas.push({
+          fecha: ds[0].fecha, sc: scs,
+          ini: Math.min.apply(null, fr.map(function(f){ return f.ini; })),
+          fin: Math.max.apply(null, fr.map(function(f){ return f.fin; })),
+          texto: texto.slice(0, 200)
+        });
+      }
+    }
+    celdas.sort(function(x, y){ return x.fecha < y.fecha ? -1 : x.fecha > y.fecha ? 1 : x.ini - y.ini || x.fin - y.fin; });
+    return { ok: true, ini: semana.ini, fin: semana.fin, celdas: celdas, secciones: secciones.map(function(s){ return s.sc; }), avisos: avisos };
+  }
+
+  // ---------- IFM de un programa ----------
+  function psClave(c){ return c.fecha + "|" + c.ini + "|" + c.fin + "|" + c.sc.join(",") + "|" + c.texto.slice(0, 40); }
+  function psEsIfm(prog, c){
+    var k = psClave(c), cam = prog.cambios || {};
+    return Object.prototype.hasOwnProperty.call(cam, k) ? !!cam[k] : !!psTipo(c.texto);
+  }
+  function psCeldas(prog, fecha, sc){
+    return prog.celdas.filter(function(c){ return c.fecha === fecha && c.sc.indexOf(sc) !== -1; });
+  }
+  // Bloques de IFM de un día para una sección: franjas seguidas = 1 bloque = 1 h.
+  function psBloques(prog, fecha, sc){
+    var fr = psCeldas(prog, fecha, sc).filter(function(c){ return psEsIfm(prog, c); })
+      .map(function(c){ return { ini: c.ini, fin: c.fin, tipo: psTipo(c.texto) || "ifm" }; })
+      .sort(function(a, b){ return a.ini - b.ini; });
+    var bl = [];
+    fr.forEach(function(x){
+      var u = bl[bl.length - 1];
+      if (u && x.ini <= u.fin){ u.fin = Math.max(u.fin, x.fin); if (x.tipo === "ifm") u.tipo = "ifm"; }
+      else bl.push({ ini: x.ini, fin: x.fin, tipo: x.tipo });
+    });
+    return bl;
+  }
+  function psProgramaDe(fecha){
+    for (var i = 0; i < programasSemanales.length; i++){
+      var p = programasSemanales[i];
+      if (fecha >= p.ini && fecha <= psSumaDias(p.ini, 6)) return p;
+    }
+    return null;
+  }
+  function psDiasLaborables(p){ var out = []; for (var k = 0; k < 5; k++) out.push(psSumaDias(p.ini, k)); return out; }
+  function psOrdenar(){ programasSemanales.sort(function(a, b){ return a.ini < b.ini ? -1 : a.ini > b.ini ? 1 : 0; }); }
+
+  // ---------- pestaña «Programas semanales» ----------
+  var psFileInput = document.getElementById("psFileInput");
+  var psDrop = document.getElementById("psDrop");
+  var psMsgs = document.getElementById("psMsgs");
+  var psAbierta = null;
+
+  function psSeccionActual(){ return seccionDelListado(); }
+
+  function renderProgramas(){
+    psOrdenar();
+    var secc = psSeccionActual(), sc = secc ? secc.sc : null;
+    document.getElementById("psSecInfo").innerHTML = secc
+      ? '<span class="ps-lbl">Sección</span><b>' + sc + ' SC</b><span>Sale de los números de protocolo del listado: ' + secc.cia + 'ª compañía, ' + secc.sec + 'ª sección. En «Pérdida de horas» se usa la sección del número de cada alumno.</span>'
+      : '<span class="ps-lbl">Sección</span><b>—</b><span>Carga el listado para saber de qué sección es la IFM que se muestra.</span>';
+
+    var total = 0, faltan = 0;
+    for (var i = 1; i < programasSemanales.length; i++){
+      var dif = Math.round((Date.parse(programasSemanales[i].ini) - Date.parse(programasSemanales[i - 1].ini)) / 86400000 / 7);
+      if (dif > 1) faltan += dif - 1;
+    }
+    var filas = programasSemanales.map(function(p){
+      var horas = 0, chips = "";
+      if (sc) psDiasLaborables(p).forEach(function(f, k){
+        psBloques(p, f, sc).forEach(function(b){
+          horas++;
+          chips += '<span class="ps-pill ' + (b.tipo === "car" ? "ps-car" : "ps-ifm") + '">' + "LMXJV".charAt(k) + " " + psHoraCorta(b.ini) + "–" + psHoraCorta(b.fin) + (b.tipo === "car" ? " carrera" : "") + "</span>";
+        });
+      });
+      total += horas;
+      var corregido = Object.keys(p.cambios || {}).length > 0;
+      var abierta = psAbierta === p.id;
+      var html = '<tr class="' + (abierta ? "ps-abierta" : "") + '"><td><b>' + psFd(p.ini) + " – " + psFd(p.fin) + "</b><br><span class=\"ps-dim\">" + p.ini.slice(0, 4) + "</span></td>" +
+        '<td class="ps-dim ps-arch">' + escapeHtml(p.archivo || "") + "</td>" +
+        "<td>" + (sc ? (chips || '<span class="ps-dim">sin IFM</span>') : "—") + "</td>" +
+        "<td><b>" + (sc ? horas + " h" : "—") + "</b></td>" +
+        "<td>" + (corregido ? '<span class="ps-pill ps-man">Corregido a mano</span>' : '<span class="ps-pill ps-ok">Leído</span>') +
+        (p.avisos && p.avisos.length ? '<br><span class="ps-pill ps-warn" title="' + escapeHtml(p.avisos.join(" · ")) + '">' + p.avisos.length + (p.avisos.length === 1 ? " aviso" : " avisos") + "</span>" : "") + "</td>" +
+        '<td class="ps-acc"><button type="button" class="btn small ghost" data-psver="' + p.id + '">' + (abierta ? "Cerrar" : "Ver") + '</button> ' +
+        '<button type="button" class="btn small danger-ghost" data-psquitar="' + p.id + '">Quitar</button></td></tr>';
+      if (abierta) html += '<tr class="ps-abierta"><td colspan="6">' + psDetalle(p, sc) + "</td></tr>";
+      return html;
+    }).join("");
+    document.getElementById("psTbody").innerHTML = filas;
+    document.getElementById("psVacio").classList.toggle("hidden", programasSemanales.length > 0);
+    document.getElementById("psTablaWrap").classList.toggle("hidden", programasSemanales.length === 0);
+
+    var stats = [
+      { num: programasSemanales.length, lbl: "Semanas cargadas" },
+      { num: programasSemanales.length ? psFd(programasSemanales[0].ini) + " – " + psFd(programasSemanales[programasSemanales.length - 1].fin) : "—", lbl: "Periodo" },
+      { num: sc ? total + " h" : "—", lbl: "Horas de IFM" + (sc ? " · " + sc + " SC" : "") },
+      { num: faltan, lbl: "Semanas que faltan en el periodo" }
+    ];
+    document.getElementById("psStats").innerHTML = stats.map(function(s){
+      return '<div class="stat-card"><div class="num">' + escapeHtml(String(s.num)) + '</div><div class="lbl">' + escapeHtml(s.lbl) + '</div></div>';
+    }).join("");
+
+    document.querySelectorAll("[data-psver]").forEach(function(b){
+      b.addEventListener("click", function(){ var id = b.getAttribute("data-psver"); psAbierta = (psAbierta === id ? null : id); renderProgramas(); });
+    });
+    document.querySelectorAll("[data-psquitar]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = programasSemanales.filter(function(x){ return x.id === b.getAttribute("data-psquitar"); })[0];
+        if (!p) return;
+        if (!confirm("¿Quitar el programa de la semana del " + formatDateDisplay(p.ini) + " al " + formatDateDisplay(p.fin) + "?\n\nSus horas de IFM dejarán de contar en «Pérdida de horas». Se puede volver a cargar el archivo cuando se quiera.")) return;
+        programasSemanales = programasSemanales.filter(function(x){ return x !== p; });
+        if (psAbierta === p.id) psAbierta = null;
+        persistProgramas();
+        renderProgramas();
+      });
+    });
+    document.querySelectorAll("[data-pscel]").forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var p = programasSemanales.filter(function(x){ return x.id === cb.getAttribute("data-psprog"); })[0];
+        if (!p) return;
+        var c = p.celdas[+cb.getAttribute("data-pscel")], k = psClave(c);
+        p.cambios = p.cambios || {};
+        if (cb.checked === !!psTipo(c.texto)) delete p.cambios[k]; else p.cambios[k] = cb.checked;
+        persistProgramas();
+        renderProgramas();
+      });
+    });
+  }
+
+  function psDetalle(p, sc){
+    if (!sc) return '<div class="ps-det ps-dim">Carga el listado para ver la IFM de la sección.</div>';
+    var html = '<div class="ps-det"><h4>Lo leído para la ' + sc + ' SC · semana del ' + psFd(p.ini) + '</h4>' +
+      '<div class="ps-dim">Marca o desmarca «Cuenta como IFM» para corregir una celda; la semana queda como corregida a mano. Las celdas «todas las secciones» son de toda la compañía.</div>' +
+      (p.avisos && p.avisos.length ? '<div class="ps-msg mal">Avisos al leerlo: ' + escapeHtml(p.avisos.join(" · ")) + '</div>' : '') +
+      '<div class="ps-dias">';
+    psDiasLaborables(p).forEach(function(f, k){
+      var bl = psBloques(p, f, sc);
+      html += '<div class="ps-dia"><div class="ps-cab"><span>' + PS_DIAS[k] + " " + psFd(f) + "</span><span>" + (bl.length ? bl.length + " h IFM" : "") + "</span></div>";
+      var cs = psCeldas(p, f, sc).sort(function(a, b){ return a.ini - b.ini || a.fin - b.fin; });
+      if (!cs.length) html += '<div class="ps-dim">Sin nada en el programa.</div>';
+      cs.forEach(function(c){
+        var on = psEsIfm(p, c), t = psTipo(c.texto), cambiada = Object.prototype.hasOwnProperty.call(p.cambios || {}, psClave(c));
+        html += '<div class="ps-celda' + (on ? (t === "car" ? " car" : " ifm") : "") + (cambiada ? " cambiada" : "") + '">' +
+          '<span class="ps-hora">' + psHora(c.ini) + "–" + psHora(c.fin) + (c.sc.length > 1 && c.sc.length >= (p.secciones || []).length ? ' <span class="ps-todas">· todas las secciones</span>' : "") + "</span>" +
+          '<span class="ps-txt">' + escapeHtml(c.texto.slice(0, 90)) + (c.texto.length > 90 ? "…" : "") + "</span>" +
+          '<label><input type="checkbox" data-psprog="' + p.id + '" data-pscel="' + p.celdas.indexOf(c) + '"' + (on ? " checked" : "") + "> Cuenta como IFM</label></div>";
+      });
+      html += "</div>";
+    });
+    return html + "</div></div>";
+  }
+
+  function psMensajes(lista){
+    psMsgs.innerHTML = lista.map(function(m){
+      return '<div class="ps-msg ' + (m.ok ? "ok" : "mal") + '">' + (m.ok ? "✔ " : "✖ ") + escapeHtml(m.texto) + "</div>";
+    }).join("");
+  }
+
+  function psCargarArchivos(files){
+    files = Array.prototype.slice.call(files || []);
+    if (!files.length) return;
+    if (typeof XLSX === "undefined"){ psMensajes([{ ok: false, texto: "No se pudo cargar el lector de hojas de cálculo de la aplicación." }]); return; }
+    var mensajes = [], pendientes = files.length, leidos = [];
+    files.forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var res;
+        try { res = leerProgramaXlsx(e.target.result, file.name); }
+        catch(err){ res = { ok: false, error: "no se ha podido leer (¿es una hoja de cálculo válida?)." }; }
+        res.archivo = file.name;
+        leidos.push(res);
+        if (--pendientes === 0) psTerminarCarga(leidos, mensajes);
+      };
+      reader.onerror = function(){
+        leidos.push({ ok: false, archivo: file.name, error: "error al leer el archivo." });
+        if (--pendientes === 0) psTerminarCarga(leidos, mensajes);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  function psTerminarCarga(leidos, mensajes){
+    var cargadas = [];
+    leidos.sort(function(a, b){ return (a.ini || "") < (b.ini || "") ? -1 : 1; }).forEach(function(res){
+      if (!res.ok){ mensajes.push({ ok: false, texto: "«" + res.archivo + "» no se ha cargado: " + res.error }); return; }
+      var previo = programasSemanales.filter(function(p){ return p.ini === res.ini; })[0];
+      if (previo){
+        var ok = confirm("Ya hay un programa de la semana del " + formatDateDisplay(res.ini) + " al " + formatDateDisplay(res.fin) +
+          " («" + previo.archivo + "»).\n\n¿Sustituirlo por «" + res.archivo + "»?" +
+          (Object.keys(previo.cambios || {}).length ? "\n\nSe perderán las correcciones hechas a mano en esa semana." : ""));
+        if (!ok){ mensajes.push({ ok: false, texto: "«" + res.archivo + "» no se ha cargado: ya había un programa de esa semana y se ha conservado el anterior." }); return; }
+        programasSemanales = programasSemanales.filter(function(p){ return p !== previo; });
+      }
+      programasSemanales.push({
+        id: uid(), ini: res.ini, fin: res.fin, archivo: res.archivo, cargadoEl: new Date().toISOString(),
+        secciones: res.secciones, celdas: res.celdas, avisos: res.avisos, cambios: {}
+      });
+      cargadas.push(psFd(res.ini) + (previo ? " (sustituye al anterior)" : ""));
+      if (res.avisos.length) mensajes.push({ ok: false, texto: "«" + res.archivo + "» se ha cargado con " + res.avisos.length + (res.avisos.length === 1 ? " aviso: " : " avisos: ") + res.avisos.join(" · ") });
+    });
+    if (cargadas.length){
+      if (!persistProgramas()){
+        mensajes.unshift({ ok: false, texto: "No se ha podido guardar: el almacenamiento del navegador está lleno." });
+      } else {
+        mensajes.unshift({ ok: true, texto: (cargadas.length === 1 ? "Cargado 1 programa: semana del " : "Cargados " + cargadas.length + " programas: semanas del ") + cargadas.join(", ") + "." });
+      }
+    }
+    psMensajes(mensajes);
+    renderProgramas();
+  }
+
+  if (psFileInput){
+    document.getElementById("psElegirBtn").addEventListener("click", function(){ psFileInput.click(); });
+    psFileInput.addEventListener("change", function(){ psCargarArchivos(psFileInput.files); psFileInput.value = ""; });
+    psDrop.addEventListener("dragover", function(e){ e.preventDefault(); psDrop.classList.add("drag"); });
+    psDrop.addEventListener("dragleave", function(){ psDrop.classList.remove("drag"); });
+    psDrop.addEventListener("drop", function(e){ e.preventDefault(); psDrop.classList.remove("drag"); psCargarArchivos(e.dataTransfer && e.dataTransfer.files); });
+  }
+
+  // ---------- pestaña «Pérdida de horas» ----------
+  var phCadeteInput = document.getElementById("phCadeteInput");
+  var phCadeteList = document.getElementById("phCadeteList");
+  var phCadetePreview = document.getElementById("phCadetePreview");
+  var phCadeteHint = document.getElementById("phCadeteHint");
+  var phDesde = document.getElementById("phDesde");
+  var phHasta = document.getElementById("phHasta");
+  var phResultado = document.getElementById("phResultado");
+  var phAlumno = null, phMarcadas = {};
+
+  function buildPerdidaCadetOptions(){
+    if (!phCadeteList) return;
+    var k = state.keys;
+    phCadeteList.innerHTML = (state.rows || []).map(function(row){
+      var pel = getVal(row, k.peloton);
+      return '<option value="' + escapeHtml(getVal(row, k.numero) + " — " + [getVal(row, k.ape1), getVal(row, k.ape2)].filter(Boolean).join(" ") + ", " + getVal(row, k.nombre) + (pel ? " (Pelotón " + pel + ")" : "")) + '">';
+    }).join("");
+  }
+
+  function prepararPerdida(){
+    buildPerdidaCadetOptions();
+    if (programasSemanales.length){
+      psOrdenar();
+      if (!phDesde.value) phDesde.value = programasSemanales[0].ini;
+      if (!phHasta.value) phHasta.value = programasSemanales[programasSemanales.length - 1].fin;
+    }
+    renderPerdida();
+  }
+
+  function phCategoriasDe(r){
+    var out = [];
+    CATEGORY_DEFS.forEach(function(c){
+      if (r.categorias && r.categorias[c.key]) out.push(c.key);
+      else if (r.total && !r.categorias && c.key !== "cama") out.push(c.key);
+    });
+    return out;
+  }
+  function phRebajesDe(numero){ return rebajes.filter(function(r){ return String(r.numero) === String(numero); }); }
+  function phCatsDelDia(rbs, fecha){
+    var out = [];
+    rbs.forEach(function(r){
+      var fin = r.fechaFin || "9999-12-31";
+      if (fecha >= r.fechaInicio && fecha <= fin) phCategoriasDe(r).forEach(function(c){ if (out.indexOf(c) === -1) out.push(c); });
+    });
+    return out;
+  }
+  function phEtiquetaCat(key){ var d = CATEGORY_DEFS.filter(function(c){ return c.key === key; })[0]; return d ? d.label : key; }
+
+  // Duración de una actividad: la celda del programa de ese día (para la
+  // sección del alumno) que empieza por la primera palabra de su nombre.
+  function phDuracion(a, sc){
+    var p = psProgramaDe(a.fecha);
+    if (!p) return { motivo: "no hay programa de esa semana" };
+    var clave = stripAccents(a.nombre).split(/\s+/)[0];
+    var cs = psCeldas(p, a.fecha, sc).filter(function(c){ return clave && stripAccents(c.texto).indexOf(clave) === 0; });
+    if (!cs.length) return { motivo: "no consta en el programa" };
+    var ini = Math.min.apply(null, cs.map(function(c){ return c.ini; })), fin = Math.max.apply(null, cs.map(function(c){ return c.fin; }));
+    return { ini: ini, fin: fin, min: fin - ini, texto: cs[0].texto };
+  }
+  function phEstadoActividad(a, numero, rbs){
+    var cats = phCatsDelDia(rbs, a.fecha).filter(function(c){ return phMarcadas[c]; }).map(phEtiquetaCat);
+    var part = a.participantes || [];
+    if (part.length){
+      return part.some(function(n){ return String(n) === String(numero); })
+        ? { e: "si", txt: "Realizada · figura como participante" }
+        : { e: "no", txt: "No realizada · no figura como participante" + (cats.length ? " (rebaje: " + cats.join(", ") + ")" : "") };
+    }
+    if (cats.length) return { e: "no", txt: "No realizada · rebajado ese día (" + cats.join(", ") + ") · sin participantes registrados" };
+    return { e: "sin", txt: "Sin datos · no hay participantes registrados ni rebaje ese día" };
+  }
+
+  function renderPerdida(){
+    if (!phResultado) return;
+    var aviso = document.getElementById("phAviso");
+    if (!programasSemanales.length){
+      aviso.textContent = "No hay ningún programa semanal cargado: cárgalos en la pestaña «Programas semanales».";
+      aviso.className = "ph-aviso warn"; phResultado.classList.add("hidden"); return;
+    }
+    if (!phAlumno){ aviso.textContent = ""; phResultado.classList.add("hidden"); return; }
+    var k = state.keys, numero = getVal(phAlumno, k.numero), secc = seccionDeNumero(numero);
+    if (!secc){
+      aviso.textContent = "El número " + numero + " no permite saber la sección (el 2º dígito es la sección)."; aviso.className = "ph-aviso error";
+      phResultado.classList.add("hidden"); return;
+    }
+    var desde = phDesde.value, hasta = phHasta.value;
+    if (!desde || !hasta || hasta < desde){
+      aviso.textContent = "Indica el periodo: la fecha «hasta» no puede ser anterior a «desde»."; aviso.className = "ph-aviso error";
+      phResultado.classList.add("hidden"); return;
+    }
+    var sc = secc.sc;
+    var sinSeccion = programasSemanales.filter(function(p){ return p.secciones && p.secciones.indexOf(sc) === -1; });
+    aviso.className = "ph-aviso" + (sinSeccion.length ? " warn" : "");
+    aviso.textContent = "Sección " + sc + " (2º dígito de su número: " + numero + ")." +
+      (sinSeccion.length ? " Ojo: " + sinSeccion.length + " programa(s) no tienen la columna «" + sc + " SC»." : "");
+
+    var rbs = phRebajesDe(numero);
+    // IFM día a día dentro del periodo
+    var dias = [], f, total = 0, no = 0;
+    for (f = desde; f <= hasta; f = psSumaDias(f, 1)){
+      var p = psProgramaDe(f), wd = psDiaSemana(f);
+      if (wd === 0 || wd === 6) continue;
+      var bl = p ? psBloques(p, f, sc) : [];
+      var perdido = phCatsDelDia(rbs, f).some(function(c){ return phMarcadas[c]; });
+      total += bl.length; if (perdido) no += bl.length;
+      dias.push({ fecha: f, prog: !!p, bloques: bl, perdido: perdido, enRebaje: phCatsDelDia(rbs, f).length > 0 });
+    }
+    // categorías presentes en sus rebajes dentro del periodo
+    var cats = [];
+    rbs.forEach(function(r){
+      var fin = r.fechaFin || "9999-12-31";
+      if (r.fechaInicio > hasta || fin < desde) return;
+      phCategoriasDe(r).forEach(function(c){ if (cats.indexOf(c) === -1) cats.push(c); });
+    });
+    cats.sort(function(a, b){ return CATEGORY_DEFS.map(function(x){ return x.key; }).indexOf(a) - CATEGORY_DEFS.map(function(x){ return x.key; }).indexOf(b); });
+    // actividades con fecha dentro del periodo
+    var acts = actividades.filter(function(a){ return a.fecha && a.fecha >= desde && a.fecha <= hasta; })
+      .sort(function(a, b){ return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0; });
+    var cuenta = { si: [0, 0], no: [0, 0], sin: [0, 0] };
+    var actHtml = acts.map(function(a){
+      var st = phEstadoActividad(a, numero, rbs), d = phDuracion(a, sc);
+      cuenta[st.e][0]++; if (d.min) cuenta[st.e][1] += d.min;
+      return '<div class="ph-item ' + (st.e === "si" ? "si" : st.e === "no" ? "no" : "") + '"><div><div class="ph-t">' + escapeHtml(a.nombre) + ' <span class="ps-dim">· ' + formatDateDisplay(a.fecha) + '</span></div>' +
+        '<span class="ps-pill ' + (st.e === "si" ? "ps-ok" : st.e === "no" ? "ph-no" : "ph-gris") + '">' + escapeHtml(st.txt) + '</span>' +
+        (d.texto ? '<div class="ps-dim">En el programa: «' + escapeHtml(d.texto.slice(0, 45)) + (d.texto.length > 45 ? "…" : "") + '»</div>' : '') +
+        '</div><div class="ph-h">' + (d.min ? psHorasTexto(d.min) + '<div class="ps-dim">' + psHora(d.ini) + "–" + psHora(d.fin) + "</div>" : '<span class="ps-pill ph-gris">' + escapeHtml(d.motivo) + "</span>") + "</div></div>";
+    }).join("") || '<div class="ps-dim">No hay actividades con fecha en este periodo.</div>';
+
+    var catsHtml = cats.map(function(c){
+      var h = 0;
+      dias.forEach(function(d){ if (phCatsDelDia(rbs, d.fecha).indexOf(c) !== -1) h += d.bloques.length; });
+      var periodos = rbs.filter(function(r){ return phCategoriasDe(r).indexOf(c) !== -1; })
+        .map(function(r){ return psFd(r.fechaInicio) + (r.fechaFin && r.fechaFin !== r.fechaInicio ? "–" + psFd(r.fechaFin) : ""); }).join(", ");
+      return '<label class="ph-item' + (phMarcadas[c] ? " marcado" : "") + '"><input type="checkbox" data-phcat="' + c + '"' + (phMarcadas[c] ? " checked" : "") + '>' +
+        '<div><div class="ph-t">' + escapeHtml(phEtiquetaCat(c)) + '</div><div class="ps-dim">Rebaje: ' + escapeHtml(periodos) + '</div></div><div class="ph-h ph-rojo">−' + h + ' h</div></label>';
+    }).join("") || '<div class="ps-dim">Este alumno no tiene rebajes en el periodo.</div>';
+
+    // calendario por semanas
+    var cal = '<div class="ph-cal"><div class="ph-hd">Lun</div><div class="ph-hd">Mar</div><div class="ph-hd">Mié</div><div class="ph-hd">Jue</div><div class="ph-hd">Vie</div><div class="ph-hd">Semana</div>';
+    for (var lunes = psLunes(desde); lunes <= hasta; lunes = psSumaDias(lunes, 7)){
+      var tot = 0, nn = 0, hayProg = false;
+      for (var kk = 0; kk < 5; kk++){
+        var fd = psSumaDias(lunes, kk), d0 = dias.filter(function(x){ return x.fecha === fd; })[0], cont = "";
+        if (d0){
+          hayProg = hayProg || d0.prog;
+          d0.bloques.forEach(function(b){
+            tot++; if (d0.perdido) nn++;
+            var et = (b.tipo === "car" ? "CARRERA " : "IFM ") + psHoraCorta(b.ini) + "–" + psHoraCorta(b.fin);
+            cont += d0.perdido ? '<span class="ps-pill ph-no">' + et + ' · no realizada</span>' : '<span class="ps-pill ' + (b.tipo === "car" ? "ps-car" : "ps-ok") + '">' + et + "</span>";
+          });
+        }
+        acts.forEach(function(a){
+          if (a.fecha !== fd) return;
+          var st = phEstadoActividad(a, numero, rbs);
+          cont += '<span class="ps-pill ' + (st.e === "no" ? "ph-no" : st.e === "si" ? "ph-act" : "ph-gris") + '">' + escapeHtml(a.nombre) + (st.e === "no" ? " · no realizada" : st.e === "sin" ? " · sin datos" : "") + "</span>";
+        });
+        var fuera = fd < desde || fd > hasta;
+        cal += '<div class="ph-dia' + (d0 && d0.perdido ? " reb" : "") + (d0 && !d0.prog ? " sinprog" : "") + (fuera ? " fuera" : "") + '"><span class="ph-n"><span class="ph-wd">' + PS_DIAS[kk] + " </span>" + psFd(fd) + "</span>" + cont + "</div>";
+      }
+      cal += '<div class="ph-sem">Semana del ' + psFd(lunes) + (hayProg
+        ? "<b>" + (tot - nn) + " h IFM realizada" + (tot - nn === 1 ? "" : "s") + "</b>" + (nn ? '<span class="ph-rojo">' + nn + " h no realizada" + (nn === 1 ? "" : "s") + "</span>" : "")
+        : '<br><span class="ps-pill ps-warn">sin programa</span>') + "</div>";
+    }
+    cal += "</div>";
+
+    var nombre = [getVal(phAlumno, k.ape1), getVal(phAlumno, k.ape2)].filter(Boolean).join(" ") + ", " + getVal(phAlumno, k.nombre);
+    phResultado.innerHTML =
+      '<div class="ph-cabecera">' + escapeHtml(nombre) + ' · Nº ' + escapeHtml(numero) + ' · ' + sc + ' SC · del ' + formatDateDisplay(desde) + ' al ' + formatDateDisplay(hasta) + '</div>' +
+      '<div class="ph-grupo">IFM</div><div class="stat-row">' +
+        '<div class="stat-card"><div class="num">' + total + ' h</div><div class="lbl">Programadas (incluye la carrera de compañía)</div></div>' +
+        '<div class="stat-card ph-ok"><div class="num">' + (total - no) + ' h</div><div class="lbl">Realizadas</div></div>' +
+        '<div class="stat-card ph-mal"><div class="num">' + no + ' h</div><div class="lbl">No realizadas</div></div></div>' +
+      '<div class="ph-grupo">Actividades</div><div class="stat-row">' +
+        '<div class="stat-card ph-ok"><div class="num">' + cuenta.si[0] + '</div><div class="lbl">Realizadas · ' + psHorasTexto(cuenta.si[1]) + ' según programa</div></div>' +
+        '<div class="stat-card ph-mal"><div class="num">' + cuenta.no[0] + '</div><div class="lbl">No realizadas · ' + psHorasTexto(cuenta.no[1]) + ' según programa</div></div>' +
+        '<div class="stat-card"><div class="num">' + cuenta.sin[0] + '</div><div class="lbl">Sin datos (sin participantes registrados ni rebaje)</div></div></div>' +
+      '<div class="ph-cols">' +
+        '<div class="panel"><h3>Categorías de rebaje</h3><div class="panel-sub">Salen las que tiene este alumno en sus rebajes del periodo. Marca las que hacen perder la IFM: cada una dice cuántas horas resta, y un día que caiga en dos categorías marcadas se resta una vez.</div>' + catsHtml + '</div>' +
+        '<div class="panel"><h3>Actividades del periodo</h3><div class="panel-sub">Las de la pestaña Actividades que tienen fecha. El estado sale solo: de la lista de participantes y, si no hay lista, de los rebajes marcados. Las horas, del programa de ese día.</div>' + actHtml + '</div>' +
+      '</div>' +
+      '<div class="panel"><h3>Calendario</h3>' + cal +
+        '<div class="ps-dim" style="margin-top:8px;"><span class="ps-pill ps-ok">IFM</span> realizada · <span class="ps-pill ps-car">CARRERA</span> carrera de compañía (cuenta como IFM) · <span class="ps-pill ph-no">no realizada</span> · <span class="ps-pill ph-act">actividad realizada</span> · fondo rosado: día con rebaje de una categoría marcada · rayado: semana sin programa</div>' +
+        '<div class="form-actions ph-noprint" style="margin-top:12px;"><button type="button" class="btn ghost" id="phImprimirBtn">Imprimir</button></div></div>';
+    phResultado.classList.remove("hidden");
+
+    phResultado.querySelectorAll("[data-phcat]").forEach(function(cb){
+      cb.addEventListener("change", function(){ phMarcadas[cb.getAttribute("data-phcat")] = cb.checked; renderPerdida(); });
+    });
+    document.getElementById("phImprimirBtn").addEventListener("click", function(){
+      document.body.classList.add("print-perdida");
+      window.print();
+    });
+  }
+  window.addEventListener("afterprint", function(){ document.body.classList.remove("print-perdida"); });
+
+  if (phCadeteInput){
+    phCadeteInput.addEventListener("input", function(){
+      var val = phCadeteInput.value.trim();
+      var m = val.match(/^(\S+)\s*—/) || val.match(/^(\d+)$/);
+      var row = m ? findCadetByNumero(m[1]) : null;
+      if (row !== phAlumno) phMarcadas = {};   // al cambiar de alumno se empieza sin categorías marcadas
+      phAlumno = row;
+      if (row){
+        var k = state.keys, numero = getVal(row, k.numero);
+        phCadetePreview.innerHTML = avatarHtml(numero, "md") + '<span class="num">Nº ' + escapeHtml(numero) + '</span><span>' +
+          escapeHtml([getVal(row, k.ape1), getVal(row, k.ape2)].filter(Boolean).join(" ")) + ', ' + escapeHtml(getVal(row, k.nombre)) +
+          (getVal(row, k.peloton) ? ' · Pelotón ' + escapeHtml(getVal(row, k.peloton)) : '') + '</span>';
+        phCadetePreview.classList.add("show");
+        phCadeteHint.classList.add("hidden");
+      } else {
+        phCadetePreview.classList.remove("show");
+        phCadeteHint.classList.toggle("hidden", val === "");
+      }
+      renderPerdida();
+    });
+    phDesde.addEventListener("change", renderPerdida);
+    phHasta.addEventListener("change", renderPerdida);
+  }
   tabBtnUsuarios.addEventListener("click", function(){ switchTab("usuarios"); renderUsuarios(); });
 
   // ---------------- roster rendering ----------------
@@ -3748,9 +4827,16 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   // ---------------- compañía / sección automáticas (a partir del nº de protocolo) ----------------
   // Convención CEFOT-2: en el nº de protocolo, el 1er dígito indica la compañía
-  // (1 a 4) y el 2º dígito indica la sección (1 a 5). Ej.: 32004 -> 3ª CÍA, Sección 2.
+  // y el 2º dígito indica la sección (los programas llegan hasta la V SC, por
+  // eso se aceptan dígitos 1 a 9). Ej.: 32004 -> 3ª CÍA, Sección 2.
   function seccionOrdinal(digit){
     return digit + "ª";
+  }
+
+  // Cabecera de los informes: compañía sacada del listado (antes iba fija «3ª»).
+  function tituloUnidadInforme(){
+    var cia = (currentSeccionInfo && currentSeccionInfo.company) || "3";
+    return "CEFOT-2 · BAL/" + seccionOrdinal(cia) + " CÍA";
   }
 
   function computeSeccionInfo(){
@@ -3761,7 +4847,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var total = 0;
     state.rows.forEach(function(row){
       var raw = getVal(row, k.numero).trim();
-      var m = /^([1-4])([1-5])\d+/.exec(raw);
+      var m = /^([1-9])([1-9])\d+/.exec(raw);
       if (!m) return;
       total++;
       var key = m[1] + "|" + m[2];
@@ -3860,10 +4946,12 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     } else {
       metaNote.textContent = "";
     }
+    var nRepo = (state.rows || []).filter(function(r){ return r._reposicion; }).length;
+    if (nRepo) metaNote.textContent += " · " + nRepo + (nRepo === 1 ? " añadido" : " añadidos") + " por reposición";
 
     tableHead.innerHTML = "<th></th>" + state.columns.map(function(c){
       return "<th>" + escapeHtml(c.label || c.key) + "</th>";
-    }).join("") + (rosterVista === "bajas" ? "<th>BAJA</th>" : "") + "<th></th>";
+    }).join("") + (rosterVista === "bajas" ? "<th>BAJA</th>" : "") + '<th class="no-print"></th>';
 
     applySeccionBranding(computeSeccionInfo());
     applyRosterFilters();
@@ -3899,7 +4987,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     if (situacionFilter && situacionFilter.value){
       c.push({
         tipo: "situacion",
-        label: { "rebaje": "Con rebaje vigente", "sancion": "Con sanción", "sin-rebaje": "Sin rebaje vigente" }[situacionFilter.value]
+        label: { "rebaje": "Con rebaje vigente", "sancion": "Con sanción", "sin-rebaje": "Sin rebaje vigente", "reposicion": "Por reposición" }[situacionFilter.value]
       });
     }
     if (searchInput && searchInput.value.trim()) c.push({ tipo: "busqueda", label: "Búsqueda «" + searchInput.value.trim() + "»" });
@@ -3969,6 +5057,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         if (situacionVal === "rebaje" && !conRebaje) return false;
         if (situacionVal === "sin-rebaje" && conRebaje) return false;
         if (situacionVal === "sancion" && !conSancion) return false;
+        if (situacionVal === "reposicion" && !row._reposicion) return false;
       }
       if (!q) return true;
       for (var i=0;i<state.headers.length;i++){
@@ -3980,6 +5069,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     pintarStatsRoster(filtered);
     renderRosterRows(filtered);
     pintarChipsRoster(filtered);
+    rosterFiltradoActual = filtered;
   }
 
   function renderRosterRows(rows){
@@ -4009,6 +5099,11 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
           : '<button class="btn small danger-ghost" data-baja="' + escapeHtml(numero) + '">Baja</button>');
       return "<tr>" + fotoCell + state.columns.map(function(c){
         var v = getVal(row, c.key);
+        if (c.key === k.numero && row._reposicion){
+          return "<td>" + escapeHtml(v) + '<br><span class="repo-chapa" title="Añadido por reposición el ' +
+            escapeHtml(formatDateDisplay(String(row._reposicion.anadidoEl || "").slice(0, 10))) + '">Reposición · ' +
+            escapeHtml(formatDateDisplay(row._reposicion.fecha)) + "</span></td>";
+        }
         if (c.key === k.peloton && v !== ""){
           return '<td><span class="pelo-badge">' + escapeHtml(v) + "</span></td>";
         }
@@ -4019,7 +5114,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         return "<td>" + escapeHtml(v) + "</td>";
       }).join("") +
       (enBajas ? "<td>" + formatDateDisplay(row._bajaFecha || "") + "</td>" : "") +
-      '<td style="display:flex;gap:6px;"><button class="btn small ghost" data-ficha="' + escapeHtml(numero) + '">Ficha</button><button class="btn small ghost" data-historial="' + escapeHtml(numero) + '">Historial</button>' +
+      '<td class="no-print" style="display:flex;gap:6px;"><button class="btn small ghost" data-ficha="' + escapeHtml(numero) + '">Ficha</button><button class="btn small ghost" data-historial="' + escapeHtml(numero) + '">Historial</button>' +
       accionBajaHtml +
       '</td>' + "</tr>";
     }).join("");
@@ -4301,6 +5396,370 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       lines.push("El navegador se ha quedado sin espacio de almacenamiento a mitad del proceso. Elimina alguna foto o adjunto para liberar sitio y vuelve a intentarlo con el resto.");
     }
     alert(lines.join("\n"));
+  }
+
+  // ---- Imprimir el listado del Roster ----
+  // Imprime las filas que se ven ahora (con los filtros y la búsqueda que
+  // haya) y sólo las columnas que se marquen en el panel. Las columnas se
+  // eligen con independencia del filtro y la elección se recuerda.
+  var rosterImprimirBtn = document.getElementById("rosterImprimirBtn");
+  var rosterPrintHeader = document.getElementById("rosterPrintHeader");
+  var rosterPrintModal = document.getElementById("rosterPrintModal");
+  var rosterPrintCols = document.getElementById("rosterPrintCols");
+  var rosterPrintResumen = document.getElementById("rosterPrintResumen");
+  var rosterPrintHint = document.getElementById("rosterPrintHint");
+  var rosterPrintGo = document.getElementById("rosterPrintGo");
+  var PREF_COLS_OCULTAS = "seccion3_imprimir_ocultas";
+
+  // Columnas tal y como están en la tabla: la foto es la 1ª, luego las de la
+  // hoja cargada y, en la vista de bajas, la fecha de baja. (La última, la de
+  // los botones, no se imprime nunca.)
+  function columnasImprimibles(){
+    var cols = [{ id: "__foto", label: "Foto" }];
+    // Servidor: las claves son internas (numero, ape1…): se usa el rótulo de la tabla.
+    (state.columns || []).forEach(function(c){ cols.push({ id: c.key, label: c.label || c.key }); });
+    if (rosterVista === "bajas") cols.push({ id: "__baja", label: "Fecha de baja" });
+    return cols.map(function(c, i){ c.n = i + 1; return c; });
+  }
+  function leerOcultas(){
+    try {
+      var v = JSON.parse(localStorage.getItem(PREF_COLS_OCULTAS) || "[]");
+      return Array.isArray(v) ? v : [];
+    } catch (e) { return []; }
+  }
+  function guardarOcultas(lista){
+    try { localStorage.setItem(PREF_COLS_OCULTAS, JSON.stringify(lista)); } catch (e) {}
+  }
+  function marcadasEnPanel(){
+    return Array.prototype.filter.call(rosterPrintCols.querySelectorAll("input[type=checkbox]"), function(cb){ return cb.checked; });
+  }
+  function actualizarBotonImprimir(){
+    var hay = marcadasEnPanel().length > 0;
+    var filas = (rosterFiltradoActual || []).length;
+    rosterPrintHint.classList.toggle("hidden", hay);
+    rosterPrintGo.disabled = !hay || !filas;
+  }
+
+  function abrirPanelImpresion(){
+    var filas = (rosterFiltradoActual || []).length;
+    var criterios = criteriosRosterActivos();
+    var quien = rosterVista === "bajas" ? (filas === 1 ? "baja" : "bajas") : (filas === 1 ? "alumno" : "alumnos");
+    rosterPrintResumen.innerHTML = filas
+      ? "Se imprimirán <strong>" + filas + " " + quien + "</strong>" +
+        (criterios.length ? ", con los filtros: " + escapeHtml(criterios.join(" ∩ ")) + "." : " — listado completo, sin filtros.")
+      : "<strong>No hay nada que imprimir:</strong> ningún alumno cumple los filtros actuales.";
+    var ocultas = leerOcultas();
+    rosterPrintCols.innerHTML = columnasImprimibles().map(function(c){
+      return '<label><input type="checkbox" data-col="' + escapeHtml(c.id) + '"' + (ocultas.indexOf(c.id) === -1 ? " checked" : "") + '> ' + escapeHtml(c.label) + '</label>';
+    }).join("");
+    actualizarBotonImprimir();
+    rosterPrintModal.classList.remove("hidden");
+  }
+  function cerrarPanelImpresion(){ rosterPrintModal.classList.add("hidden"); }
+
+  function construirCabeceraImpresionRoster(){
+    var filas = rosterFiltradoActual || [];
+    var criterios = criteriosRosterActivos();
+    var k = state.keys || {};
+    var unidad = (document.getElementById("brandTitle") || {}).textContent || "";
+    var titulo = rosterVista === "bajas" ? "Personal dado de baja" : "Listado del personal de la sección";
+    var palabra = rosterVista === "bajas" ? (filas.length === 1 ? " baja" : " bajas") : (filas.length === 1 ? " alumno" : " alumnos");
+    var total = filas.length + palabra;
+    if (k.sexo){
+      var nH = filas.filter(function(r){ return getVal(r, k.sexo).toUpperCase() === "H"; }).length;
+      var nM = filas.filter(function(r){ return getVal(r, k.sexo).toUpperCase() === "M"; }).length;
+      total += " · " + nH + " H / " + nM + " M";
+    }
+    var ahora = new Date();
+    rosterPrintHeader.innerHTML =
+      '<div class="roster-print-head">' +
+        '<div class="rp-unidad">' + escapeHtml(unidad) + '</div>' +
+        '<div class="rp-tit">' + escapeHtml(titulo) + '</div>' +
+        '<div class="rp-lin"><b>Filtros:</b> ' +
+          (criterios.length ? escapeHtml(criterios.join("  ∩  ")) : "sin filtros — listado completo") + '</div>' +
+        '<div class="rp-lin"><b>Total:</b> ' + escapeHtml(total) + '</div>' +
+        '<div class="rp-lin"><b>Impreso:</b> ' + ahora.toLocaleDateString("es-ES") + " a las " +
+          ahora.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) + '</div>' +
+      '</div>';
+  }
+
+  // Oculta en el papel las columnas desmarcadas (por su posición en la tabla).
+  function aplicarColumnasImpresion(ocultas){
+    var estilo = document.getElementById("rosterPrintColsStyle");
+    if (!estilo){
+      estilo = document.createElement("style");
+      estilo.id = "rosterPrintColsStyle";
+      document.head.appendChild(estilo);
+    }
+    estilo.textContent = columnasImprimibles().filter(function(c){ return ocultas.indexOf(c.id) !== -1; }).map(function(c){
+      return "@media print{body.print-roster #rosterTable tr > :nth-child(" + c.n + "){display:none !important;}}";
+    }).join("\n");
+  }
+
+  if (rosterImprimirBtn && rosterPrintModal){
+    rosterImprimirBtn.addEventListener("click", abrirPanelImpresion);
+    document.getElementById("rosterPrintCloseBtn").addEventListener("click", cerrarPanelImpresion);
+    document.getElementById("rosterPrintCancel").addEventListener("click", cerrarPanelImpresion);
+    document.getElementById("rosterPrintTodas").addEventListener("click", function(){
+      rosterPrintCols.querySelectorAll("input[type=checkbox]").forEach(function(cb){ cb.checked = true; });
+      actualizarBotonImprimir();
+    });
+    document.getElementById("rosterPrintNinguna").addEventListener("click", function(){
+      rosterPrintCols.querySelectorAll("input[type=checkbox]").forEach(function(cb){ cb.checked = false; });
+      actualizarBotonImprimir();
+    });
+    rosterPrintCols.addEventListener("change", actualizarBotonImprimir);
+    rosterPrintGo.addEventListener("click", function(){
+      if (rosterPrintGo.disabled) return;
+      // Se guardan las DESMARCADAS: así, una columna nueva de otra hoja sale marcada.
+      var ocultas = leerOcultas().filter(function(id){
+        return !rosterPrintCols.querySelector('input[data-col="' + id.replace(/"/g, '\\"') + '"]');
+      });
+      rosterPrintCols.querySelectorAll("input[type=checkbox]").forEach(function(cb){
+        if (!cb.checked) ocultas.push(cb.getAttribute("data-col"));
+      });
+      guardarOcultas(ocultas);
+      cerrarPanelImpresion();
+      construirCabeceraImpresionRoster();
+      aplicarColumnasImpresion(ocultas);
+      document.body.classList.add("print-roster");
+      window.print();
+    });
+    window.addEventListener("afterprint", function(){ document.body.classList.remove("print-roster"); });
+  }
+
+  // ---- Añadir alumnos por reposición (desde Excel) ----
+  // Añade al listado alumnos que se incorporan más tarde. Nunca cambia ni
+  // borra nada de lo que ya hay: si un número ya está en la sección o en
+  // Bajas, esa fila se salta. Cada alumno añadido guarda su fecha de
+  // reposición, que pone el usuario y no tiene por qué ser la de hoy.
+  var repoBtn = document.getElementById("rosterReposicionBtn");
+  var repoModal = document.getElementById("repoModal");
+  var repoFileInput = document.getElementById("repoFileInput");
+  var repoArchivo = document.getElementById("repoArchivo");
+  var repoFecha = document.getElementById("repoFecha");
+  var repoObs = document.getElementById("repoObs");
+  var repoColCheck = document.getElementById("repoColCheck");
+  var repoPreview = document.getElementById("repoPreview");
+  var repoAnadirBtn = document.getElementById("repoAnadirBtn");
+  var repoMsg = document.getElementById("repoMsg");
+  var repoPlan = null;
+
+  // Para casar columnas por nombre: sin acentos, sin espacios ni guiones.
+  function normCab(h){ return stripAccents(h).replace(/[\s_.\-]+/g, ""); }
+
+  function numerosExistentes(){
+    var k = state.keys || {}, act = {}, baj = {};
+    (state.rows || []).forEach(function(r){ var n = getVal(r, k.numero).trim(); if (n) act[n] = true; });
+    (state.bajas || []).forEach(function(r){ var n = getVal(r, k.numero).trim(); if (n) baj[n] = true; });
+    return { act: act, baj: baj };
+  }
+
+  function abrirReposicion(){
+    repoPlan = null;
+    repoFileInput.value = "";
+    repoArchivo.textContent = "Ningún archivo elegido";
+    repoArchivo.classList.add("vacio");
+    repoFecha.value = todayIso();
+    repoObs.value = "";
+    repoColCheck.className = "repo-colcheck hidden";
+    repoColCheck.textContent = "";
+    repoPreview.innerHTML = "";
+    repoAnadirBtn.disabled = true;
+    repoAnadirBtn.textContent = "Añadir alumnos";
+    repoMsg.textContent = "";
+    repoMsg.className = "form-msg";
+    repoModal.classList.remove("hidden");
+  }
+  function cerrarReposicion(){ repoModal.classList.add("hidden"); }
+
+  function planificarReposicion(parsed, archivo){
+    var k = state.keys || {};
+    var porNorm = {}, mapa = {}, faltan = [], usadas = {};
+    parsed.headers.forEach(function(h){ if (porNorm[normCab(h)] === undefined) porNorm[normCab(h)] = h; });
+    // Servidor: las columnas del listado son numero, ape1… (ROSTER_HEADERS);
+    // si el archivo usa otro nombre conocido (DESTINO para unidad…), vale.
+    var alias = resolveRosterKeys(parsed.headers);
+    state.headers.forEach(function(h){
+      var f = porNorm[normCab(h)];
+      if (f === undefined && alias[h]) f = alias[h];
+      if (f !== undefined){ mapa[h] = f; usadas[normCab(f)] = true; }
+      else faltan.push(h);
+    });
+    var sobran = parsed.headers.filter(function(h){ return !usadas[normCab(h)] && !/^COL\d+$/.test(h); });
+    var sinNumero = !k.numero || mapa[k.numero] === undefined;
+    var ex = numerosExistentes(), vistos = {};
+    var filas = parsed.rows.map(function(src){
+      var row = {};
+      state.headers.forEach(function(h){
+        row[h] = mapa[h] !== undefined ? String(src[mapa[h]] == null ? "" : src[mapa[h]]).trim() : "";
+      });
+      var num = k.numero ? getVal(row, k.numero).trim() : "";
+      var estado;
+      if (!num) estado = "sinnumero";
+      else if (ex.act[num]) estado = "seccion";
+      else if (ex.baj[num]) estado = "bajas";
+      else if (vistos[num]) estado = "repetido";
+      else { estado = "nuevo"; vistos[num] = true; }
+      return { row: row, numero: num, estado: estado };
+    });
+    return { archivo: archivo, filas: filas, faltan: faltan, sobran: sobran, sinNumero: sinNumero, hecho: false };
+  }
+
+  var REPO_ESTADOS = {
+    nuevo: ["ok", "Se añade"],
+    anadido: ["ok", "Añadido ✓"],
+    seccion: ["no", "Ya está en la sección · no se toca"],
+    bajas: ["no", "Está en Bajas · no se toca"],
+    repetido: ["no", "Repetido en el archivo · se salta"],
+    sinnumero: ["err", "Sin número · no se puede añadir"]
+  };
+
+  function pintarPlanReposicion(){
+    var p = repoPlan, k = state.keys || {};
+    if (!p) return;
+    if (p.sinNumero){
+      repoColCheck.className = "repo-colcheck err";
+      repoColCheck.textContent = "El archivo no tiene la columna del número (" + (k.numero === "numero" ? "NUMERO" : (k.numero || "NUMERO")) + "). Sin ella no se sabe quién es quién, así que no se añade nada.";
+      repoPreview.innerHTML = "";
+      repoAnadirBtn.disabled = true;
+      repoAnadirBtn.textContent = "Añadir alumnos";
+      repoMsg.textContent = "";
+      return;
+    }
+    var coinciden = state.headers.length - p.faltan.length;
+    // Servidor: rótulos legibles en vez de las claves internas (numero, ape1…).
+    var ROT = { numero: "Número", ape1: "Apellido 1", ape2: "Apellido 2", nombre: "Nombre", peloton: "Pelotón", sexo: "Sexo", unidad: "Unidad (Destino)", dni: "DNI", telefono: "Teléfono" };
+    function rot(h){ return ROT[h] || h; }
+    var txt = p.faltan.length
+      ? "Columnas: " + coinciden + " de " + state.headers.length + " coinciden con el listado. Faltan " + p.faltan.map(rot).join(", ") + ": quedarán en blanco."
+      : "✔ Columnas del archivo: las " + state.headers.length + " coinciden con las del listado (" + state.headers.map(rot).join(", ") + ").";
+    if (p.sobran.length) txt += " Sobran " + p.sobran.join(", ") + ": no se cargan.";
+    repoColCheck.className = "repo-colcheck " + (p.faltan.length || p.sobran.length ? "warn" : "ok");
+    repoColCheck.textContent = txt;
+
+    function nombre(r){
+      var ap = [getVal(r, k.ape1), getVal(r, k.ape2)].filter(Boolean).join(" ");
+      var no = getVal(r, k.nombre);
+      return ap && no ? ap + ", " + no : (ap || no || "—");
+    }
+    repoPreview.innerHTML = '<table class="repo-tabla"><thead><tr><th>Número</th><th>Alumno</th><th>Pelotón</th><th>Qué pasará</th></tr></thead><tbody>' +
+      p.filas.map(function(f){
+        var e = REPO_ESTADOS[f.estado];
+        return "<tr><td>" + escapeHtml(f.numero || "—") + "</td><td>" + escapeHtml(nombre(f.row)) + "</td><td>" +
+          escapeHtml((k.peloton && getVal(f.row, k.peloton)) || "—") + '</td><td><span class="repo-pill ' + e[0] + '">' + escapeHtml(e[1]) + "</span></td></tr>";
+      }).join("") + "</tbody></table>";
+
+    if (p.hecho) return;
+    var nuevos = p.filas.filter(function(f){ return f.estado === "nuevo"; }).length;
+    var saltan = p.filas.length - nuevos;
+    repoAnadirBtn.disabled = !nuevos || !repoFecha.value;
+    repoAnadirBtn.textContent = nuevos === 1 ? "Añadir 1 alumno" : "Añadir " + nuevos + " alumnos";
+    repoMsg.className = "form-msg" + (repoFecha.value ? "" : " error");
+    repoMsg.textContent = "De " + p.filas.length + (p.filas.length === 1 ? " fila: " : " filas: ") +
+      nuevos + (nuevos === 1 ? " se añade" : " se añaden") + " y " + saltan + (saltan === 1 ? " se salta." : " se saltan.") +
+      (repoFecha.value ? "" : " Falta la fecha de reposición.");
+  }
+
+  if (repoBtn && repoModal){
+    repoBtn.addEventListener("click", abrirReposicion);
+    document.getElementById("repoCloseBtn").addEventListener("click", cerrarReposicion);
+    document.getElementById("repoCancelBtn").addEventListener("click", cerrarReposicion);
+    document.getElementById("repoElegirBtn").addEventListener("click", function(){ repoFileInput.click(); });
+    repoFecha.addEventListener("change", pintarPlanReposicion);
+    repoFecha.addEventListener("input", pintarPlanReposicion);
+
+    repoFileInput.addEventListener("change", function(){
+      var file = repoFileInput.files && repoFileInput.files[0];
+      if (!file) return;
+      repoArchivo.textContent = file.name;
+      repoArchivo.classList.remove("vacio");
+      var reader = new FileReader();
+      reader.onload = function(e){
+        try {
+          var wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
+          var parsed = parseWorkbook(wb, file.name);
+          if (!parsed.rows.length) throw new Error("sin filas");
+          repoPlan = planificarReposicion(parsed, file.name);
+          pintarPlanReposicion();
+        } catch(err){
+          repoPlan = null;
+          repoPreview.innerHTML = "";
+          repoColCheck.className = "repo-colcheck hidden";
+          repoAnadirBtn.disabled = true;
+          repoAnadirBtn.textContent = "Añadir alumnos";
+          repoMsg.className = "form-msg error";
+          repoMsg.textContent = "No se ha podido leer «" + file.name + "» o no tiene filas de datos. Comprueba que es una hoja de cálculo válida (.xlsx, .ods o .csv).";
+        }
+      };
+      reader.onerror = function(){
+        repoMsg.className = "form-msg error";
+        repoMsg.textContent = "Error al leer el archivo.";
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    repoAnadirBtn.addEventListener("click", function(){
+      if (!repoPlan || repoPlan.hecho || !repoFecha.value) return;
+      // Se vuelve a comprobar justo antes de añadir, por si algo ha cambiado
+      // desde que se eligió el archivo.
+      var ex = numerosExistentes();
+      var anadidas = [];
+      repoPlan.filas.forEach(function(f){
+        if (f.estado !== "nuevo") return;
+        if (ex.act[f.numero]){ f.estado = "seccion"; return; }
+        if (ex.baj[f.numero]){ f.estado = "bajas"; return; }
+        ex.act[f.numero] = true;
+        anadidas.push(f);
+      });
+      if (!anadidas.length){ pintarPlanReposicion(); return; }
+      // Servidor: se añaden con su propia ruta, que también se salta a quien
+      // ya esté en la sección o en Bajas (nunca cambia ni borra nada).
+      repoAnadirBtn.disabled = true;
+      repoMsg.className = "form-msg";
+      repoMsg.textContent = "Guardando en el servidor…";
+      fetch("/api/roster/reposicion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filas: anadidas.map(function(f){ return f.row; }), fecha: repoFecha.value, archivo: repoPlan.archivo, obs: repoObs.value.trim() })
+      }).then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (!res.ok){
+          repoAnadirBtn.disabled = false;
+          repoMsg.className = "form-msg error";
+          repoMsg.textContent = (res.data && res.data.error) || "No se ha podido guardar en el servidor. No se ha añadido nadie.";
+          return;
+        }
+        var hechos = {};
+        (res.data.anadidos || []).forEach(function(row){ hechos[String(row.numero)] = row; });
+        anadidas = anadidas.filter(function(f){
+          var row = hechos[f.numero];
+          if (!row){ f.estado = "seccion"; return false; }
+          state.rows.push(row);
+          return true;
+        });
+        terminarReposicion(anadidas);
+      }).catch(function(){
+        repoAnadirBtn.disabled = false;
+        repoMsg.className = "form-msg error";
+        repoMsg.textContent = "Sin conexión con el servidor. No se ha añadido nadie.";
+      });
+    });
+
+    function terminarReposicion(anadidas){
+      anadidas.forEach(function(f){ f.estado = "anadido"; });
+      repoPlan.hecho = true;
+      renderRoster();
+      if (typeof buildCadetOptions === "function") buildCadetOptions();
+      if (typeof buildSanCadetOptions === "function") buildSanCadetOptions();
+      if (typeof buildRefCadetOptions === "function") buildRefCadetOptions();
+      pintarPlanReposicion();
+      repoAnadirBtn.disabled = true;
+      repoAnadirBtn.textContent = "Hecho";
+      repoMsg.className = "form-msg ok";
+      repoMsg.textContent = (anadidas.length === 1 ? "Añadido 1 alumno" : "Añadidos " + anadidas.length + " alumnos") +
+        " por reposición, con fecha " + formatDateDisplay(repoFecha.value) + ". Ya están en el Roster.";
+    }
   }
 
   searchInput.addEventListener("input", applyRosterFilters);
@@ -4939,71 +6398,57 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   });
 
   // ================= CUESTIONARIO DE INICIO DE CURSO (modal) =================
-  // Flujo pensado sin backend propio: 1) el profesor crea un formulario
-  // (Google Forms u otro) con las preguntas de la ficha personal; 2) desde
-  // aquí se genera, por alumno, un enlace de WhatsApp con el mensaje y el
-  // enlace al formulario ya escritos (WhatsApp no permite el envío
-  // automático real: hay que pulsar "enviar" en cada chat que se abre);
-  // 3) cuando hay respuestas, se importa la hoja de cálculo de resultados
-  // y se empareja cada fila con su alumno por el número de expediente.
+  // El formulario (Google Forms) ya está creado y los alumnos lo rellenan
+  // con el QR. Aquí se carga la hoja de respuestas y cada fila se adjunta a
+  // la ficha de su alumno por el número de protocolo (row._cuestionario).
+  // Cargar otra vez la hoja SOLO AÑADE: un alumno que ya tenía respuesta la
+  // conserva tal cual (como mucho se le añaden preguntas que antes no venían)
+  // y, si en el archivo aparece dos veces, vale la primera.
+  var cuestFiltro = "pendientes";
 
-  function normalizePhoneWa(raw){
-    var s = String(raw || "").trim();
-    if (!s) return "";
-    s = s.replace(/^00/, "+");
-    var hasPlus = s.charAt(0) === "+";
-    var digits = s.replace(/\D/g, "");
-    if (!digits) return "";
-    if (!hasPlus && digits.length === 9) digits = "34" + digits; // España por defecto si son 9 dígitos sin prefijo
-    return digits;
+  function cuestEstadoAlumnos(){
+    var hechos = [], pendientes = [];
+    (state.rows || []).forEach(function(row){
+      if (row._cuestionario && Object.keys(row._cuestionario).length) hechos.push(row); else pendientes.push(row);
+    });
+    return { hechos: hechos, pendientes: pendientes };
   }
 
-  function fillMensajePlantilla(tmpl, nombre, enlace){
-    return String(tmpl || "").split("{nombre}").join(nombre || "").split("{enlace}").join(enlace || "");
-  }
-
-  function buildWhatsappUrl(phoneDigits, message){
-    return "https://wa.me/" + phoneDigits + "?text=" + encodeURIComponent(message);
+  function cuestEtiquetaAlumno(row){
+    var k = state.keys;
+    return (k.numero ? getVal(row, k.numero) + " " : "") + nombreCompletoAlumno(row);
   }
 
   function renderCuestList(){
-    var k = state.keys;
-    var url = cuestUrlInput.value.trim();
-    var tmpl = cuestMensajeInput.value || CUEST_MSG_DEFAULT;
-    var conEnlace = 0, sinEnlace = 0;
-
+    var k = state.keys, est = cuestEstadoAlumnos();
+    document.getElementById("cuestNPend").textContent = "(" + est.pendientes.length + ")";
+    document.getElementById("cuestNHechos").textContent = "(" + est.hechos.length + ")";
+    document.getElementById("cuestNTodos").textContent = "(" + state.rows.length + ")";
+    cuestFiltroWrap.querySelectorAll("[data-cfiltro]").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-cfiltro") === cuestFiltro);
+    });
     if (!state.rows.length){
       cuestListBody.innerHTML = '<tr><td colspan="4">No hay alumnos cargados.</td></tr>';
-      cuestListSummary.textContent = "";
       return;
     }
-
-    var rowsHtml = state.rows.map(function(row){
-      var numero = k.numero ? getVal(row, k.numero) : "";
-      var nombreCompleto = nombreCompletoAlumno(row);
-      var nombrePila = k.nombre ? getVal(row, k.nombre) : nombreCompleto;
-      var telRaw = k.telefono ? getVal(row, k.telefono) : "";
-      var digits = normalizePhoneWa(telRaw);
-      var accionHtml;
-      if (digits && url){
-        conEnlace++;
-        var msg = fillMensajePlantilla(tmpl, nombrePila, url);
-        var waUrl = buildWhatsappUrl(digits, msg);
-        accionHtml = '<a class="btn small primary" href="' + escapeHtml(waUrl) + '" target="_blank" rel="noopener">Abrir WhatsApp</a>';
-      } else {
-        sinEnlace++;
-        accionHtml = '<span class="hint">' + (!url ? "falta el enlace del formulario" : "sin teléfono") + '</span>';
-      }
-      return "<tr><td>" + escapeHtml(numero) + "</td><td>" + escapeHtml(nombreCompleto) + "</td><td>" + escapeHtml(telRaw || "—") + "</td><td>" + accionHtml + "</td></tr>";
+    var lista = cuestFiltro === "pendientes" ? est.pendientes : cuestFiltro === "hechos" ? est.hechos : state.rows;
+    if (!lista.length){
+      cuestListBody.innerHTML = '<tr><td colspan="4">' + (cuestFiltro === "pendientes" ? "Todos los alumnos lo han rellenado." : "Todavía no hay ninguna respuesta cargada.") + '</td></tr>';
+      return;
+    }
+    cuestListBody.innerHTML = lista.map(function(row){
+      var hecho = row._cuestionario && Object.keys(row._cuestionario).length;
+      var estado = hecho
+        ? '<span class="cuest-pill si">Hecho' + (row._cuestionarioFecha ? " · cargado el " + escapeHtml(formatDateDisplay(row._cuestionarioFecha)) : "") + '</span>'
+        : '<span class="cuest-pill no">Pendiente</span>';
+      return "<tr><td>" + escapeHtml(k.numero ? getVal(row, k.numero) : "") + "</td><td>" + escapeHtml(nombreCompletoAlumno(row)) +
+        "</td><td>" + escapeHtml(k.peloton ? getVal(row, k.peloton) : "") + "</td><td>" + estado + "</td></tr>";
     }).join("");
-
-    cuestListBody.innerHTML = rowsHtml;
-    cuestListSummary.textContent = conEnlace + " listo(s) para enviar · " + sinEnlace + " sin teléfono o sin enlace configurado";
   }
 
   function openCuestModal(){
-    cuestUrlInput.value = localStorage.getItem(CUEST_URL_KEY) || "";
-    cuestMensajeInput.value = localStorage.getItem(CUEST_MSG_KEY) || CUEST_MSG_DEFAULT;
+    cuestResultado.innerHTML = "";
+    cuestFiltro = "pendientes";
     renderCuestList();
     cuestModal.classList.remove("hidden");
   }
@@ -5018,14 +6463,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   document.addEventListener("keydown", function(e){
     if (e.key === "Escape" && !cuestModal.classList.contains("hidden")) closeCuestModal();
   });
-
-  cuestUrlInput.addEventListener("input", function(){
-    try { localStorage.setItem(CUEST_URL_KEY, cuestUrlInput.value); } catch(err){}
-    renderCuestList();
-  });
-  cuestMensajeInput.addEventListener("input", function(){
-    try { localStorage.setItem(CUEST_MSG_KEY, cuestMensajeInput.value); } catch(err){}
-    renderCuestList();
+  cuestFiltroWrap.querySelectorAll("[data-cfiltro]").forEach(function(b){
+    b.addEventListener("click", function(){ cuestFiltro = b.getAttribute("data-cfiltro"); renderCuestList(); });
   });
 
   cuestImportBtn.addEventListener("click", function(){
@@ -5037,7 +6476,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var file = cuestImportInput.files && cuestImportInput.files[0];
     if (!file) return;
     if (typeof XLSX === "undefined"){
-      alert("No se pudo cargar la librería de hojas de cálculo (xlsx). Comprueba tu conexión a internet e inténtalo de nuevo.");
+      cuestMostrarError("No se pudo cargar el lector de hojas de cálculo de la aplicación.");
       return;
     }
     var reader = new FileReader();
@@ -5045,87 +6484,155 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       try {
         var data = new Uint8Array(e.target.result);
         var wb = XLSX.read(data, { type: "array" });
-        procesarRespuestasCuestionario(wb);
+        procesarRespuestasCuestionario(wb, file.name);
       } catch(err){
         console.error(err);
-        alert("No se pudo leer el archivo de respuestas: " + (err && err.message ? err.message : err));
+        cuestMostrarError("No se ha podido leer «" + file.name + "»: " + (err && err.message ? err.message : err));
       }
     };
     reader.readAsArrayBuffer(file);
   });
 
-  function procesarRespuestasCuestionario(wb){
+  function cuestMostrarError(texto){
+    cuestResultado.innerHTML = '<div class="cuest-res mal"><b class="t">No se ha cargado nada</b>' + escapeHtml(texto) + '</div>';
+  }
+
+  function cuestDigitos(v){ return String(v == null ? "" : v).replace(/\D/g, ""); }
+
+  // Columna del número: primero por el nombre de la pregunta (protocolo,
+  // expediente, número —que no sea teléfono ni DNI—); si no, la columna cuyos
+  // valores coinciden con más números del listado.
+  function cuestColumnaNumero(headers, raw){
+    var norm = headers.map(function(h){ return stripAccents(h); });
+    var pruebas = [
+      function(h){ return h.indexOf("PROTOCOLO") !== -1; },
+      function(h){ return h.indexOf("EXPEDIENTE") !== -1; },
+      function(h){ return /N(U|Ú)MERO|^N[º°O]\b|^N\.?\s?[º°]/.test(h) && !/TELEF|MOVIL|DNI|NIE|DOCUMENTO|CUENTA|PIE|CALZADO/.test(h); }
+    ];
+    for (var t = 0; t < pruebas.length; t++){
+      for (var i = 0; i < norm.length; i++) if (pruebas[t](norm[i])) return i;
+    }
+    var k = state.keys, nums = {};
+    (state.rows || []).concat(state.bajas || []).forEach(function(r){ var d = cuestDigitos(getVal(r, k.numero)); if (d) nums[d] = true; });
+    var mejor = -1, mejorN = 0;
+    for (var c = 0; c < headers.length; c++){
+      var n = 0;
+      for (var r = 1; r < raw.length; r++) if (raw[r] && nums[cuestDigitos(raw[r][c])]) n++;
+      if (n > mejorN){ mejorN = n; mejor = c; }
+    }
+    return mejor;
+  }
+
+  function procesarRespuestasCuestionario(wb, nombreArchivo){
     var ws = wb.Sheets[wb.SheetNames[0]];
-    var raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-    if (!raw.length){ alert("La hoja de respuestas está vacía."); return; }
+    var raw = ws ? XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false }) : [];
+    if (!raw.length){ cuestMostrarError("La hoja de respuestas está vacía."); return; }
+    if (!state.keys.numero || !state.rows.length){ cuestMostrarError("Primero hay que cargar el listado de alumnos."); return; }
 
     var headers = raw[0].map(function(h){ return String(h == null ? "" : h).trim(); });
-    var numeroColIdx = -1;
-    for (var i=0;i<headers.length;i++){
-      var norm = stripAccents(headers[i]).toUpperCase();
-      if (norm.indexOf("EXPEDIENTE") !== -1 || norm.indexOf("PROTOCOLO") !== -1 || norm.indexOf("NUMERO") !== -1){
-        numeroColIdx = i;
-        break;
-      }
-    }
-    if (numeroColIdx === -1){
-      alert("No se ha encontrado ninguna columna con el número de expediente/protocolo del alumno en la hoja de respuestas. Revisa que el formulario incluya esa pregunta (por ejemplo, 'Número de expediente / protocolo') y que sea la primera pregunta.");
+    // ¿Se ha elegido por error el propio listado de alumnos? Se reconoce
+    // porque sus cabeceras son las del listado cargado.
+    var cabListado = {};
+    (state.headers || []).forEach(function(h){ cabListado[stripAccents(String(h))] = true; });
+    var llenas = headers.filter(Boolean), iguales = llenas.filter(function(h){ return cabListado[stripAccents(h)]; }).length;
+    if (llenas.length && iguales >= 3 && iguales / llenas.length >= 0.6){
+      cuestMostrarError("«" + nombreArchivo + "» parece el listado de alumnos, no la hoja de respuestas del formulario. No se ha tocado nada.");
       return;
     }
+    var numeroColIdx = cuestColumnaNumero(headers, raw);
+    if (numeroColIdx === -1){
+      cuestMostrarError("No se encuentra la columna «Número de protocolo» en «" + nombreArchivo + "», ni ninguna columna con números del listado. ¿Es la hoja de respuestas del formulario?");
+      return;
+    }
+    // La marca temporal cambia en cada envío: no cuenta como «respuesta distinta».
+    var esMarcaTiempo = headers.map(function(h){ return /MARCA TEMPORAL|TIMESTAMP|FECHA Y HORA/.test(stripAccents(h)); });
 
     var k = state.keys;
-    var emparejadas = [], sinCoincidencia = [], sinNumero = [];
+    var porNumero = {}, porNumeroBaja = {};
+    state.rows.forEach(function(r){ var d = cuestDigitos(getVal(r, k.numero)); if (d) porNumero[d] = r; });
+    (state.bajas || []).forEach(function(r){ var d = cuestDigitos(getVal(r, k.numero)); if (d) porNumeroBaja[d] = r; });
 
-    for (var r=1; r<raw.length; r++){
+    var total = 0, nuevas = [], yaEstaban = 0, ampliadas = [], distintas = [], repetidasArchivo = [], sinAlumno = [], deBaja = [], sinNumero = [];
+    var vistosEnArchivo = {};
+    var cuestCambiadas = []; // servidor: filas cuyo cuestionario hay que guardar
+    var hoy = todayIso();
+
+    for (var r = 1; r < raw.length; r++){
       var line = raw[r];
       if (!line || line.every(function(c){ return String(c).trim() === ""; })) continue;
+      total++;
       var numeroResp = String(line[numeroColIdx] == null ? "" : line[numeroColIdx]).trim();
-      var numeroDigits = numeroResp.replace(/\D/g, "");
-      if (!numeroDigits){ sinNumero.push("Fila " + (r+1)); continue; }
-
-      var matchRow = null;
-      if (k.numero){
-        matchRow = state.rows.find(function(rr){
-          var rn = getVal(rr, k.numero).replace(/\D/g, "");
-          return rn && rn === numeroDigits;
-        });
+      var d = cuestDigitos(numeroResp);
+      if (!d){ sinNumero.push("fila " + (r + 1)); continue; }
+      var row = porNumero[d];
+      if (!row){
+        if (porNumeroBaja[d]) deBaja.push("Nº " + numeroResp + " (" + nombreCompletoAlumno(porNumeroBaja[d]) + ")");
+        else sinAlumno.push("Nº " + numeroResp + " (fila " + (r + 1) + ")");
+        continue;
       }
-      if (!matchRow){ sinCoincidencia.push("Nº " + numeroResp); continue; }
-
       var datos = {};
       headers.forEach(function(h, idx){
-        if (idx === numeroColIdx) return;
+        if (idx === numeroColIdx || !h) return;
         var v = line[idx] == null ? "" : String(line[idx]).trim();
         if (v !== "") datos[h] = v;
       });
-      matchRow._cuestionario = datos;
-      matchRow._cuestionarioFecha = todayIso();
-      emparejadas.push("Nº " + numeroResp + " — " + nombreCompletoAlumno(matchRow));
+
+      if (vistosEnArchivo[d]){
+        // Segunda vez en el mismo archivo: vale la primera.
+        repetidasArchivo.push(cuestEtiquetaAlumno(row));
+        continue;
+      }
+      vistosEnArchivo[d] = true;
+
+      var previo = row._cuestionario && Object.keys(row._cuestionario).length ? row._cuestionario : null;
+      if (!previo){
+        row._cuestionario = datos;
+        row._cuestionarioFecha = hoy;
+        nuevas.push(cuestEtiquetaAlumno(row));
+        cuestCambiadas.push(row);
+        continue;
+      }
+      // Ya tenía respuesta: no se sustituye nada; solo se añaden preguntas nuevas.
+      yaEstaban++;
+      var anadidas = 0, distinta = false;
+      Object.keys(datos).forEach(function(h){
+        if (!Object.prototype.hasOwnProperty.call(previo, h)){ previo[h] = datos[h]; anadidas++; }
+        else if (previo[h] !== datos[h] && !esMarcaTiempo[headers.indexOf(h)]) distinta = true;
+      });
+      if (anadidas) cuestCambiadas.push(row);
+      if (anadidas) ampliadas.push(cuestEtiquetaAlumno(row) + " (" + anadidas + (anadidas === 1 ? " pregunta)" : " preguntas)"));
+      if (distinta) distintas.push(cuestEtiquetaAlumno(row));
     }
 
-    if (emparejadas.length) persist();
-
+    if (nuevas.length || ampliadas.length) persist();
+    // Servidor: persist() no hace nada; las respuestas se guardan con su ruta
+    // (solo añade: nunca sustituye una respuesta ya guardada).
+    if (cuestCambiadas.length) guardarCuestionariosEnServidor(cuestCambiadas);
     renderRoster();
     if (fichaNumeroActual) renderFichaCuestionario(fichaNumeroActual);
 
-    var lines = [];
-    lines.push("Respuestas emparejadas con la ficha del alumno: " + emparejadas.length + " de " + (emparejadas.length + sinCoincidencia.length + sinNumero.length));
-    if (emparejadas.length){
-      lines.push("");
-      lines.push("Emparejadas correctamente:");
-      emparejadas.forEach(function(s){ lines.push("  ✓ " + s); });
+    function lista(arr){ return escapeHtml(arr.join(" · ")); }
+    var html = '<div class="cuest-res ok"><b class="t">Hoja cargada: «' + escapeHtml(nombreArchivo) + '» · columna del número: «' + escapeHtml(headers[numeroColIdx] || "") + '»</b><ul>' +
+      '<li>' + total + (total === 1 ? " respuesta" : " respuestas") + ' en el archivo</li>' +
+      '<li><b>' + nuevas.length + (nuevas.length === 1 ? " nueva adjuntada" : " nuevas adjuntadas") + '</b>' + (nuevas.length ? ": " + lista(nuevas) : "") + '</li>' +
+      (yaEstaban ? '<li>' + yaEstaban + (yaEstaban === 1 ? " ya estaba guardada: se conserva" : " ya estaban guardadas: se conservan") + ' tal cual' +
+        (ampliadas.length ? " (se han añadido preguntas que antes no venían en: " + lista(ampliadas) + ")" : "") + '</li>' : "") +
+      (distintas.length ? '<li>Con respuestas distintas a las guardadas (se mantiene la primera): ' + lista(distintas) + '</li>' : "") +
+      (repetidasArchivo.length ? '<li>Repetidas en el archivo (vale la primera): ' + lista(repetidasArchivo) + '</li>' : "") +
+      '</ul></div>';
+    if (sinAlumno.length || deBaja.length || sinNumero.length){
+      html += '<div class="cuest-res mal"><b class="t">No se han podido adjuntar</b><ul>' +
+        (sinAlumno.length ? '<li>Número que no está en el listado — revísalo: ' + lista(sinAlumno) + '</li>' : "") +
+        (deBaja.length ? '<li>Alumnos que están de baja: ' + lista(deBaja) + '</li>' : "") +
+        (sinNumero.length ? '<li>Sin número de protocolo: ' + lista(sinNumero) + '</li>' : "") + '</ul></div>';
     }
-    if (sinCoincidencia.length){
-      lines.push("");
-      lines.push("Sin alumno coincidente en la tabla cargada (revisa el número):");
-      sinCoincidencia.forEach(function(s){ lines.push("  · " + s); });
-    }
-    if (sinNumero.length){
-      lines.push("");
-      lines.push("Sin número de expediente en la respuesta (no se pudo emparejar):");
-      sinNumero.forEach(function(s){ lines.push("  · " + s); });
-    }
-    alert(lines.join("\n"));
+    var est = cuestEstadoAlumnos();
+    html += est.pendientes.length
+      ? '<div class="cuest-res warn"><b class="t">⚠ ' + (est.pendientes.length === 1 ? "Falta 1 alumno" : "Faltan " + est.pendientes.length + " alumnos") + ' por rellenar el cuestionario</b>' + lista(est.pendientes.map(cuestEtiquetaAlumno)) + '</div>'
+      : '<div class="cuest-res ok"><b class="t">✔ Todos los alumnos de la sección lo han rellenado.</b></div>';
+    cuestResultado.innerHTML = html;
+    cuestFiltro = "pendientes";
+    renderCuestList();
   }
 
   function renderHistorial(numero){
@@ -5304,6 +6811,55 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   // buscadores (sanciones, refuerzos, rebajes...). Con incluirBajas=true se
   // busca también entre las bajas, que es lo que necesitan la ficha y el
   // historial para poder consultarlas aunque el alumno ya no esté activo.
+  // ---------------- Fotografía del alumno (v40, la usan las novedades de la v48) ----------------
+  // Punto único desde el que se pinta la foto de un alumno en CUALQUIER
+  // pestaña. Si el alumno no tiene foto cargada se dibuja un círculo con sus
+  // iniciales, para que la fila no quede descuadrada. Busca también entre las
+  // bajas, de modo que un expediente antiguo sigue mostrando su retrato.
+  function datosAlumnoFoto(numero){
+    var num = String(numero == null ? "" : numero).trim();
+    var row = num ? findCadetByNumero(num, true) : null;
+    var k = state.keys || {};
+    var ape1 = row ? getVal(row, k.ape1) : "";
+    var ape2 = row ? getVal(row, k.ape2) : "";
+    var nombre = row ? getVal(row, k.nombre) : "";
+    var apellidos = [ape1, ape2].filter(Boolean).join(" ");
+    var completo = apellidos
+      ? (apellidos + (nombre ? ", " + nombre : ""))
+      : (nombre || ("Nº " + num));
+    var ini = ((nombre || "").charAt(0) + (ape1 || "").charAt(0)).trim() || num.slice(-2);
+    return {
+      numero: num, row: row, nombre: nombre, apellidos: apellidos, completo: completo,
+      peloton: row ? getVal(row, k.peloton) : "",
+      foto: (row && row._foto) || null,
+      iniciales: ini.toUpperCase(),
+      deBaja: !!(row && row._bajaFecha)
+    };
+  }
+  function fotoDeAlumno(numero){ return datosAlumnoFoto(numero).foto; }
+
+  // tam: "xs" filas de tabla · "sm" listas · "md" · "lg" tarjeta lateral
+  function avatarHtml(numero, tam){
+    var d = datosAlumnoFoto(numero);
+    var cls = "alu-foto-" + (tam || "xs");
+    var titulo = escapeHtml(d.completo);
+    if (d.foto){
+      return '<img class="alu-foto ' + cls + '" src="' + d.foto + '" alt="' + titulo + '" title="' + titulo + '">';
+    }
+    return '<span class="alu-foto-ini ' + cls + '" title="' + titulo + '" aria-label="' + titulo + '">' +
+           escapeHtml(d.iniciales) + '</span>';
+  }
+
+  // Foto + texto en una sola línea, para celdas de tabla y listas.
+  // "textoHtml" ya debe venir escapado; si se omite se usa el nombre completo.
+  function alumnoLineaHtml(numero, textoHtml, tam){
+    var d = datosAlumnoFoto(numero);
+    return '<span class="alu-linea">' + avatarHtml(numero, tam || "xs") +
+           '<span class="alu-linea-txt">' +
+           (textoHtml == null ? escapeHtml(d.completo) : textoHtml) +
+           '</span></span>';
+  }
+
   function findCadetByNumero(numero, incluirBajas){
     var k = state.keys;
     for (var i=0;i<state.rows.length;i++){
@@ -8056,6 +9612,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       }
 
       setF("expediente_numero", "Nº " + record.expediente);
+      rotularCompaniaPlantilla(pdfDoc, companiaDeAlumnos(alumnos));
 
       if (!multi){
         var al = alumnos[0] || {};
@@ -8157,6 +9714,47 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     } catch(err){
       console.error(err);
       alert("No se pudo generar el documento PDF: " + (err && err.message ? err.message : err));
+    }
+  }
+
+  // ---------- compañía en la cabecera del documento ----------
+  // La plantilla (Apéndice 2) trae escrito «BAL./3ª CÍA.» en su cabecera.
+  // Se pone la compañía de los alumnos del documento (1er dígito de su
+  // número; si hubiera mezcla, la de la mayoría; sin alumnos, la del
+  // listado). Se cambia la cifra dentro del propio contenido de la página:
+  // misma letra y mismo sitio, porque en Helvetica todas las cifras miden lo
+  // mismo, y al copiar el texto del PDF sale la compañía correcta.
+  function companiaDeAlumnos(alumnos){
+    var cuenta = {}, mejor = null;
+    (alumnos || []).forEach(function(al){
+      var s = seccionDeNumero(al && al.numero);
+      if (!s) return;
+      cuenta[s.cia] = (cuenta[s.cia] || 0) + 1;
+      if (!mejor || cuenta[s.cia] > cuenta[mejor]) mejor = s.cia;
+    });
+    return mejor || (currentSeccionInfo && currentSeccionInfo.company) || "3";
+  }
+  function rotularCompaniaPlantilla(pdfDoc, cia){
+    try {
+      if (!/^[1-9]$/.test(String(cia))) return false;
+      var ctx = pdfDoc.context, PDFName = PDFLib.PDFName;
+      var ref = pdfDoc.getPage(0).node.get(PDFName.of("Contents"));
+      var stream = ctx.lookup(ref);
+      if (!(stream instanceof PDFLib.PDFRawStream)) return false;
+      var bytes = PDFLib.decodePDFRawStream(stream).decode();
+      var txt = "";
+      for (var i = 0; i < bytes.length; i += 4096) txt += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+      var viejo = "(BAL./3\\252 C\\315A.)";
+      var pos = txt.indexOf(viejo);
+      if (pos === -1){ console.warn("Plantilla: no se encuentra «BAL./3ª CÍA.» en la cabecera"); return false; }
+      txt = txt.slice(0, pos) + "(BAL./" + cia + "\\252 C\\315A.)" + txt.slice(pos + viejo.length);
+      var nuevos = new Uint8Array(txt.length);
+      for (var j = 0; j < txt.length; j++) nuevos[j] = txt.charCodeAt(j) & 255;
+      ctx.assign(ref, ctx.flateStream(nuevos));
+      return true;
+    } catch(err){
+      console.warn("No se pudo poner la compañía en la cabecera del documento", err);
+      return false;
     }
   }
 
@@ -8499,7 +10097,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Fase: ' + escapeHtml(fase) + ' — ' + (invertir ? "Personal que NO ha participado" : "Participación en actividades") + '</div>';
     html += '<div class="consulta-report-meta">Total: ' + total + (invertir ? ' pendiente' : ' participaci') + (invertir ? (total === 1 ? "" : "s") : (total === 1 ? "ón" : "ones")) + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -8530,7 +10128,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Fase: ' + escapeHtml(fase) + ' — ' + escapeHtml([alumno.ape1, alumno.ape2].filter(Boolean).join(" ")) + ', ' + escapeHtml(alumno.nombre) + ' (Nº ' + escapeHtml(alumno.numero) + ')</div>';
     html += '<div class="consulta-report-meta">Ha participado en ' + hechas + ' de ' + data.length + ' actividades · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -8637,7 +10235,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function renderConsultaArrestoPendienteResultados(rows){
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Sanciones de arresto con fecha pendiente de fijar</div>';
     html += '<div class="consulta-report-meta">Total: ' + rows.length + ' sanci' + (rows.length === 1 ? "ón" : "ones") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -8683,7 +10281,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Sanciones de arresto con fecha pendiente de fijar — agrupado por expediente</div>';
     html += '<div class="consulta-report-meta">Total: ' + grupos.length + ' expediente' + (grupos.length === 1 ? "" : "s") + ' · ' + totalAlumnos + ' alumno' + (totalAlumnos === 1 ? "" : "s") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -8752,7 +10350,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Sanciones de trabajo' + (soloVencidos ? " — solo vencidos" : ": hechos, pendientes y vencidos") + '</div>';
     html += '<div class="consulta-report-meta">Total: ' + rows.length + ' trabajo' + (rows.length === 1 ? "" : "s") + (soloVencidos ? "" : (" · " + vencidosCount + " vencido" + (vencidosCount === 1 ? "" : "s"))) + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -8864,7 +10462,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function renderConsultaExpedienteResultados(data){
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Informe completo del expediente Nº ' + escapeHtml(data.query || "—") + '</div>';
     html += '</div>';
 
@@ -9027,7 +10625,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
     var html = '';
     html += '<div class="consulta-report-header">';
-    html += '<div class="consulta-report-title">CEFOT-2 · BAL/3ª CÍA</div>';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
     html += '<div class="consulta-report-sub">Personal con rebaje, refuerzo o arresto en el periodo del ' + formatDateDisplay(fechaIni) + ' al ' + formatDateDisplay(fechaFin) + '</div>';
     html += '<div class="consulta-report-meta">Total: ' + total + ' registro' + (total === 1 ? "" : "s") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
     html += '</div>';
@@ -9049,6 +10647,72 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   consFechaFin.addEventListener("change", validateConsFechasLive);
   if (consExpedienteInput){
     consExpedienteInput.addEventListener("input", actualizarValidacionConsultaExpediente);
+  }
+
+  // ---- Consulta «Reposiciones» ----
+  var consRepoWrap = document.getElementById("consRepoWrap");
+  var consRepoDesde = document.getElementById("consRepoDesde");
+  var consRepoHasta = document.getElementById("consRepoHasta");
+
+  // Alumnos añadidos por reposición, estén en la sección o ya de baja,
+  // filtrados por su FECHA DE REPOSICIÓN (no por el día en que se cargaron).
+  function computeConsultaReposiciones(desde, hasta){
+    var k = state.keys || {}, out = [];
+    function mete(row, situacion){
+      var r = row._reposicion;
+      if (!r) return;
+      if (desde && r.fecha < desde) return;
+      if (hasta && r.fecha > hasta) return;
+      out.push({
+        numero: getVal(row, k.numero), ape1: getVal(row, k.ape1), ape2: getVal(row, k.ape2),
+        nombre: getVal(row, k.nombre), peloton: getVal(row, k.peloton),
+        fecha: r.fecha, anadidoEl: r.anadidoEl, archivo: r.archivo, obs: r.obs, situacion: situacion
+      });
+    }
+    (state.rows || []).forEach(function(r){ mete(r, "En la sección"); });
+    (state.bajas || []).forEach(function(r){ mete(r, "Baja" + (r._bajaFecha ? " (" + formatDateDisplay(r._bajaFecha) + ")" : "")); });
+    out.sort(function(a, b){
+      if (a.fecha !== b.fecha) return a.fecha < b.fecha ? -1 : 1;
+      return String(a.numero).localeCompare(String(b.numero), "es", { numeric: true });
+    });
+    return out;
+  }
+
+  function renderConsultaReposiciones(lista, desde, hasta){
+    var periodo = desde && hasta ? "del " + formatDateDisplay(desde) + " al " + formatDateDisplay(hasta)
+      : desde ? "desde el " + formatDateDisplay(desde)
+      : hasta ? "hasta el " + formatDateDisplay(hasta)
+      : "(todas)";
+    var n = lista.length;
+    var html = '<div class="consulta-report-header">';
+    html += '<div class="consulta-report-title">' + tituloUnidadInforme() + '</div>';
+    html += '<div class="consulta-report-sub">Reposiciones ' + periodo + '</div>';
+    html += '<div class="consulta-report-meta">Total: ' + n + (n === 1 ? " alumno repuesto" : " alumnos repuestos") + ' · Generado el ' + formatDateDisplay(todayIso()) + '</div>';
+    html += '</div>';
+    var body;
+    if (!n){
+      body = '<div class="empty-state">' + (desde || hasta ? "No hay ninguna reposición en ese periodo." : "Todavía no se ha añadido ningún alumno por reposición.") + '</div>';
+    } else {
+      body = '<table class="consulta-table consulta-repo"><thead><tr>' +
+        '<th>Número</th><th>Alumno</th><th>Pelotón</th><th>Fecha de reposición</th><th>Añadido el</th><th>Archivo</th><th>Situación</th><th>Observaciones</th>' +
+        '</tr></thead><tbody>' +
+        lista.map(function(r){
+          return "<tr>" +
+            "<td>" + escapeHtml(String(r.numero || "—")) + "</td>" +
+            "<td>" + alumnoLineaHtml(r.numero, escapeHtml([r.ape1, r.ape2].filter(Boolean).join(" ")) + ", " + escapeHtml(r.nombre || "")) + "</td>" +
+            "<td>" + (r.peloton ? '<span class="pelo-badge">' + escapeHtml(r.peloton) + '</span>' : "—") + "</td>" +
+            "<td>" + formatDateDisplay(r.fecha) + "</td>" +
+            "<td>" + formatDateDisplay(String(r.anadidoEl || "").slice(0, 10)) + "</td>" +
+            "<td>" + escapeHtml(r.archivo || "—") + "</td>" +
+            "<td>" + escapeHtml(r.situacion) + "</td>" +
+            "<td>" + escapeHtml(r.obs || "—") + "</td>" +
+            "</tr>";
+        }).join("") +
+        "</tbody></table>";
+    }
+    html += '<div class="consulta-section"><h4>Reposiciones <span class="historial-count">' + n + '</span></h4>' + body + '</div>';
+    consResultados.innerHTML = html;
+    consResultadosWrap.classList.remove("hidden");
   }
 
   // ================= HOJA DE SEGUIMIENTO =================
@@ -9575,15 +11239,17 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var esTrabajos = tipo === "trabajos";
     var esExpediente = tipo === "expediente";
     var esSeguimiento = tipo === "seguimiento";
+    var esReposiciones = tipo === "reposiciones";
     consFechasWrap.classList.toggle("hidden", !esEstadoPeriodo);
     consActividadFaseWrap.classList.toggle("hidden", !esActividades);
     consArrestoPendienteWrap.classList.toggle("hidden", !esArrestoPendiente);
     consTrabajosWrap.classList.toggle("hidden", !esTrabajos);
     consExpedienteWrap.classList.toggle("hidden", !esExpediente);
+    consRepoWrap.classList.toggle("hidden", !esReposiciones);
     consSeguimientoWrap.classList.toggle("hidden", !esSeguimiento);
     // La hoja de seguimiento no usa el botón «Consultar»: se abre sola al
     // elegir al alumno, porque es una pantalla de edición, no un informe.
-    consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos || esExpediente));
+    consActions.classList.toggle("hidden", !(esEstadoPeriodo || esActividades || esArrestoPendiente || esTrabajos || esExpediente || esReposiciones));
     if (!esSeguimiento){
       segWrap.classList.add("hidden");
     } else {
@@ -9627,6 +11293,21 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
 
   consBuscarBtn.addEventListener("click", function(){
     var tipo = consTipoSelect.value;
+
+    if (tipo === "reposiciones"){
+      var dRepo = consRepoDesde.value, hRepo = consRepoHasta.value;
+      if (dRepo && hRepo && hRepo < dRepo){
+        consFormMsg.textContent = "La fecha «hasta» no puede ser anterior a «desde».";
+        consFormMsg.className = "form-msg error";
+        return;
+      }
+      var listaRepo = computeConsultaReposiciones(dRepo, hRepo);
+      renderConsultaReposiciones(listaRepo, dRepo, hRepo);
+      consFormMsg.textContent = "Consulta realizada: " + listaRepo.length + (listaRepo.length === 1 ? " alumno repuesto." : " alumnos repuestos.");
+      consFormMsg.className = "form-msg ok";
+      consImprimirBtn.disabled = false;
+      return;
+    }
 
     if (tipo === "expediente"){
       var vExpCons = actualizarValidacionConsultaExpediente();
@@ -10541,7 +12222,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   var currentUser = null;
 
   function arrancar(){
-    Promise.all([fetchRebajes(), fetchSanciones(), fetchRefuerzosServer(), fetchRosterFromServer(), fetchActividades()])
+    Promise.all([fetchRebajes(), fetchSanciones(), fetchRefuerzosServer(), fetchRosterFromServer(), fetchActividades(), fetchProgramas()])
       .then(function(results){
         var hayRoster = results[3];
         renderRebajesTab();
@@ -10705,7 +12386,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         html += '<button type="button" class="ua' + (open ? " open" : "") + '" data-act="ua" data-id="' + ua.id + '" aria-expanded="' + open + '">';
         html += '<span class="code">' + esc(ua.codigo) + "</span> ";
         html += r.pendientesHuecos ? '<span class="tag a">' + r.pendientesHuecos + " sin fecha</span>" : '<span class="tag o">Completa</span>';
-        html += "<div>" + esc(ua.titulo) + '</div><div class="muted" style="font-size:.75rem">T ' + fmt(ua.horasT) + " · P " + fmt(ua.horasP) + " · " + r.dadosHuecos + "/" + r.totalHuecos + " huecos fechados</div></button>";
+        html += "<div>" + esc(ua.titulo) + '</div><div class="muted uacnt" style="font-size:.75rem">T ' + fmt(ua.horasT) + " · P " + fmt(ua.horasP) + " · " + r.dadosHuecos + "/" + r.totalHuecos + " huecos fechados</div></button>";
         html += '<div class="slots">';
         if (ua.nota) html += '<p class="nota">' + esc(ua.nota) + "</p>";
         html += '<div class="lote"><label>Misma fecha para huecos de esta UA<input type="date" data-lote="' + ua.id + '"></label>';
@@ -10740,10 +12421,93 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     document.getElementById("cefot2-horas-ua-app").innerHTML = html;
   }
 
+  // ---- Actualización en su sitio -----------------------------------------
+  // Al fechar una hora NO se vuelve a dibujar el panel: se tocan sólo los
+  // contadores afectados. Si se repintara, la fila recién fechada
+  // desaparecería al instante con el filtro «Pendientes» y la lista se movería
+  // bajo el cursor justo cuando se están fechando muchas horas seguidas.
+  function buscarUa(id) {
+    var r = null;
+    modulo().unidades.forEach(function (ud) { ud.uas.forEach(function (u) { if (u.id === id) r = u; }); });
+    return r;
+  }
+  function buscarUd(uaId) {
+    var r = null;
+    modulo().unidades.forEach(function (ud) { ud.uas.forEach(function (u) { if (u.id === uaId) r = ud; }); });
+    return r;
+  }
+  function actualizarResumen(h) {
+    var app = document.getElementById("cefot2-horas-ua-app");
+    var inp = app.querySelector('[data-hueco="' + h + '"]');
+    if (!inp) { render(); return; }
+
+    // La propia casilla.
+    var lab = inp.closest(".hueco");
+    if (lab) lab.classList.toggle("ok", valida(estado.fechas[h]));
+
+    // La unidad de aprendizaje y su unidad didáctica.
+    var slots = inp.closest(".slots");
+    var btnUa = slots && slots.previousElementSibling;
+    var uaId = btnUa && btnUa.getAttribute("data-id");
+    var ua = uaId ? buscarUa(uaId) : null;
+    if (ua) {
+      var r = resumir(huecosUa(ua));
+      var tag = btnUa.querySelector(".tag");
+      if (tag) {
+        tag.className = "tag " + (r.pendientesHuecos ? "a" : "o");
+        tag.textContent = r.pendientesHuecos ? r.pendientesHuecos + " sin fecha" : "Completa";
+      }
+      var cnt = btnUa.querySelector(".uacnt");
+      if (cnt) cnt.textContent = "T " + fmt(ua.horasT) + " · P " + fmt(ua.horasP) + " · " + r.dadosHuecos + "/" + r.totalHuecos + " huecos fechados";
+      var ud = buscarUd(uaId), art = inp.closest("article.ud");
+      if (ud && art) {
+        var rUd = resumir(ud.uas.reduce(function (a, u) { return a.concat(huecosUa(u)); }, []));
+        var pUd = art.querySelector("header p");
+        if (pUd) pUd.textContent = rUd.pendientesHuecos ? rUd.pendientesHuecos + " huecos sin fecha" : "Unidad completa";
+      }
+    }
+
+    // El módulo: barra de progreso y porcentaje.
+    var m = modulo(), rM = resumir(huecosMod(m));
+    var pct = rM.totalHoras ? Math.round((rM.dadosHoras / rM.totalHoras) * 100) : 0;
+    var pctP = app.querySelector(".pct");
+    if (pctP) pctP.innerHTML = "<span>Impartidas " + fmt(rM.dadosHoras) + " de " + fmt(rM.totalHoras) + "</span><span>" + pct + " %</span>";
+    var bar = app.querySelector(".bar");
+    if (bar) {
+      bar.classList.toggle("full", pct === 100);
+      var relleno = bar.querySelector("i");
+      if (relleno) relleno.style.width = pct + "%";
+    }
+
+    // La chapa del botón de módulo.
+    var meta = app.querySelector(".mod-btn .meta");
+    if (meta) {
+      var spans = meta.querySelectorAll("span");
+      var sub = spans[spans.length - 1];
+      if (sub) {
+        sub.style.color = rM.pendientesHuecos ? "var(--alarm)" : "var(--ok)";
+        sub.textContent = rM.pendientesHuecos ? fmt(rM.pendientesHoras) + " sin fecha" : "Completo";
+      }
+    }
+
+    // La alarma de la fase.
+    var rF = resumir(modsFase().reduce(function (a, x) { return a.concat(huecosMod(x)); }, []));
+    var mf = metaFase();
+    var caja = app.querySelector("section.card.alarma, section.card.okbox");
+    if (caja) {
+      caja.className = "card " + (rF.pendientesHuecos ? "alarma" : "okbox");
+      var tit = caja.querySelector("h2"), txt = caja.querySelector("p");
+      if (tit) tit.textContent = rF.pendientesHuecos ? "Alarma de horas sin impartir" : "Fase sin horas pendientes";
+      if (txt) txt.textContent = rF.pendientesHuecos
+        ? "Fase " + mf.sigla + ": " + rF.pendientesHuecos + " huecos sin fecha (" + fmt(rF.pendientesHoras) + "). Módulo " + m.codigo + ": " + rM.pendientesHuecos + " pendientes (" + fmt(rM.pendientesHoras) + ")."
+        : "Fase " + mf.sigla + ": todas las horas tienen fecha.";
+    }
+  }
+
   document.getElementById("cefot2-horas-ua-app").addEventListener("click", function (ev) {
     var t = ev.target.closest("[data-act]");
     if (!t) {
-      if (!ev.target.closest(".mod-wrap")) { estado.menu = false; render(); }
+      if (estado.menu && !ev.target.closest(".mod-wrap")) { estado.menu = false; render(); }
       return;
     }
     var act = t.getAttribute("data-act"), id = t.getAttribute("data-id");
@@ -10826,7 +12590,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
     var anterior = estado.fechas[h];
     var nueva = ev.target.value;
     if (nueva) estado.fechas[h] = nueva; else delete estado.fechas[h];
-    render();
+    actualizarResumen(h);
     fetch(API_BASE + "/hueco", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -10835,7 +12599,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       .then(function (res) {
         if (!res.ok || !res.data || !res.data.fechas) throw new Error((res.data && res.data.error) || "");
         estado.fechas = res.data.fechas;
-        render();
+        actualizarResumen(h);
       })
       .catch(function (err) {
         if (anterior) estado.fechas[h] = anterior; else delete estado.fechas[h];

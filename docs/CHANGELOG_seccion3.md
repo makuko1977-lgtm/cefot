@@ -1316,6 +1316,47 @@ El resumen previo indica cuántos son nuevos y cuántos se omiten.
 
 ---
 
+## 2026-11-18 — Servidor: novedades de la v48
+
+Las mismas novedades de la v48 llevadas al servidor (`public/admin.html` y
+rutas), sin quitar nada de lo que ya había. En el servidor los datos son
+de la sección y no del navegador, así que algunas piezas tienen su propia
+ruta:
+
+| Novedad | En el servidor |
+|---|---|
+| Imprimir listado del Roster | Igual que en local; las columnas salen con su rótulo («Número», «Apellido 1»…). |
+| Añadir por reposición | `POST /api/roster/reposicion`. Solo añade números que no estén ni en la sección ni en Bajas; guarda la fecha de reposición (`_reposicion`). |
+| «Cargar otra hoja» | `POST /api/roster` con `fusionar`. Actualiza a los que vienen, conserva foto, adjuntos, cuestionario y reposición, mantiene a los que no vienen y deja en Bajas a los de baja. Muestra el resumen. |
+| Cuestionario de inicio de curso (QR) | `PATCH /api/roster/cuestionarios`. **Antes no se guardaba en el servidor**; ahora sí, y solo añade: nunca sustituye una respuesta ya guardada. |
+| Programas semanales y Pérdida de horas | `GET/PUT /api/programas` (nuevo `routes/programas.js`). Se guardan por sección, no en el navegador. |
+| Consulta «Reposiciones», TTE, cabeceras con la compañía real, Horas UA | Igual que en local. |
+| Copia de seguridad («Exportar copia») | Incluye los programas semanales. |
+
+**También en el HTML local:**
+- «Importar copia del servidor (añadir)» añade los programas semanales que
+  falten, por identificador y semana.
+- Nunca se sustituye uno ya cargado.
+
+**Corrección:** la consulta «Reposiciones» y la ficha del alumno en «Pérdida
+de horas» usan la foto del alumno. Las funciones de foto existían en el HTML
+local pero no en el servidor y daban error, así que se han añadido.
+
+**Comprobado:**
+- `npm test`: 37 pruebas correctas, 4 de ellas nuevas en
+  `tests/v48-servidor.test.js`.
+- Prueba real en el navegador con el servidor de demostración:
+  - Reposición: añade 2 y salta 1.
+  - Cuestionario: se guarda, y una segunda carga no sustituye nada y solo
+    añade la pregunta nueva.
+  - Programas: se guardan en el servidor.
+  - «Cargar otra hoja»: 26 activos y 1 baja, con la foto, la reposición y el
+    cuestionario conservados.
+  - Consulta de Reposiciones y Pérdida de horas.
+- Todas las pantallas por rol cargan sin errores.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí

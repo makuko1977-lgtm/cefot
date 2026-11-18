@@ -46,6 +46,7 @@ app.use("/api/superadmin", require("./routes/jefesEstudiosAdmin"));
 app.use("/api/estudios", require("./routes/estudios"));
 app.use("/api/capitan", require("./routes/capitan"));
 app.use("/api/seguimientos", require("./routes/seguimientos"));
+app.use("/api/programas", require("./routes/programas"));
 
 // ---------------- frontend estático ----------------
 app.use(express.static(path.join(__dirname, "public")));

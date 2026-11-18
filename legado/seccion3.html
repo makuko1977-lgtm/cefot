@@ -4835,7 +4835,19 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
            expRepetidos.join(", ") + ". Se añadirán igualmente (no se borra ninguno), pero quedarán dos partes con el mismo número. Revísalos después en la pestaña Sanciones.")
         : "";
 
-      var totalOmitidos = omitidosRoster + omitidasBajas + mSanciones.omitidos + mRebajes.omitidos + mRefuerzos.omitidos + mActividades.omitidos + horasUaOmitidas;
+      // Programas semanales del servidor (v48): se añaden los que aquí no hay
+      // (mismo id o misma semana ya cargada → se deja el de aquí).
+      var progSrv = Array.isArray(data.programasSemanales) ? data.programasSemanales : [];
+      var progSrvNuevos = [], progSrvOmitidos = 0, progSrvIds = {}, progSrvSem = {};
+      programasSemanales.forEach(function(p){ if (p && p.id) progSrvIds[p.id] = true; if (p && p.ini) progSrvSem[p.ini] = true; });
+      progSrv.forEach(function(p){
+        if (!p || !p.id || !p.ini) return;
+        if (progSrvIds[p.id] || progSrvSem[p.ini]){ progSrvOmitidos++; return; }
+        progSrvIds[p.id] = true; progSrvSem[p.ini] = true;
+        progSrvNuevos.push(p);
+      });
+
+      var totalOmitidos = omitidosRoster + omitidasBajas + mSanciones.omitidos + mRebajes.omitidos + mRefuerzos.omitidos + mActividades.omitidos + horasUaOmitidas + progSrvOmitidos;
 
       var resumen =
         "Alumnos nuevos en el roster: " + nuevosRoster.length + " (ya existían y se omiten: " + omitidosRoster + ")\n" +
@@ -4845,6 +4857,7 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
         "Refuerzos nuevos: " + mRefuerzos.nuevos.length + " (ya existían y se omiten: " + mRefuerzos.omitidos + ")\n" +
         "Actividades nuevas: " + mActividades.nuevos.length + " (ya existían y se omiten: " + mActividades.omitidos + ")\n" +
         "Fechas de Horas UA nuevas: " + horasUaNuevas.length + " (ya existían y se omiten: " + horasUaOmitidas + ")" +
+        (progSrv.length ? "\nProgramas semanales nuevos: " + progSrvNuevos.length + " (ya existían y se omiten: " + progSrvOmitidos + ")" : "") +
         (data.exportedAt ? ("\n\nExportada el: " + formatDateDisplay(String(data.exportedAt).slice(0,10))) : "") +
         avisoExp;
 
@@ -4882,6 +4895,8 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
       horasUaNuevas.forEach(function(key){ horasUaLocal[key] = horasUaImport[key]; });
       try { localStorage.setItem("cefot2_ua_fechas", JSON.stringify(horasUaLocal)); }
       catch(err){ console.warn("No se pudo guardar Horas UA fusionadas", err); }
+
+      if (progSrvNuevos.length){ programasSemanales = programasSemanales.concat(progSrvNuevos); persistProgramas(); }
 
       // Hojas de seguimiento del servidor: solo se añaden los alumnos y las
       // líneas que aquí no existen; lo ya editado en este navegador no se toca.
