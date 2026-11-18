@@ -4919,6 +4919,9 @@ if (window.dayjs && window.dayjs_plugin_customParseFormat) {
   function renderRoster(){
     var k = state.keys;
     var fuente = rosterFuenteActual();
+    // El capitán no cambia el roster: tampoco añade por reposición (el servidor lo rechaza).
+    var repoBtnRoster = document.getElementById("rosterReposicionBtn");
+    if (repoBtnRoster) repoBtnRoster.classList.toggle("hidden", esCapitanActuando());
 
     if (rosterBajasCount) rosterBajasCount.textContent = "(" + (state.bajas || []).length + ")";
 

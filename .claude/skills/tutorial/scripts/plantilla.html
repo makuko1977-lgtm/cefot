@@ -70,11 +70,11 @@ var IMAGENES = /*IMAGENES*/;
 var ROLES = [
   { id:"peloton", nombre:"Jefe de pelotón", desc:"Da de alta partes desde el móvil.", temas:[
       { grupo:"Partes" },
-      { id:"peloton_parte", titulo:"Dar de alta un parte", ref:"Manual PDF · apartado 13" },
-      { id:"peloton_multiple", titulo:"Parte múltiple (varios alumnos)", ref:"Manual PDF · apartado 13" },
+      { id:"peloton_parte", titulo:"Dar de alta un parte", ref:"Manual PDF · apartado 14" },
+      { id:"peloton_multiple", titulo:"Parte múltiple (varios alumnos)", ref:"Manual PDF · apartado 14" },
       { grupo:"Con permiso del jefe de sección" },
-      { id:"peloton_ficha", titulo:"Ficha y foto del alumno", ref:"Manual PDF · apartado 14" },
-      { id:"peloton_rebref", titulo:"Consultar rebajes y refuerzos", ref:"Manual PDF · apartado 14" } ]},
+      { id:"peloton_ficha", titulo:"Ficha y foto del alumno", ref:"Manual PDF · apartado 15" },
+      { id:"peloton_rebref", titulo:"Consultar rebajes y refuerzos", ref:"Manual PDF · apartado 15" } ]},
   { id:"seccion", nombre:"Jefe de sección", desc:"Gestión completa de su sección.", temas:[
       { grupo:"Sanciones" },
       { id:"seccion_sancion", titulo:"Poner una sanción (sin parte de pelotón)", ref:"Manual PDF · apartado 5" },
@@ -84,6 +84,10 @@ var ROLES = [
       { id:"seccion_quitar_alumno", titulo:"Quitar a un alumno de un expediente", ref:"Manual PDF · apartado 5.3" },
       { grupo:"Alumnos" },
       { id:"seccion_roster", titulo:"Roster, ficha e historial", ref:"Manual PDF · apartado 3" },
+      { id:"seccion_imprimir_roster", titulo:"Imprimir el listado", ref:"Manual PDF · apartado 3" },
+      { id:"seccion_reposicion", titulo:"Añadir alumnos por reposición", ref:"Manual PDF · apartado 3" },
+      { id:"seccion_cuestionario", titulo:"Cuestionario de inicio de curso (QR)", ref:"Manual PDF · apartado 3" },
+      { id:"seccion_cargar_hoja", titulo:"Cargar otra hoja (sin perder nada)", ref:"Manual PDF · apartado 3" },
       { id:"seccion_rebajes", titulo:"Rebajes", ref:"Manual PDF · apartado 4" },
       { id:"seccion_refuerzos", titulo:"Refuerzos", ref:"Manual PDF · apartado 6" },
       { grupo:"Otras" },
@@ -91,17 +95,19 @@ var ROLES = [
       { id:"seccion_consultas", titulo:"Consultas", ref:"Manual PDF · apartado 8" },
       { id:"seccion_seguimiento", titulo:"Hoja de seguimiento del alumno", ref:"Manual PDF · apartado 8" },
       { id:"seccion_horasua", titulo:"Horas UA", ref:"Manual PDF · apartado 10" },
-      { id:"seccion_usuarios", titulo:"Jefes de pelotón y permisos", ref:"Manual PDF · apartado 11" },
-      { id:"seccion_exportar", titulo:"Exportar copia al HTML local", ref:"Manual PDF · apartado 12" } ]},
+      { id:"seccion_programas", titulo:"Programas semanales", ref:"Manual PDF · apartado 11.1" },
+      { id:"seccion_perdida", titulo:"Pérdida de horas", ref:"Manual PDF · apartado 11.2" },
+      { id:"seccion_usuarios", titulo:"Jefes de pelotón y permisos", ref:"Manual PDF · apartado 12" },
+      { id:"seccion_exportar", titulo:"Exportar copia al HTML local", ref:"Manual PDF · apartado 13" } ]},
   { id:"capitan", nombre:"Capitán de compañía", desc:"Sus secciones y los arrestos.", temas:[
-      { id:"capitan_entrar", titulo:"Entrar en una sección y volver", ref:"Manual PDF · apartado 15" },
-      { id:"capitan_arresto", titulo:"Dar curso a un arresto", ref:"Manual PDF · apartado 16" },
-      { id:"capitan_protocolo", titulo:"Consultar un alumno por nº de protocolo", ref:"Manual PDF · apartado 16" },
-      { id:"capitan_historial", titulo:"Historial de arrestos", ref:"Manual PDF · apartado 16" },
+      { id:"capitan_entrar", titulo:"Entrar en una sección y volver", ref:"Manual PDF · apartado 16" },
+      { id:"capitan_arresto", titulo:"Dar curso a un arresto", ref:"Manual PDF · apartado 17" },
+      { id:"capitan_protocolo", titulo:"Consultar un alumno por nº de protocolo", ref:"Manual PDF · apartado 17" },
+      { id:"capitan_historial", titulo:"Historial de arrestos", ref:"Manual PDF · apartado 17" },
       { grupo:"Pendiente de las plantillas" },
       { titulo:"Rellenar e imprimir los documentos del arresto" } ]},
   { id:"estudios", nombre:"Jefe de estudios", desc:"Estadísticas sin datos personales.", temas:[
-      { id:"estudios_estadisticas", titulo:"Consultar las estadísticas", ref:"Manual PDF · apartado 18" } ]}
+      { id:"estudios_estadisticas", titulo:"Consultar las estadísticas", ref:"Manual PDF · apartado 19" } ]}
 ];
 
 var estado = { rol:null, demo:null, paso:0, auto:null };

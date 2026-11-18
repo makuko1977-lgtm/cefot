@@ -16,13 +16,17 @@ Si está Pillow (pip install pillow), las imágenes se convierten a WebP
 (calidad WEBP_CALIDAD, por defecto 75): ocupan ~50 % menos que el JPEG
 original. Sin Pillow se usan los JPEG tal cual.
 """
-import base64, glob, io, json, os, shutil, sys
+import base64, glob, io, json, os, shutil, subprocess, sys
 try:
     from PIL import Image
-except ImportError:
+    Image.new("RGB", (1, 1))  # comprueba que la parte compilada funciona
+except Exception:
     Image = None
 CALIDAD = int(os.environ.get("WEBP_CALIDAD", "75"))
-WEBP = Image is not None and CALIDAD > 0
+# Sin Pillow, se usa ImageMagick («convert») si está instalado y admite WebP.
+MAGICK = Image is None and shutil.which("convert") is not None and \
+    "WEBP" in subprocess.run(["convert", "-list", "format"], capture_output=True, text=True).stdout
+WEBP = (Image is not None or MAGICK) and CALIDAD > 0
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(AQUI, "..", "..", "..", ".."))
@@ -38,10 +42,14 @@ def leer_css():
 
 def bytes_imagen(ruta):
     """Devuelve (bytes, extensión, tipo MIME) de la imagen, en WebP si se puede."""
-    if WEBP:
+    if WEBP and Image is not None:
         b = io.BytesIO()
         Image.open(ruta).save(b, "WEBP", quality=CALIDAD, method=6)
         return b.getvalue(), ".webp", "image/webp"
+    if WEBP:
+        datos = subprocess.run(["convert", ruta, "-quality", str(CALIDAD), "-define", "webp:method=6", "webp:-"],
+                               capture_output=True, check=True).stdout
+        return datos, ".webp", "image/webp"
     ext = os.path.splitext(ruta)[1]
     return open(ruta, "rb").read(), ext, ("image/png" if ext == ".png" else "image/jpeg")
 

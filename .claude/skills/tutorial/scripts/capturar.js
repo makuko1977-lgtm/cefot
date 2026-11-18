@@ -381,7 +381,7 @@ demo('seccion_consultas', false, async ({ p, paso })=>{
   await entrar(p, 'JEFE33'); await sinAvisos(p);
   await paso('#tabBtnConsultas', 'Pestaña «Consultas»', 'Listados listos para imprimir.', {margen:6});
   await p.click('#tabBtnConsultas'); await p.waitForTimeout(800);
-  await paso('#consTipoSelect', 'Tipo de consulta', 'Elige qué quieres consultar: personal rebajado, en refuerzo o en arresto en un periodo; participantes en una actividad; arrestos con fecha pendiente; trabajos; o un expediente completo; o la <b>hoja de seguimiento</b> de un alumno. En el ejemplo, la primera.');
+  await paso('#consTipoSelect', 'Tipo de consulta', 'Elige qué quieres consultar: personal rebajado, en refuerzo o en arresto en un periodo; participantes en una actividad; arrestos con fecha pendiente; trabajos; o un expediente completo; la <b>hoja de seguimiento</b> de un alumno; o las <b>reposiciones</b>. En el ejemplo, la primera.');
   await p.selectOption('#consTipoSelect', 'estado_periodo'); await p.waitForTimeout(400);
   await paso('#consFechasWrap', 'Periodo', 'Indica la <b>fecha de inicio</b> y la <b>de fin</b> de la consulta.', {margen:4});
   await p.fill('#consFechaIni', mas(0)); await p.fill('#consFechaFin', mas(7)); await p.waitForTimeout(300);
@@ -597,6 +597,178 @@ demo('peloton_rebref', true, async ({ p, paso })=>{
 /*MAS_DEMOS*/
 
 // ---------------------------------------------------------------------------
+// ===========================================================================
+//  v48 · Novedades del jefe de sección (se graban al final: cambian el roster)
+// ===========================================================================
+// Crea un .xlsx dentro de la página con la librería de hojas de cálculo que ya
+// carga la aplicación. `filas` = lista de filas; `combinar` = rangos combinados.
+async function xlsxEnPagina(p, filas, combinar){
+  const b64 = await p.evaluate(([f, m])=>{
+    const ws = XLSX.utils.aoa_to_sheet(f);
+    if (m && m.length) ws['!merges'] = m.map(x=>({ s:{r:x[0],c:x[1]}, e:{r:x[2],c:x[3]} }));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Hoja1');
+    return XLSX.write(wb, { type:'base64', bookType:'xlsx' });
+  }, [filas, combinar || []]);
+  return Buffer.from(b64, 'base64');
+}
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const CAB_LISTADO = ['NUMERO','APE1','APE2','NOMBRE','PELOTON','SEXO','DESTINO','DNI','TELEFONO'];
+
+demo('seccion_imprimir_roster', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  await paso('#pelotonFilter', 'Filtra primero', 'Se imprime <b>lo que se ve</b> en el Roster. Filtra antes si quieres un listado parcial. En el ejemplo, el pelotón 2.');
+  await p.selectOption('#pelotonFilter', '2'); await p.waitForTimeout(500);
+  await paso('#rosterImprimirBtn', 'Imprimir listado', 'Pulsa <b>Imprimir listado…</b>.');
+  await p.click('#rosterImprimirBtn'); await p.waitForTimeout(700);
+  await paso('#rosterPrintResumen', 'Qué se imprime', 'La ventana dice <b>cuántos alumnos</b> salen y con qué filtros.', {margen:4});
+  await paso('#rosterPrintCols', 'Columnas', 'Marca las <b>columnas</b> que quieres en el papel (la foto incluida). <b>Todas</b> y <b>Ninguna</b> marcan o desmarcan de golpe. La elección se recuerda para la próxima vez.', {margen:4});
+  await p.locator('#rosterPrintCols input[data-col="dni"]').uncheck().catch(()=>{});
+  await p.locator('#rosterPrintCols input[data-col="telefono"]').uncheck().catch(()=>{}); await p.waitForTimeout(300);
+  await paso('#rosterPrintGo', 'Imprimir', 'Pulsa <b>Imprimir</b>: se abre el cuadro de impresión del navegador (papel o PDF). El listado lleva la cabecera de la unidad.');
+  await paso(null, 'Fin', '¡Hecho! Si no hay ninguna columna marcada o ningún alumno cumple los filtros, el botón <b>Imprimir</b> no se activa.');
+});
+
+demo('seccion_reposicion', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  const excel = await xlsxEnPagina(p, [CAB_LISTADO,
+    ['33001','Ficticio','Demo','Adrián','1','H','BAL','','600000100'],
+    ['33031','Repuesto','Ejemplo','Iván','2','H','BAL','','600000131'],
+    ['33032','Repuesta','Muestra','Marta','3','M','BAL','','600000132']]);
+  await paso('#rosterReposicionBtn', 'Añadir por reposición', 'Para alumnos que se incorporan con el curso empezado, pulsa <b>Añadir por reposición…</b>. No sustituye el listado: <b>solo añade</b>.');
+  await p.click('#rosterReposicionBtn'); await p.waitForTimeout(600);
+  await paso('#repoElegirBtn', 'Elige el Excel', 'Pulsa <b>Elegir Excel…</b> y elige la hoja con los alumnos nuevos. Debe tener las mismas columnas que el listado (al menos el número).');
+  await p.setInputFiles('#repoFileInput', { name:'reposicion_ficticia.xlsx', mimeType:XLSX_MIME, buffer:excel }); await p.waitForTimeout(900);
+  await paso('#repoFecha', 'Fecha de reposición', 'Indica la <b>fecha de reposición</b>: la de incorporación, que no tiene por qué ser la de hoy. Las <b>observaciones</b> son opcionales.');
+  await p.fill('#repoFecha', mas(-1)); await p.dispatchEvent('#repoFecha', 'change');
+  await p.fill('#repoObs', 'Reposición de ejemplo (datos ficticios)'); await p.waitForTimeout(400);
+  await paso('#repoPreview', 'Qué pasará', 'Antes de añadir, se ve fila a fila qué pasará: <b>Se añade</b>, o se salta porque <b>ya está en la sección</b>, en <b>Bajas</b> o repetido. Nunca se cambia a nadie.', {margen:4});
+  await paso('#repoAnadirBtn', 'Añadir', 'Pulsa <b>Añadir</b>. En el ejemplo se añaden 2 y se salta 1.');
+  await p.click('#repoAnadirBtn'); await p.waitForTimeout(1500);
+  await paso('#repoMsg', 'Añadidos', 'Los alumnos ya están en el Roster, con su fecha de reposición.', {margen:6});
+  await p.click('#repoCloseBtn'); await p.waitForTimeout(400);
+  await p.click('#rosterAdvToggle'); await p.waitForTimeout(400);
+  await paso('#situacionFilter', 'Ver los repuestos', 'En <b>Filtros avanzados</b> › Situación, <b>Por reposición</b> muestra solo los alumnos añadidos así.');
+  await p.selectOption('#situacionFilter', 'reposicion'); await p.waitForTimeout(600);
+  await verDesde(p, '#tableBody', 60);
+  await paso('#tableBody .repo-chapa', 'Marca «Reposición»', 'Junto a su número llevan la marca <b>Reposición</b> con la fecha.', {margen:3, sinScroll:true});
+  await arriba(p);
+  await paso('#tabBtnConsultas', 'Consulta «Reposiciones»', 'En <b>Consultas</b> hay un listado de todos los repuestos.', {margen:6});
+  await p.click('#tabBtnConsultas'); await p.waitForTimeout(700);
+  await p.selectOption('#consTipoSelect', 'reposiciones'); await p.waitForTimeout(400);
+  await paso('#consRepoWrap', 'Fechas (opcional)', 'Elige <b>Reposiciones</b>. Las fechas son opcionales y cuentan la <b>fecha de reposición</b>; sin fechas salen todos.', {margen:4});
+  await paso('#consBuscarBtn', 'Consultar', 'Pulsa <b>Consultar</b>.');
+  await p.click('#consBuscarBtn'); await p.waitForTimeout(1200);
+  await verDesde(p, '#consResultadosWrap');
+  await paso('#consResultados', 'Listado', 'Cada alumno repuesto con su fecha de reposición. Se puede <b>Imprimir</b>.', {margen:2});
+  await paso(null, 'Fin', '¡Hecho!');
+});
+
+demo('seccion_cuestionario', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  const excel = await xlsxEnPagina(p, [
+    ['Marca temporal','Número de protocolo','Grupo sanguíneo','¿Tienes carné de conducir?','Persona de contacto'],
+    ['16/11/2026 9:01','33001','A+','Sí','Contacto ficticio 1'],
+    ['16/11/2026 9:03','33002','0-','No','Contacto ficticio 2'],
+    ['16/11/2026 9:05','33003','B+','Sí','Contacto ficticio 3'],
+    ['16/11/2026 9:06','33005','AB+','No','Contacto ficticio 5'],
+    ['16/11/2026 9:08','39999','A-','No','Número mal escrito']]);
+  await paso('#rosterCuestBtn', 'Cuestionario de inicio de curso', 'En el Roster, pulsa <b>Cuestionario inicio de curso…</b>.');
+  await p.click('#rosterCuestBtn'); await p.waitForTimeout(700);
+  await paso('#cuestModal .modal-box ol, #cuestModal ol', 'Cómo funciona', 'El formulario de Google ya existe: los alumnos lo rellenan con el móvil escaneando su <b>código QR</b>. Cuando haya respuestas, descárgalas en Excel desde Google Forms (pestaña <b>Respuestas</b> › Ver en Hojas de cálculo › Archivo › Descargar).', {margen:4});
+  await paso('#cuestImportBtn', 'Cargar las respuestas', 'Pulsa <b>Cargar hoja de respuestas…</b> y elige el archivo. Debe tener la pregunta <b>«Número de protocolo»</b>.');
+  await p.setInputFiles('#cuestImportInput', { name:'respuestas_ficticias.xlsx', mimeType:XLSX_MIME, buffer:excel }); await p.waitForTimeout(1500);
+  await paso('#cuestResultado', 'Resultado', 'Cada respuesta se adjunta a la ficha de su alumno por el número. Se indica cuántas son <b>nuevas</b>, cuáles no se han podido adjuntar (número que no está en el listado) y <b>cuántos faltan</b> por rellenarlo.', {margen:4});
+  await paso('#cuestModal [data-cfiltro="hechos"]', 'Pendientes y hechos', 'Debajo, la lista de alumnos: <b>Pendientes</b>, <b>Hechos</b> o <b>Todos</b>.');
+  await p.click('#cuestModal [data-cfiltro="hechos"]'); await p.waitForTimeout(500);
+  await paso('#cuestListWrap', 'Hechos', 'Los que ya lo han rellenado.', {margen:4});
+  await p.click('#cuestCloseBtn'); await p.waitForTimeout(400);
+  await p.fill('#searchInput', '33001'); await p.waitForTimeout(600);
+  await p.click('#tableBody [data-ficha]'); await p.waitForTimeout(1000);
+  await paso('#fichaCuestBlock', 'En la ficha del alumno', 'Las respuestas se ven en su <b>Ficha</b>, con la fecha en que se cargaron.', {margen:4});
+  await paso(null, 'Fin', '¡Hecho! Se puede volver a cargar la hoja cuando haya más respuestas: <b>solo se añade lo nuevo</b>; lo ya guardado no se sustituye.');
+});
+
+demo('seccion_programas', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  // Programa semanal FICTICIO de la semana actual, con el formato que lee la aplicación.
+  const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const lun = new Date(hoy); lun.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+  const dia = n=>{ const d = new Date(lun); d.setDate(lun.getDate() + n); return d; };
+  const vie = dia(4), dd = d=>String(d.getDate()).padStart(2,'0');
+  const titulo = `PROGRAMA SEMANAL DEL ${dd(lun)} AL ${dd(vie)} DE ${MESES[vie.getMonth()]} DE ${vie.getFullYear()} (EJEMPLO FICTICIO)`;
+  const archivo = `PROGRAMA_${dd(lun)}AL${dd(vie)}${MESES[vie.getMonth()].slice(0,3)}${String(vie.getFullYear()).slice(2)}_ficticio.xlsx`;
+  const filas = [[titulo], ['DÍA','HORARIO','I SC','II SC','III SC','IV SC','V SC']], comb = [];
+  const FR = ['08:00-09:00','09:00-10:00','10:00-11:00','11:00-12:00'];
+  const LETRA = ['L','M','X','J','V'];
+  for (let d = 0; d < 5; d++){
+    const r0 = filas.length;
+    const materia = [
+      d === 2 ? 'CARRERA DE COMPAÑÍA' : 'I.F.M.',
+      d === 2 ? 'TIRO' : 'I.F.M.',
+      'TEORÍA FM-I', d === 4 ? 'ORDEN CERRADO' : 'TOPOGRAFÍA'];
+    FR.forEach((fr, i)=>{ filas.push([i === 0 ? LETRA[d] + '-' + dd(dia(d)) : '', fr, materia[i], '', '', '', '']); comb.push([r0 + i, 2, r0 + i, 6]); });
+    comb.push([r0, 0, r0 + 3, 0]);
+  }
+  comb.push([0, 0, 0, 6]);
+  const excel = await xlsxEnPagina(p, filas, comb);
+  await paso('#tabBtnProgramas', 'Pestaña «Programas semanales»', 'Abre <b>Programas semanales</b>.', {margen:6});
+  await p.click('#tabBtnProgramas'); await p.waitForTimeout(900);
+  await paso('#psElegirBtn', 'Cargar programas', 'Pulsa <b>Elegir archivos…</b> (o arrastra los archivos al recuadro). Son las hojas Excel (.xlsx) del programa semanal; se pueden cargar varias semanas a la vez.');
+  await p.setInputFiles('#psFileInput', { name:archivo, mimeType:XLSX_MIME, buffer:excel }); await p.waitForTimeout(1500);
+  await paso('#psMsgs', 'Cargado', 'La aplicación lee la <b>semana</b> (del nombre del archivo o del título), los <b>días</b> y las franjas con <b>IFM</b> de cada sección. Del archivo solo se guarda lo leído.', {margen:4});
+  await paso('#psStats', 'Resumen', 'Semanas cargadas, periodo y <b>horas de IFM</b> de la sección. Dos franjas seguidas de IFM cuentan <b>1 h</b> (la otra es la ducha) y la <b>carrera de compañía</b> cuenta como 1 h.', {margen:4});
+  await verDesde(p, '#psTablaWrap', 80);
+  await paso('#psTbody [data-psver]', 'Ver la semana', 'Pulsa <b>Ver</b> para revisar lo leído.');
+  await p.click('#psTbody [data-psver]'); await p.waitForTimeout(800);
+  await paso('#psTbody [data-pscel]', 'Corregir a mano', 'Si alguna celda está mal clasificada, marca o desmarca <b>Cuenta como IFM</b>. <b>Quitar</b> borra esa semana (se puede volver a cargar).');
+  await paso(null, 'Fin', '¡Hecho! Estos programas son los que usa <b>Pérdida de horas</b>.');
+});
+
+demo('seccion_perdida', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  // Preparación (no se graba): rebaje total del 33006 de lunes a miércoles, guardado
+  // igual que desde el formulario (el total marca todas las categorías salvo la cama).
+  const lunes = (()=>{ const d = new Date(hoy); d.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7)); return d.toISOString().slice(0,10); })();
+  const miercoles = (()=>{ const d = new Date(lunes); d.setDate(d.getDate() + 2); return d.toISOString().slice(0,10); })();
+  const r6 = (await api(p, 'GET', '/api/roster')).roster.find(a=>a.numero === '33006');
+  const cats = {}; ['ifm','ejercicioFisico','marchas','ordenCombate','ordenCerrado','maniobras','guardiaOrden','instruccionNocturna','armas','formaciones'].forEach(k=>cats[k] = true);
+  await api(p, 'POST', '/api/rebajes', { numero:r6.numero, ape1:r6.ape1, ape2:r6.ape2, nombre:r6.nombre, peloton:r6.peloton, fechaInicio:lunes, fechaFin:miercoles, total:true, categorias:cats });
+  await p.reload(); await p.waitForTimeout(2500); await sinAvisos(p);
+  await paso('#tabBtnPerdida', 'Pestaña «Pérdida de horas»', 'Abre <b>Pérdida de horas</b>. Necesita los programas semanales cargados.', {margen:6});
+  await p.click('#tabBtnPerdida'); await p.waitForTimeout(900);
+  await paso('#phCadeteInput', 'Alumno', 'Escribe el número, apellidos o nombre del alumno y elígelo de la lista. Su sección sale del 2º dígito de su número. En el ejemplo, uno con un <b>rebaje total</b> de lunes a miércoles.');
+  await p.fill('#phCadeteInput', '33006'); await p.dispatchEvent('#phCadeteInput', 'input'); await p.dispatchEvent('#phCadeteInput', 'change'); await p.waitForTimeout(1200);
+  await paso('#phDesde', 'Periodo', 'Las fechas se rellenan con las semanas cargadas; cámbialas si quieres otro periodo.');
+  await verDesde(p, '#phResultado', 10);
+  await paso('#phResultado [data-phcat]', 'Categorías de rebaje', 'Salen las categorías de sus rebajes del periodo. <b>Marca las que hacen perder la IFM</b>: el cálculo cambia al momento.', {sinScroll:false});
+  await p.locator('#phResultado [data-phcat="ifm"]').check().catch(()=>{}); await p.waitForTimeout(800);
+  await verDesde(p, '#phResultado', 10);
+  await paso('#phResultado', 'Horas', 'IFM <b>programadas</b>, <b>realizadas</b> y <b>no realizadas</b>, las actividades del periodo con su estado y, debajo, un <b>calendario</b> de cada semana con lo realizado y lo no realizado.', {margen:2, sinScroll:true});
+  await paso('#phImprimirBtn', 'Imprimir', '<b>Imprimir</b> saca el informe del alumno.');
+  await paso(null, 'Fin', '¡Hecho!');
+});
+
+demo('seccion_cargar_hoja', false, async ({ p, paso })=>{
+  await entrar(p, 'JEFE33'); await sinAvisos(p);
+  const r = await api(p, 'GET', '/api/roster');
+  const filas = [CAB_LISTADO].concat(r.roster.filter(a=>a.numero !== '33024').map(a=>[a.numero, a.ape1, a.ape2, a.nombre, a.peloton, a.sexo, a.unidad, '', a.numero === '33001' ? '600000999' : a.telefono]));
+  const excel = await xlsxEnPagina(p, filas);
+  let mensajes = [];
+  p.removeAllListeners('dialog'); p.on('dialog', x=>{ mensajes.push(x.message()); x.accept(); });
+  await paso('#reloadBtnTop', 'Cargar otra hoja', 'Para actualizar el listado con una hoja nueva, pulsa <b>Cargar otra hoja</b> (arriba a la derecha).');
+  await p.click('#reloadBtnTop'); await p.waitForTimeout(900);
+  const aviso = (mensajes[0] || '').split('\n').filter(Boolean)[1] || '';
+  await paso('#fileInput', 'Elige la hoja', 'Antes, el navegador avisa: «' + aviso + '» Al <b>Aceptar</b>, elige el archivo (.xlsx, .ods o .csv).', {margen:6});
+  await p.setInputFiles('#fileInput', { name:'listado_actualizado_ficticio.xlsx', mimeType:XLSX_MIME, buffer:excel }); await p.waitForTimeout(600);
+  await paso('#loadBtn', 'Cargar', 'Pulsa <b>Cargar</b>.');
+  await p.click('#loadBtn'); await p.waitForTimeout(3000);
+  const res = (mensajes.find(m=>/^Hoja nueva cargada/.test(m)) || '').split('\n').filter(l=>/^•/.test(l)).map(l=>l.replace(/^•\s*/,''));
+  console.log('   resumen:', res.join(' | '));
+  await paso(null, 'Resumen', 'Al terminar, un resumen de lo hecho: ' + res.slice(0, 3).map(x=>'<b>' + x.replace(/\.$/,'') + '</b>').join('; ') + '.');
+  await paso('#statRow', 'Nada se pierde', 'Los que vienen en la hoja se actualizan y <b>conservan</b> su foto, archivos, cuestionario y reposición; los que no vienen <b>se mantienen</b> (si alguno ya no está, dale de <b>Baja</b>); las bajas siguen en Bajas.', {margen:4});
+  await paso(null, 'Fin', '¡Hecho! Rebajes, sanciones, refuerzos y actividades no se tocan.');
+});
+
 (async()=>{
   const b = await chromium.launch({args:['--lang=es-ES'], env:Object.assign({}, process.env, {LANG:'es_ES.UTF-8', LANGUAGE:'es_ES:es', LC_ALL:'es_ES.UTF-8'})});
   const previo = `${OUT}/demos.json`;

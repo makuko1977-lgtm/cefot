@@ -187,7 +187,7 @@ router.post("/reposicion", auth.requireAuth, auth.requireRole("admin"), auth.blo
 // ya tenía solo gana las preguntas que antes no venían. Nunca se sustituye.
 const CUEST_MAX_PREGUNTAS = 200;
 const CUEST_MAX_TEXTO = 4000;
-router.patch("/cuestionarios", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+router.patch("/cuestionarios", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   const entrada = req.body && req.body.respuestas;
   if (!entrada || typeof entrada !== "object" || Array.isArray(entrada)){
     return res.status(400).json({ error: "Faltan las respuestas." });

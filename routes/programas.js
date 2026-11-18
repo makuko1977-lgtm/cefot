@@ -28,7 +28,7 @@ router.get("/", auth.requireAuth, auth.requireRole("admin"), function (req, res)
   res.json({ programas: req.db.programasSemanales });
 });
 
-router.put("/", auth.requireAuth, auth.requireRole("admin"), auth.blockCapitan, function (req, res){
+router.put("/", auth.requireAuth, auth.requireRole("admin"), function (req, res){
   asegurar(req.db);
   const lista = req.body && req.body.programas;
   if (!Array.isArray(lista)) return res.status(400).json({ error: "Faltan los programas." });

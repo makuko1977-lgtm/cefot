@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>CEFOT-2 · Manual de usuario</title>
+<meta name="subject" content="Aplicación de gestión de la sección">
+<meta name="author" content="CEFOT-2">
+<!--
+  Fuente del manual en PDF (docs/Manual_usuario_CEFOT2.pdf).
+  Se genera con:  NODE_PATH=$(npm root -g) node docs/manual_fuente/generar_pdf.js
+  · Los apartados (h2[data-sec]) y las figuras (figure[id]) se numeran solos.
+  · Las referencias se escriben <a class="ap" href="#id"></a> (apartado) y
+    <a class="fg" href="#id"></a> (figura): el número se pone solo.
+  · El índice y sus páginas los rellena generar_pdf.js (dos pasadas).
+  · La versión (fecha) está en VERSION, más abajo.
+-->
+<style>
+  @page { size: A4; margin: 16mm 15mm 17mm 15mm; }
+  :root{ --verde:#1f4a2a; --banda:#2e6b3f; --tinta:#1b201c; --gris:#545454; --borde:#c9cec6; --cab:#e8eee6; --nota:#eef3ec; --aviso:#f8ece9; --rojo:#a8322a; }
+  *{ box-sizing:border-box; }
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{ margin:0; font-family:"DejaVu Sans", Verdana, sans-serif; font-size:9.6pt; line-height:1.45; color:var(--tinta); }
+  p{ margin:0 0 6pt; }
+  h1{ font-size:21pt; margin:30mm 0 4pt; }
+  .sub{ font-size:12.5pt; color:#3c4a40; margin-bottom:16pt; }
+  .regla{ height:6px; background:var(--banda); border-radius:1px; }
+  h2{ font-size:14pt; color:var(--verde); margin:10pt 0 8pt; padding-bottom:4pt; border-bottom:1.3px solid var(--tinta); break-after:avoid; }
+  h2.fuerte{ border-bottom:2px solid var(--verde); }
+  h3{ font-size:11pt; color:var(--verde); margin:9pt 0 4pt; break-after:avoid; }
+  .parte{ background:var(--banda); color:#fff; font-weight:700; font-size:12.8pt; padding:8pt 12pt; border-radius:4px; margin:0 0 10pt; break-before:page; break-after:avoid; }
+  .salto{ break-before:page; }
+  ol, ul{ margin:0 0 7pt; padding-left:17pt; }
+  li{ margin:0 0 1pt; }
+  .b{ display:inline-block; border:1px solid #8c918a; border-radius:4px; padding:0 3.5pt; line-height:1.2; font-size:8.7pt; background:#f6f7f3; color:#2b2f2c; white-space:nowrap; }
+  figure{ margin:5pt 0 8pt; text-align:center; break-inside:avoid; }
+  figure img{ max-width:100%; border:1px solid #d6d9d2; border-radius:5px; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  figcaption{ font-size:8.4pt; font-style:italic; color:var(--gris); margin-top:5pt; }
+  .ancho img{ width:86%; } .medio img{ width:70%; } .estrecho img{ width:56%; }
+  .dos{ display:grid; grid-template-columns:1fr 1fr; gap:16pt; break-inside:avoid; }
+  .tres{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12pt; break-inside:avoid; align-items:start; }
+  .tres img{ width:100%; }
+  .lado{ display:grid; grid-template-columns:1fr 1.05fr; gap:16pt; align-items:start; }
+  .lado figure{ margin-top:2pt; }
+  table{ width:100%; border-collapse:collapse; margin:4pt 0 9pt; font-size:9pt; break-inside:auto; }
+  tr{ break-inside:avoid; }
+  th{ background:var(--cab); text-align:left; font-weight:700; }
+  th, td{ border:1px solid var(--borde); padding:3pt 5pt; vertical-align:top; }
+  table.peq{ font-size:8.4pt; }
+  td ul{ margin:0; padding-left:13pt; }
+  .nota{ background:var(--nota); border-left:4px solid var(--banda); padding:5pt 9pt; margin:7pt 0 8pt; font-size:9pt; break-inside:avoid; }
+  .nota.aviso{ background:var(--aviso); border-left-color:var(--rojo); }
+  .portada dl{ display:grid; grid-template-columns:auto 1fr; gap:3pt 12pt; margin:0 0 16pt; font-size:10pt; }
+  .portada dt{ font-weight:700; } .portada dd{ margin:0; }
+  #indice{ font-size:9.8pt; }
+  #indice .l{ color:inherit; text-decoration:none; display:flex; align-items:baseline; gap:4pt; margin:0 0 1.5pt; }
+  #indice .l .t{ white-space:nowrap; }
+  #indice .l .p{ flex:1; border-bottom:1px dotted #9aa09a; transform:translateY(-3pt); }
+  #indice .l.grupo{ color:var(--verde); font-weight:700; margin-top:6pt; }
+  .legal{ border-top:1px solid var(--borde); margin-top:10pt; padding-top:5pt; font-size:8.6pt; color:var(--gris); }
+  i.arch{ font-style:italic; }
+</style>
+</head>
+<body>
+
+<!-- ======================= PORTADA ======================= -->
+<section class="portada">
+  <div class="regla"></div>
+  <h1>Manual de usuario</h1>
+  <div class="sub">Aplicación de gestión de la sección · CEFOT-2 · BAL</div>
+  <dl>
+    <dt>Perfiles</dt><dd>Jefe de sección (I) · Jefe de pelotón (II) · Capitán de compañía (III) · Jefe de estudios (IV)</dd>
+    <dt>Dirección</dt><dd>https://cefot.up.railway.app</dd>
+    <dt>Versión</dt><dd id="version"></dd>
+  </dl>
+  <div id="indice"></div>
+  <div class="legal">Todas las capturas de este manual se han hecho con <b>datos ficticios</b> (nombres, DNI y teléfonos inventados). La aplicación maneja datos personales y disciplinarios: no compartas tu usuario ni tu contraseña y cierra la sesión al terminar, sobre todo en equipos compartidos.</div>
+</section>
+
+<!-- ======================= 1 ======================= -->
+<h2 class="salto" id="s-intro" data-sec>Introducción y acceso</h2>
+<p>La aplicación registra el roster de la sección, rebajes, sanciones, refuerzos, actividades y horas impartidas. Todos los datos se guardan en el servidor: cada usuario ve siempre la información actualizada, entre desde el ordenador, la tablet o el móvil.</p>
+<table class="peq">
+  <tr><th style="width:26%">Perfil</th><th>Qué puede hacer</th><th style="width:22%">Pantalla</th></tr>
+  <tr><td>Jefe de sección</td><td>Todo lo de su sección: roster, rebajes, sanciones, refuerzos, actividades, consultas, notas, horas UA, programas semanales y pérdida de horas, alta de jefes de pelotón y cierre de curso.</td><td>admin.html</td></tr>
+  <tr><td>Jefe de pelotón</td><td>Dar de alta partes (sanciones y amonestaciones). Con permiso del jefe de sección: fotos, ficha, adjuntos y consulta de rebajes/refuerzos.</td><td>instructor.html</td></tr>
+  <tr><td>Capitán de compañía</td><td>Entra en cualquiera de las secciones de su compañía y trabaja en ella como su jefe de sección, salvo roster, usuarios y cierre de curso.</td><td>capitan.html</td></tr>
+  <tr><td>Jefe de estudios</td><td>Consultar estadísticas agregadas de todas las secciones, sin datos personales.</td><td>estudios.html</td></tr>
+  <tr><td>Súper Administrador</td><td>Crea secciones, capitanes y jefes de estudios; informes y cambio de curso.</td><td>superadmin.html</td></tr>
+</table>
+<div class="lado">
+  <div>
+    <h3>Entrar</h3>
+    <ol>
+      <li>Abre <b>https://cefot.up.railway.app</b> y pulsa <span class="b">Entrar</span>.</li>
+      <li>Escribe tu <b>Usuario</b> y tu <b>Contraseña</b>. El usuario te lo da quien te dio de alta (puede ser un DNI o un identificador como <i>PELOTON1</i>).</li>
+      <li>Pulsa <span class="b">Entrar</span>. La aplicación te lleva sola a la pantalla de tu perfil.</li>
+    </ol>
+    <h3>Salir</h3>
+    <p>Pulsa <span class="b">Cerrar sesión</span> (arriba a la derecha). La sesión caduca sola a las 12 horas.</p>
+    <div class="nota"><b>Contraseñas.</b> El sistema no guarda las contraseñas de forma legible, así que nadie puede consultarlas. Si un jefe de pelotón olvida la suya, el jefe de sección le asigna una nueva (apartado <a class="ap" href="#s-usuarios"></a>). Si la olvida un jefe de sección, la cambia el Súper Administrador.</div>
+    <div class="nota">Tras cinco intentos fallidos seguidos, el acceso se bloquea unos segundos antes de permitir otro intento.</div>
+  </div>
+  <figure id="f-acceso"><img src="img/acceso.jpg" alt=""><figcaption>Pantalla de acceso.</figcaption></figure>
+</div>
+
+<!-- ======================= PARTE I ======================= -->
+<div class="parte" data-parte="I">PARTE I · JEFE DE SECCIÓN</div>
+<h2 id="s-principal" data-sec class="fuerte">Pantalla principal y avisos</h2>
+<figure id="f-principal" class="ancho"><img src="img/principal.jpg" alt=""><figcaption>Pantalla principal del jefe de sección, con partes de pelotón pendientes de revisar.</figcaption></figure>
+<h3>Cabecera</h3>
+<ul>
+  <li><span class="b">Exportar copia</span>: descarga un archivo con todos los datos de la sección (ver apartado <a class="ap" href="#s-exportar"></a>).</li>
+  <li><span class="b">Cargar otra hoja</span>: carga una hoja de cálculo nueva (.xlsx, .ods o .csv) y la <b>fusiona</b> con el roster: los alumnos que vienen en ella se actualizan y no se pierde nada (ver «Cargar otra hoja» en el apartado <a class="ap" href="#s-roster"></a>). Afecta a <b>todos</b> los usuarios de la sección. Los rebajes, sanciones y refuerzos ya registrados no se pierden.</li>
+  <li><span class="b">Cerrar sesión</span>.</li>
+</ul>
+<h3>Pestañas</h3>
+<p>Roster · Rebajes · Sanciones · Refuerzos · Actividades · Consultas · Cuestionario de notas · Programas semanales · Pérdida de horas · Horas UA · Usuarios.</p>
+<h3>Avisos de partes de pelotón</h3>
+<p>Cuando un jefe de pelotón da de alta un parte, aparece arriba una franja amarilla con el expediente, el alumno, la medida propuesta y quién lo puso.</p>
+<ol>
+  <li>Revisa la medida en el desplegable. Puedes dejarla o cambiarla.</li>
+  <li>Pulsa <span class="b">Guardar medida</span>: la medida queda fijada en el parte y el aviso desaparece.</li>
+  <li><span class="b">Marcar todos como vistos</span> retira los avisos sin cambiar ninguna medida, <b>salvo los partes con arresto</b>: esos solo se retiran al validarlos con <span class="b">Guardar medida</span>.</li>
+</ol>
+<div class="nota">Si guardas un parte con la medida <b>Arresto</b>, se envía al capitán de la compañía para su curso administrativo (apartado <a class="ap" href="#s-arrestos"></a>). El propio aviso lo indica.</div>
+
+<!-- ======================= 3 ROSTER ======================= -->
+<h2 class="salto" id="s-roster" data-sec>Roster (alumnos)</h2>
+<figure id="f-roster" class="medio"><img src="img/roster_filtros.jpg" alt=""><figcaption>Roster con los filtros avanzados abiertos y el pelotón 1 seleccionado.</figcaption></figure>
+<h3>Consultar y filtrar</h3>
+<ul>
+  <li><b>En la sección / Bajas</b>: cambia entre los alumnos en activo y los dados de baja.</li>
+  <li>Los cuadros superiores (alumnos, pelotones, unidades, hombres/mujeres) cuentan <b>solo lo filtrado</b>.</li>
+  <li>Filtros: búsqueda libre (nombre, apellidos, número o DNI), pelotón, unidad y, en <span class="b">Filtros avanzados</span>, sexo y situación (con rebaje vigente, sin rebaje vigente, con sanción, <b>por reposición</b>). Todos los filtros se cumplen a la vez.</li>
+</ul>
+<h3>Acciones por alumno</h3>
+<ul>
+  <li><span class="b">Ficha</span>: datos del alumno, foto (<span class="b">Hacer foto</span> con la cámara o <span class="b">Subir foto</span>), resumen de rebajes, sanciones y refuerzos, alerta por reincidencia, archivos adjuntos (PDF o imagen) y, si lo ha rellenado, sus respuestas del cuestionario de inicio de curso.</li>
+  <li><span class="b">Historial</span>: todos los rebajes, sanciones y refuerzos del alumno.</li>
+  <li><span class="b">Baja</span>: pasa al alumno a la lista de bajas sin borrar nada. Desde <b>Bajas</b> se puede <span class="b">Reincorporar</span> tal como estaba.</li>
+</ul>
+<div class="dos">
+  <figure id="f-ficha"><img src="img/ficha.jpg" alt=""><figcaption>Ficha del alumno.</figcaption></figure>
+  <figure id="f-historial"><img src="img/historial.jpg" alt=""><figcaption>Historial del alumno.</figcaption></figure>
+</div>
+<h3>Otras herramientas</h3>
+<ul>
+  <li><span class="b">Importar fotos…</span>: carga varias fotos a la vez. Cada archivo se asigna al alumno cuyo <b>número</b> coincide con el nombre del archivo (por ejemplo <i>33001.jpg</i>) o, si no, por apellidos y nombre. Al terminar muestra las que no ha podido asignar.</li>
+  <li><span class="b">Cuestionario inicio de curso…</span>: carga las respuestas del formulario de Google que los alumnos rellenan con su <b>código QR</b> y las adjunta a su ficha (ver más abajo).</li>
+  <li><span class="b">Imprimir listado…</span>: imprime lo que se ve en el Roster, con las columnas que elijas (ver más abajo).</li>
+  <li><span class="b">Añadir por reposición…</span>: añade alumnos que se incorporan con el curso empezado, sin cambiar lo ya cargado (ver más abajo).</li>
+</ul>
+
+<h3>Imprimir el listado</h3>
+<div class="lado">
+  <div>
+    <ol>
+      <li>Filtra el Roster si solo quieres una parte (por ejemplo, un pelotón): se imprime <b>lo que se ve</b>.</li>
+      <li>Pulsa <span class="b">Imprimir listado…</span>. La ventana indica cuántos alumnos salen y con qué filtros.</li>
+      <li>Marca las <b>columnas</b> que quieres en el papel (la foto incluida). <span class="b">Todas</span> y <span class="b">Ninguna</span> marcan o desmarcan de golpe; la elección se recuerda para la próxima vez.</li>
+      <li>Pulsa <span class="b">Imprimir</span>: se abre el cuadro de impresión del navegador (papel o PDF). El listado lleva la cabecera de la unidad.</li>
+    </ol>
+  </div>
+  <figure id="f-imprimir"><img src="img/imprimir.jpg" alt=""><figcaption>Imprimir listado: alumnos que salen y columnas.</figcaption></figure>
+</div>
+
+<h3>Añadir alumnos por reposición</h3>
+<p>Para alumnos que se incorporan con el curso empezado. <b>Solo añade</b>: no cambia ni borra nada de lo ya cargado.</p>
+<ol>
+  <li>Pulsa <span class="b">Añadir por reposición…</span> y, en la ventana, <span class="b">Elegir Excel…</span>. La hoja debe tener las mismas columnas que el listado (al menos el número); la ventana indica qué columnas coinciden.</li>
+  <li>Indica la <b>fecha de reposición</b> (la de incorporación, que no tiene por qué ser la de hoy) y, si quieres, unas <b>observaciones</b>.</li>
+  <li>Revisa la tabla <b>Qué pasará</b>: cada fila dice si <b>se añade</b> o si se salta porque el número ya está en la sección, en Bajas, está repetido o falta.</li>
+  <li>Pulsa <span class="b">Añadir</span>. Los alumnos añadidos llevan en el Roster la marca <b>Reposición</b> con su fecha; se ven todos con el filtro de situación <b>Por reposición</b> y con la consulta <b>Reposiciones</b> (apartado <a class="ap" href="#s-consultas"></a>).</li>
+</ol>
+<figure id="f-reposicion" class="medio"><img src="img/reposicion.jpg" alt=""><figcaption>Añadir por reposición: fecha, observaciones y qué pasará con cada fila.</figcaption></figure>
+
+<h3>Cuestionario de inicio de curso (código QR)</h3>
+<p>El formulario de la ficha personal ya está creado en Google Forms. Los alumnos lo rellenan con el móvil escaneando su <b>código QR</b>; no hay que enviarles nada.</p>
+<ol>
+  <li>Cuando haya respuestas, en Google Forms: pestaña «Respuestas» → «Ver en Hojas de cálculo» → Archivo → Descargar → Microsoft Excel (.xlsx).</li>
+  <li>En el Roster pulsa <span class="b">Cuestionario inicio de curso…</span> y <span class="b">Cargar hoja de respuestas…</span>. El archivo (.xlsx, .ods o .csv) debe tener la pregunta <b>«Número de protocolo»</b>: cada respuesta se adjunta a la ficha de su alumno por ese número.</li>
+  <li>El resultado indica cuántas respuestas son <b>nuevas</b>, cuáles no se han podido adjuntar (número que no está en el listado, alumno de baja o sin número) y cuántos alumnos <b>faltan</b> por rellenarlo. Debajo, la lista de alumnos: <span class="b">Pendientes</span>, <span class="b">Hechos</span> o <span class="b">Todos</span>.</li>
+</ol>
+<figure id="f-cuestionario" class="medio"><img src="img/cuestionario_qr.jpg" alt=""><figcaption>Cuestionario de inicio de curso: resultado de cargar la hoja de respuestas.</figcaption></figure>
+<div class="nota">Se puede volver a cargar la hoja las veces que haga falta (por ejemplo, la misma hoja con más respuestas): <b>solo se añade lo nuevo</b>. Lo que ya estaba guardado no se sustituye ni se sobrescribe.</div>
+
+<h3>Cargar otra hoja</h3>
+<p><span class="b">Cargar otra hoja</span> (en la cabecera) sirve para actualizar el roster con un listado nuevo. Al aceptar el aviso, elige el archivo y pulsa <span class="b">Cargar</span>. No se pierde nada:</p>
+<ul>
+  <li>Los alumnos que vienen en la hoja se <b>actualizan</b> con sus datos y conservan su foto, sus archivos, su cuestionario y su reposición.</li>
+  <li>Los que <b>no vienen</b> en la hoja se mantienen en la sección. Si alguno ya no está, dale de <span class="b">Baja</span>.</li>
+  <li>Las bajas siguen en Bajas, aunque vengan en la hoja (para devolver a alguien a la sección, <span class="b">Reincorporar</span>).</li>
+  <li>Rebajes, sanciones, refuerzos y actividades no se tocan.</li>
+</ul>
+<p>Al terminar, un resumen indica cuántos alumnos se han actualizado, cuántos son nuevos, cuántos se mantienen sin venir en la hoja y cuántas bajas se conservan.</p>
+
+<!-- ======================= 4 REBAJES ======================= -->
+<h2 id="s-rebajes" data-sec class="fuerte">Rebajes</h2>
+<div class="lado">
+  <div>
+    <ol>
+      <li>Escribe el número, apellidos o nombre del alumno y <b>selecciónalo de la lista</b>; el resto de sus datos se rellena solo.</li>
+      <li>Indica <b>Fecha inicio</b> y <b>Fecha fin</b> (la de fin no puede ser anterior).</li>
+      <li>Marca las actividades de las que queda exento: IFM, ejercicio físico, marchas, orden de combate, orden cerrado, maniobras, guardia de orden, instrucción nocturna, armas, formaciones y cama.<br><b>Rebaje total / clase</b> exime de todas y las marca automáticamente, salvo la <b>cama</b>, que va aparte y se elige a mano.</li>
+      <li>Pulsa <span class="b">Guardar rebaje</span>. <span class="b">Limpiar formulario</span> lo vacía.</li>
+    </ol>
+    <p>Debajo aparece el listado de rebajes, con búsqueda, filtro por pelotón y por estado (<b>vigentes</b>, <b>programados</b> o <b>finalizados</b>), y el botón <span class="b">Eliminar</span> en cada uno.</p>
+  </div>
+  <figure id="f-rebaje"><img src="img/rebaje.jpg" alt=""><figcaption>Nuevo rebaje con dos categorías marcadas.</figcaption></figure>
+</div>
+
+<!-- ======================= 5 SANCIONES ======================= -->
+<h2 id="s-sanciones" data-sec class="fuerte">Sanciones</h2>
+<h3><span class="num"></span>.1 Dar de alta un parte</h3>
+<ol>
+  <li><b>Alumno(s)</b>: <span class="b">Individual</span> para uno o <span class="b">Múltiple</span> para varios en el mismo expediente (máximo 25). Selecciónalos de la lista.</li>
+  <li>Opcional: <b>Vincular a un expediente ya cursado</b> para añadir la falta a un expediente existente en lugar de abrir uno nuevo.</li>
+  <li><b>Día, lugar y hora</b>; <b>tipo de falta</b> (leve o grave) y, si se quiere, la <b>fase</b> (FFMG o FFE).</li>
+  <li>Datos del profesor que da el parte: empleo (CAP, TTE, BG, SGT1, SGTO), nombre, apellidos y DNI.</li>
+  <li><b>Fundamento legal</b>: se elige de la lista, que cambia según el tipo de falta.</li>
+  <li><b>Motivo</b>: descripción de los hechos. Son obligatorios el alumno, la fecha, el tipo de falta, el fundamento y el motivo.</li>
+  <li><b>Medida correctora</b> (ver <span class="sn"></span>.2) y observaciones, si hacen falta.</li>
+  <li>Pulsa <span class="b">Guardar sanción</span> y pasa el dispositivo al alumno para que <b>firme con el dedo</b> (o con el ratón). En un parte múltiple firma cada alumno por turno. <b>Sin la firma de todos no se guarda el parte.</b></li>
+</ol>
+<div class="dos" style="align-items:start">
+  <figure id="f-sancion"><img src="img/sancion_arresto.jpg" alt=""><figcaption>Formulario de sanción con medida «Arresto» y fecha pendiente.</figcaption></figure>
+  <figure id="f-firma"><img src="img/sancion_firma.jpg" alt=""><figcaption>Firma obligatoria del alumno antes de guardar.</figcaption></figure>
+</div>
+<h3><span class="num"></span>.2 Medidas correctoras</h3>
+<table>
+  <tr><th style="width:25%">Medida</th><th>Qué hay que hacer</th></tr>
+  <tr><td>Amonestación verbal</td><td>En el listado, <span class="b">Documento</span> genera el PDF «Amonestaciones Verbales» con la firma del alumno.</td></tr>
+  <tr><td>Trabajo no superior a 5 horas</td><td>Indica la <b>fecha límite</b>. Cuando el alumno lo entregue, marca <b>Hecho</b> en el listado (o desde Consultas). Si pasa la fecha sin marcarlo, aparece un aviso de trabajo vencido.</td></tr>
+  <tr><td>Refuerzo</td><td>En el listado, <span class="b">Generar refuerzo</span> abre la pestaña Refuerzos con los datos del parte ya rellenados; solo faltan lugar, hora y duración.</td></tr>
+  <tr><td>Arresto</td><td><b>Fecha conocida</b>: inicio y fin (los días se calculan solos). <b>Pendiente</b>: se guarda sin fecha y se fija después en el listado con <span class="b">Fijar fecha</span>. Al guardarlo, o al validar el de un jefe de pelotón, <b>se envía al capitán</b> para su curso administrativo.</td></tr>
+  <tr><td>Sin medida</td><td>Solo queda registrado el parte.</td></tr>
+</table>
+<div class="nota"><b>Coincidencia de fechas.</b> Si un arresto o refuerzo se solapa con otro ya fechado del mismo alumno, la aplicación lo avisa (un <b>arresto y un refuerzo de estudio o IFM</b> sí pueden coincidir: se complementan) y abre un calendario por alumno con los días ocupados en rojo y tachados. Quien choque recibe un expediente propio con las nuevas fechas; los demás siguen en el original.</div>
+<h3><span class="num"></span>.3 Listado de sanciones</h3>
+<figure id="f-sanciones" class="medio"><img src="img/sanciones_listado.jpg" alt=""><figcaption>Listado: cuadros resumen, filtros y acciones de cada expediente.</figcaption></figure>
+<ul>
+  <li>Cuadros: expedientes registrados, sanciones individuales, leves, graves y <b>alumnos con alerta</b>.</li>
+  <li>Filtros: búsqueda, pelotón, tipo y dos alertas de reincidencia: <b>5 o más sanciones en total</b> y <b>3 o más con el mismo fundamento</b>. Cada columna tiene además su propio filtro.</li>
+  <li>Acciones según la medida: <span class="b">Documento</span>, <span class="b">Generar refuerzo</span>, <span class="b">Fijar fecha</span>, <b>Hecho</b> y <span class="b">Eliminar</span> (quita <b>solo a ese alumno</b>, también de su refuerzo derivado; si su documento ya se generó, sale <b>⚠ REGENERAR</b>).</li>
+  <li>Los arrestos muestran su situación ante el capitán: <b>Enviado al capitán</b> o <b>Tramitado por el capitán</b>. Cambia sola cuando el capitán lo tramita.</li>
+</ul>
+
+<!-- ======================= 6 REFUERZOS ======================= -->
+<h2 id="s-refuerzos" data-sec class="fuerte">Refuerzos</h2>
+<div class="lado">
+  <div>
+    <p>Sesión de refuerzo (IFM, estudio o entreno), voluntaria o derivada de una sanción.</p>
+    <ol>
+      <li>Alumno(s) (<span class="b">Individual</span> o <span class="b">Múltiple</span>), fecha de inicio y fin, <b>tipo</b>, hora de inicio y duración.</li>
+      <li>Si el periodo incluye sábado o domingo, indica su horario propio.</li>
+      <li><b>Datos del documento (ANEXO)</b>: día, lugar y hora de los hechos, profesor, tipo de falta, fundamento, motivo, trámite de audiencia (día y hora), jefe de compañía que firma y lugar y fecha de la resolución. Si el refuerzo viene de una sanción, se rellenan solos.</li>
+      <li>Pulsa <span class="b">Guardar refuerzo</span>.</li>
+    </ol>
+  </div>
+  <figure id="f-refuerzo"><img src="img/refuerzo.jpg" alt=""><figcaption>Nuevo refuerzo.</figcaption></figure>
+</div>
+<p>En el listado (filtros por pelotón, tipo y origen <i>manual / de sanción</i>) cada refuerzo tiene <span class="b">Editar</span> y <span class="b">Rellenar documento</span> (ANEXO sin límite de alumnos: pasados 25 añade hojas). Los alumnos se quitan en <b>Sanciones</b>, también los de refuerzos manuales.</p>
+
+<!-- ======================= 7 ACTIVIDADES ======================= -->
+<h2 class="salto" id="s-actividades" data-sec>Actividades</h2>
+<div class="lado">
+  <div>
+    <p>Registra quién ha participado en cada marcha, tiro, examen o conferencia del ciclo. Cada fase tiene sus propias actividades.</p>
+    <ol>
+      <li>Elige la fase: <span class="b">FFMG</span> o <span class="b">FFE</span>. La primera vez se carga un catálogo estándar, que puedes modificar.</li>
+      <li>Para una actividad nueva escribe su nombre y, si quieres, la fecha, y pulsa <span class="b">Añadir actividad</span>.</li>
+      <li>Pulsa el botón <span class="b">N participantes</span> de la actividad, marca a los alumnos que han participado y guarda.</li>
+    </ol>
+  </div>
+  <figure id="f-actividades"><img src="img/actividades.jpg" alt=""><figcaption>Actividades de la fase FFMG.</figcaption></figure>
+</div>
+
+<!-- ======================= 8 CONSULTAS ======================= -->
+<h2 id="s-consultas" data-sec class="fuerte">Consultas</h2>
+<p>Elige el tipo de consulta, rellena sus datos (fechas, actividad, alumno o expediente) y pulsa <span class="b">Consultar</span>. <span class="b">Imprimir</span> saca el resultado en papel o PDF.</p>
+<figure id="f-consultas" class="medio"><img src="img/consultas.jpg" alt=""><figcaption>Personal rebajado, en refuerzo o en arresto en un periodo.</figcaption></figure>
+<table>
+  <tr><th style="width:42%">Tipo de consulta</th><th>Qué obtienes</th></tr>
+  <tr><td>Personal rebajado, en refuerzo o en arresto en un periodo</td><td>Tres listas (rebajados, en refuerzo y arrestados) entre dos fechas.</td></tr>
+  <tr><td>Personal que ha participado en una actividad</td><td>Por actividad o por alumno, dentro de una fase.</td></tr>
+  <tr><td>Sanciones de arresto con fecha pendiente</td><td>Arrestos a los que falta fijar fecha.</td></tr>
+  <tr><td>Sanciones de trabajo: hechos, pendientes y vencidos</td><td>Estado de los trabajos; se pueden marcar como hechos.</td></tr>
+  <tr><td>Consulta de expediente (informe completo)</td><td>Todo lo registrado con un número de expediente («4» y «004» son el mismo).</td></tr>
+  <tr><td>Hoja de seguimiento del alumno</td><td>Sus sanciones: marca las que figuran y edita las observaciones (se guarda). Indica el <b>Ciclo</b>; saca el PDF editable o imprime.</td></tr>
+  <tr><td>Reposiciones: alumnos añadidos y su fecha de reposición</td><td>Los alumnos añadidos por reposición, con su fecha. Las fechas son opcionales y cuentan la <b>fecha de reposición</b>, no el día en que se cargó el Excel; sin fechas salen todos.</td></tr>
+</table>
+
+<!-- ======================= 9 NOTAS ======================= -->
+<h2 id="s-notas" data-sec class="fuerte">Cuestionario de notas</h2>
+<div class="lado">
+  <div>
+    <p>Herramienta puntual para ver qué alumnos no alcanzan la nota mínima de un examen o control.</p>
+    <ol>
+      <li><span class="b">Añadir hoja o CSV…</span> con las notas (puedes añadir varios archivos).</li>
+      <li>En cada archivo elige la <b>columna de la nota</b> y escribe la <b>nota mínima</b>.</li>
+      <li>Pulsa <span class="b">Comprobar</span>. Si procede, marca alumnos y pulsa <span class="b">Sancionar seleccionados</span>.</li>
+    </ol>
+    <div class="nota">Nada de lo que subas en esta pestaña se guarda en el servidor.</div>
+  </div>
+  <figure id="f-notas"><img src="img/cuestionario_notas.jpg" alt=""><figcaption>Cuestionario de notas.</figcaption></figure>
+</div>
+
+<!-- ======================= 10 HORAS UA ======================= -->
+<h2 id="s-horasua" data-sec class="fuerte">Horas UA</h2>
+<figure id="f-horasua" class="medio"><img src="img/horas_ua.jpg" alt=""><figcaption>Horas por unidad de aprendizaje, con la alarma de horas sin fecha.</figcaption></figure>
+<ol>
+  <li>Elige la fase (<b>FFMG</b> o <b>FFE</b>) y el módulo.</li>
+  <li>Despliega una unidad de aprendizaje: cada hora teórica (T) o práctica (P) tiene su casilla de fecha. <b>Misma fecha para huecos de esta UA</b> rellena todas de una vez.</li>
+  <li>La <b>alarma</b> indica cuántas horas quedan sin fecha. Filtra por <b>pendientes</b>, <b>impartidas</b> o <b>todas</b>; <span class="b">Exportar</span> descarga el estado y <span class="b">Vaciar</span> borra las fechas.</li>
+</ol>
+
+<!-- ======================= 11 PROGRAMAS Y PÉRDIDA (nuevo, v48) ======================= -->
+<h2 class="salto" id="s-programas" data-sec>Programas semanales y pérdida de horas</h2>
+<h3><span class="num"></span>.1 Programas semanales</h3>
+<div class="lado">
+  <div>
+    <p>Se carga el programa de cada semana (hoja de cálculo Excel, .xlsx) y la aplicación lee en qué días y franjas tiene <b>IFM</b> la sección.</p>
+    <ol>
+      <li>Abre la pestaña <b>Programas semanales</b> y pulsa <span class="b">Elegir archivos…</span>, o arrastra los archivos al recuadro. Se pueden cargar varias semanas a la vez.</li>
+      <li>La semana se toma del <b>nombre del archivo</b> o del <b>título</b> del programa (por ejemplo, «16AL20NOV26» o «DEL 16 AL 20 DE NOVIEMBRE DE 2026»). El programa debe tener la columna <b>HORARIO</b>, los días a su izquierda (L-16, M-17…) y una columna por sección (I SC, II SC…).</li>
+      <li>Revisa el resumen: semanas cargadas, periodo y <b>horas de IFM</b> de la sección.</li>
+    </ol>
+  </div>
+  <figure id="f-programas"><img src="img/programas.jpg" alt=""><figcaption>Programa semanal cargado y resumen de horas de IFM.</figcaption></figure>
+</div>
+<ul>
+  <li><b>Cómo cuenta la IFM:</b> dos franjas seguidas de IFM cuentan <b>1 h</b> (la otra es la ducha) y la «CARRERA DE COMPAÑÍA» cuenta como 1 h de IFM.</li>
+  <li>En <b>Semanas cargadas</b>, <span class="b">Ver</span> muestra lo leído de esa semana; si una celda está mal clasificada, se corrige a mano con <b>Cuenta como IFM</b>. <span class="b">Quitar</span> borra la semana (se puede volver a cargar).</li>
+  <li>Si ya hay un programa de esa semana, pregunta antes de sustituirlo. Del archivo solo se guarda lo leído, no el archivo.</li>
+</ul>
+<h3><span class="num"></span>.2 Pérdida de horas</h3>
+<p>Calcula las horas de IFM y las actividades que un alumno ha perdido en un periodo. Necesita los programas semanales cargados.</p>
+<ol>
+  <li>Abre la pestaña <b>Pérdida de horas</b> y elige al <b>alumno</b>. Su sección sale del 2º dígito de su número.</li>
+  <li>Las fechas <b>Desde</b> y <b>Hasta</b> se rellenan con las semanas cargadas; cámbialas si quieres otro periodo.</li>
+  <li>En <b>Categorías de rebaje</b> salen las de sus rebajes del periodo: marca las que hacen perder la IFM. Cada una indica cuántas horas resta; un día que caiga en dos categorías marcadas se resta una vez.</li>
+  <li>El resultado muestra las horas de IFM <b>programadas</b> (incluida la carrera de compañía), <b>realizadas</b> y <b>no realizadas</b>, y las <b>actividades del periodo</b> (de la pestaña Actividades) con su estado: sale de la lista de participantes y, si no hay lista, de los rebajes marcados. Debajo, un <b>calendario</b> de cada semana con lo realizado y lo no realizado. <span class="b">Imprimir</span> saca el informe.</li>
+</ol>
+<figure id="f-perdida" class="medio"><img src="img/perdida.jpg" alt=""><figcaption>Pérdida de horas de un alumno con rebaje total, con la IFM marcada como categoría que se pierde.</figcaption></figure>
+
+<!-- ======================= USUARIOS ======================= -->
+<h2 class="salto" id="s-usuarios" data-sec>Usuarios y cierre de curso</h2>
+<figure id="f-usuarios" class="ancho"><img src="img/usuarios.jpg" alt=""><figcaption>Alta de jefes de pelotón, permisos y cierre de curso.</figcaption></figure>
+<h3>Dar de alta un jefe de pelotón</h3>
+<ol>
+  <li>Rellena <b>Usuario</b> (DNI u otro identificador, sin espacios), <b>Nombre completo</b> y <b>Contraseña inicial</b> (mínimo 6 caracteres).</li>
+  <li>Marca los permisos extra que necesite y pulsa <span class="b">Crear usuario</span>.</li>
+  <li>Comunícale la dirección, su usuario y su contraseña por un canal seguro.</li>
+</ol>
+<table>
+  <tr><th style="width:28%">Permiso</th><th>Qué le permite (además de dar de alta partes, que siempre puede)</th></tr>
+  <tr><td>Hacer foto del alumno</td><td>Hacer o subir la foto desde la ficha del alumno.</td></tr>
+  <tr><td>Ver ficha básica</td><td>Ver sexo, DNI, teléfono y unidad del alumno.</td></tr>
+  <tr><td>Adjuntar archivos</td><td>Añadir PDF o imágenes a la ficha y borrar los suyos.</td></tr>
+  <tr><td>Ver rebajes/refuerzos</td><td>Consultar (sin modificar) los rebajes y refuerzos vigentes.</td></tr>
+</table>
+<p>En el listado: <span class="b">Editar permisos</span> (el cambio vale al momento), <span class="b">Cambiar contraseña</span> y <span class="b">Eliminar</span> (pierde el acceso inmediatamente).</p>
+<h3>Cerrar curso académico</h3>
+<p><span class="b">Cerrar curso…</span> vacía las sanciones, rebajes y refuerzos de la sección y reinicia la numeración de expedientes. El roster se conserva, salvo que marques lo contrario. Para confirmar hay que <b>descargar antes la copia</b> y escribir <b>CERRAR CURSO</b>.</p>
+<div class="nota aviso">Es irreversible. Guarda la copia en un lugar seguro: contiene datos personales.</div>
+
+<!-- ======================= EXPORTAR ======================= -->
+<h2 class="salto" id="s-exportar" data-sec>Exportar copia al HTML local</h2>
+<p>Mientras el servidor no sea accesible desde la intranet, los datos del servidor se pueden pasar a la versión local de la aplicación (el archivo <i>seccion3.html</i>, que se abre con doble clic):</p>
+<ol>
+  <li>En el servidor pulsa <span class="b">Exportar copia</span>. Se descarga un archivo con nombre <i>CEFOT2_copia_3-3_2026-09-26.json</i> (compañía-sección y fecha).</li>
+  <li>Lleva el archivo al ordenador de la intranet.</li>
+  <li>En el HTML local pulsa <span class="b">Importar copia del servidor (añadir)…</span> y elige el archivo.</li>
+  <li>Se muestra un resumen de lo que es nuevo y de lo que ya existía. Al aceptar, <b>solo se añade lo que falta</b>: nunca se sustituye ni se borra nada.</li>
+</ol>
+<p>La copia lleva el roster, las bajas, las sanciones, los rebajes, los refuerzos, las actividades, las fechas de Horas UA, las hojas de seguimiento y los programas semanales.</p>
+<table class="peq">
+  <tr><th style="width:50%">Situación</th><th>Qué hace el HTML local</th></tr>
+  <tr><td>Importar dos veces la misma copia</td><td>La segunda vez no añade nada: no se duplican registros.</td></tr>
+  <tr><td>Un parte del servidor trae un nº de expediente que en local ya usa otro parte</td><td>Lo añade igualmente y avisa de los números repetidos para revisarlos.</td></tr>
+  <tr><td>Un registro ya importado se modifica después en el servidor</td><td>El cambio no llega (nunca se sobrescribe): hay que corregirlo a mano en local.</td></tr>
+  <tr><td>Un programa semanal de una semana que en local ya está cargada</td><td>Se deja el de local; no se duplica la semana.</td></tr>
+  <tr><td>Copia completa del Súper Administrador</td><td>Pregunta qué sección importar y la añade del mismo modo.</td></tr>
+</table>
+
+<!-- ======================= PARTE II ======================= -->
+<div class="parte" data-parte="II">PARTE II · JEFE DE PELOTÓN</div>
+<h2 id="s-parte" data-sec class="fuerte">Dar de alta un parte</h2>
+<p>Al entrar se abre <b>Nueva sanción</b>. El jefe de pelotón solo da de alta partes: no ve el listado de sanciones ni el roster completo. Está pensada para usarse desde el móvil.</p>
+<div class="tres">
+  <figure id="f-pel-buscar"><img src="img/peloton_buscar.jpg" alt=""><figcaption>Buscar al alumno y pulsarlo en la lista.</figcaption></figure>
+  <figure id="f-pel-firma"><img src="img/peloton_firma.jpg" alt=""><figcaption>Firma del alumno antes de guardar.</figcaption></figure>
+  <figure id="f-pel-registrado"><img src="img/peloton_registrado.jpg" alt=""><figcaption>Parte registrado.</figcaption></figure>
+</div>
+<ol>
+  <li><b>Alumno(s)</b>: <span class="b">Individual</span> o <span class="b">Múltiple</span>. Escribe número, apellidos o nombre y <b>pulsa al alumno en la lista</b> que aparece (figura <a class="fg" href="#f-pel-buscar"></a>). Si te equivocas, <span class="b">Cambiar</span>.</li>
+  <li><b>Día, lugar y hora</b> y <b>tipo de falta</b> (leve o grave).</li>
+  <li>Datos del profesor: empleo, nombre, apellidos y DNI.</li>
+  <li><b>Fundamento legal</b> (de la lista, según el tipo de falta) y <b>motivo</b> (descripción de los hechos).</li>
+  <li><b>Medida correctora</b> que propones: amonestación verbal, trabajo no superior a 5 horas (con fecha límite), refuerzo, arresto (con fechas de inicio y fin) o sin medida.</li>
+  <li>Pulsa <span class="b">Guardar sanción</span>, pasa el móvil al alumno para que firme con el dedo y pulsa <span class="b">Firmar y guardar</span> (figura <a class="fg" href="#f-pel-firma"></a>). En un parte múltiple, <span class="b">Firmar y continuar</span> pasa al siguiente alumno. <b>Sin firma no se guarda.</b></li>
+  <li>Aparece el resumen con el <b>número de expediente</b> (figura <a class="fg" href="#f-pel-registrado"></a>). Si la medida es amonestación verbal, <span class="b">Firmar y generar documento</span> produce el PDF firmado. <span class="b">Registrar otra sanción</span> deja el formulario en blanco.</li>
+</ol>
+<div class="nota"><b>¿Qué pasa después?</b> El parte llega al momento al jefe de sección como aviso (apartado <a class="ap" href="#s-principal"></a>). Él confirma o cambia la medida propuesta y gestiona el resto (fechas, documentos, refuerzos).</div>
+<h2 id="s-pel-ficha" data-sec class="fuerte">Ficha del alumno y rebajes/refuerzos</h2>
+<p>Estas pestañas solo aparecen si el jefe de sección te ha dado el permiso correspondiente (apartado <a class="ap" href="#s-usuarios"></a>). Los permisos se comprueban en cada acción: si te retiran uno, deja de funcionar al momento.</p>
+<ul>
+  <li><b>Ficha del alumno</b>: busca al alumno para ver sus datos básicos (si tienes <i>Ver ficha básica</i>), hacer o subir su foto (<i>Hacer foto</i>) y añadir archivos PDF o imágenes (<i>Adjuntar archivos</i>).</li>
+  <li><b>Rebajes / Refuerzos</b>: consulta, sin poder modificar, los rebajes y refuerzos vigentes (<i>Ver rebajes/refuerzos</i>).</li>
+</ul>
+<div class="tres">
+  <figure id="f-pel-completo"><img src="img/peloton_parte_completo.jpg" alt="" style="width:62%"><figcaption>Parte completo antes de guardar.</figcaption></figure>
+  <figure id="f-pel-ficha"><img src="img/peloton_ficha.jpg" alt=""><figcaption>Ficha del alumno.</figcaption></figure>
+  <figure id="f-pel-rebref"><img src="img/peloton_rebref.jpg" alt=""><figcaption>Rebajes y refuerzos vigentes.</figcaption></figure>
+</div>
+
+<!-- ======================= PARTE III ======================= -->
+<div class="parte" data-parte="III">PARTE III · CAPITÁN DE COMPAÑÍA</div>
+<p>El capitán no tiene sección propia: supervisa las cinco secciones de <b>su</b> compañía y puede entrar en cualquiera de ellas para trabajar como su jefe de sección. No puede entrar en secciones de otras compañías.</p>
+<h2 id="s-cap-entrar" data-sec class="fuerte">Entrar en una sección de la compañía</h2>
+<figure id="f-cap-inicio" class="medio"><img src="img/capitan_inicio.jpg" alt=""><figcaption>Pantalla del capitán: su contraseña y las secciones de su compañía.</figcaption></figure>
+<ol>
+  <li>Entra con tu usuario y contraseña: se abre la pantalla <b>Capitán de compañía</b>.</li>
+  <li>En <b>Secciones de mi compañía</b> aparecen las cinco secciones. Las creadas muestran su jefe de sección y cuántos alumnos y sanciones tienen; las apagadas están <i>sin crear</i> y no se puede entrar en ellas.</li>
+  <li>Pulsa <span class="b">Entrar</span> en la sección que quieras. Se abre su pantalla de gestión con el aviso <b>Modo capitán de compañía</b> (figura <a class="fg" href="#f-cap-seccion"></a>).</li>
+  <li>Para volver a tu pantalla principal sin cerrar la sesión, pulsa <span class="b">Volver a compañía</span> en ese aviso. Desde ahí puedes entrar en otra sección.</li>
+</ol>
+<p>En la misma pantalla, <b>Mi contraseña</b> permite cambiar tu contraseña: escríbela dos veces (mínimo 6 caracteres) y pulsa <span class="b">Guardar contraseña</span>.</p>
+<figure id="f-cap-seccion" class="medio"><img src="img/capitan_en_seccion.jpg" alt=""><figcaption>Dentro de la 3ª Sección en modo capitán: aviso con «Volver a compañía» y sin la pestaña Usuarios.</figcaption></figure>
+
+<h2 class="salto" id="s-arrestos" data-sec>Arrestos para dar curso administrativo</h2>
+<p>Una sanción con medida <b>Arresto</b> llega al capitán de la compañía:</p>
+<ul>
+  <li>al guardarla, si la pone el <b>jefe de sección</b> (o el propio capitán dentro de una sección);</li>
+  <li>si la pone un <b>jefe de pelotón</b>, cuando el jefe de sección la <b>ratifica</b> con «Guardar medida». Si la cambia a otra medida, no llega (o se retira si aún no estaba tramitada).</li>
+</ul>
+<figure id="f-cap-arrestos" class="ancho"><img src="img/capitan_arrestos.jpg" alt=""><figcaption>Ventana de arrestos del capitán con «Ver datos» abierto: el alumno 33018 está en su 3.er arresto.</figcaption></figure>
+<h3>Qué hace el capitán</h3>
+<ol>
+  <li>Al entrar le aparece arriba la ventana <b>«Arrestos para dar curso administrativo»</b>, con cada expediente, su sección, el motivo, las fechas del arresto y quién lo envió. Si algún alumno tiene antecedentes lo avisa: <i>«⚠ 1 alumno con antecedentes»</i>.</li>
+  <li><span class="b">Ver datos</span> muestra todos los datos del parte y la lista de alumnos con sus <b>antecedentes en su sección</b> (qué número de arresto es y cuántas sanciones anteriores tiene).</li>
+  <li><span class="b">Historial</span> abre el historial completo del alumno: el mismo que ve su jefe de sección (sanciones, rebajes y refuerzos).</li>
+  <li><span class="b">Marcar como tramitado</span> le da curso: sale de la ventana y pasa al historial de arrestos. El jefe de sección ve el cambio en su listado.</li>
+</ol>
+<div class="nota">Si el capitán está trabajando dentro de una sección, el aviso de modo capitán le recuerda cuántos arrestos tiene pendientes.</div>
+<div class="dos">
+  <figure id="f-cap-hist-alumno"><img src="img/capitan_historial_alumno.jpg" alt=""><figcaption>Historial del alumno visto por el capitán.</figcaption></figure>
+  <figure id="f-cap-hist-arrestos"><img src="img/capitan_historial_arrestos.jpg" alt=""><figcaption>Historial de arrestos filtrado por un alumno.</figcaption></figure>
+</div>
+<h3>Consultar un alumno por su nº de protocolo</h3>
+<p>En <b>Consultar alumno por nº de protocolo</b>, escribe el número y pulsa <span class="b">Buscar</span>. Aparece el alumno, su sección, cuántas sanciones y arrestos tiene, y el botón <span class="b">Ver historial</span>. Solo encuentra alumnos de las secciones de su compañía.</p>
+<h3>Historial de arrestos</h3>
+<p>Recoge todos los arrestos que le han llegado, pendientes y tramitados. Se filtra por <b>sección</b>, <b>estado</b>, <b>fechas del parte</b> y <b>texto</b> (alumno, nº de protocolo, expediente o motivo). Un arresto tramitado por error se puede <span class="b">Devolver a pendientes</span>.</p>
+<div class="nota"><b>Plantillas de documentos.</b> Los botones «Rellenar documentos» e «Imprimir» están preparados y se activarán cuando se incorporen las plantillas: los datos comunes se rellenarán una sola vez para todos los alumnos del expediente y se imprimirá un documento por alumno.</div>
+<div class="nota">Cada arresto es <b>una sola sanción</b>, aunque la vean el jefe de pelotón, el jefe de sección, el capitán y el jefe de estudios: las estadísticas la cuentan una sola vez.</div>
+
+<h2 class="salto" id="s-cap-puede" data-sec>Qué puede y qué no puede hacer</h2>
+<p>Dentro de una sección, el capitán usa las mismas pantallas que el jefe de sección (Parte I).</p>
+<table class="peq">
+  <tr><th style="width:50%">Puede (igual que el jefe de sección)</th><th>No puede (le corresponde al jefe de sección)</th></tr>
+  <tr><td><ul>
+    <li>Consultar el roster, la ficha y el historial de los alumnos.</li>
+    <li>Dar de alta, revisar y eliminar rebajes, sanciones y refuerzos, fijar fechas de arresto y generar documentos.</li>
+    <li>Revisar los avisos de partes de pelotón y fijar la medida.</li>
+    <li>Actividades, consultas, cuestionario de notas y horas UA.</li>
+    <li>Programas semanales, pérdida de horas y cargar las respuestas del cuestionario de inicio de curso.</li>
+    <li>Exportar la copia de la sección.</li>
+    <li>Dar curso administrativo a los arrestos de toda su compañía (apartado <a class="ap" href="#s-arrestos"></a>).</li>
+  </ul></td><td><ul>
+    <li>Cambiar el roster: cargar otra hoja, añadir por reposición, dar de baja o reincorporar alumnos.</li>
+    <li>Dar de alta, modificar o eliminar jefes de pelotón (no ve la pestaña Usuarios).</li>
+    <li>Cerrar el curso académico.</li>
+    <li>Entrar en secciones de otra compañía.</li>
+  </ul></td></tr>
+</table>
+<div class="nota">En el documento de un refuerzo, el campo <b>Jefe de Compañía (firma resolución)</b> se rellena automáticamente con el nombre del capitán cuando es él quien lo prepara.</div>
+<div class="nota">Todo lo que el capitán registra queda en la sección igual que si lo hubiera hecho su jefe de sección, y este lo ve al momento.</div>
+
+<!-- ======================= PARTE IV ======================= -->
+<div class="parte" data-parte="IV">PARTE IV · JEFE DE ESTUDIOS</div>
+<h2 id="s-estudios" data-sec class="fuerte">Estadísticas agregadas</h2>
+<div class="lado">
+  <div>
+    <p>El jefe de estudios consulta cifras de conjunto de todas las secciones para seguir la disciplina y detectar tendencias. <b>No ve datos personales</b> de los alumnos ni puede modificar nada.</p>
+    <ol>
+      <li>Entra con tu usuario y contraseña: se abre <b>Jefe de estudios</b>.</li>
+      <li>Elige <b>Compañía</b> y <b>Sección</b> (o deja <i>Todas</i>) y pulsa <span class="b">Actualizar</span>.</li>
+    </ol>
+    <table>
+      <tr><th style="width:36%">Bloque</th><th>Qué muestra</th></tr>
+      <tr><td>Cuadros superiores</td><td>Número de refuerzos, rebajes, arrestos y sanciones.</td></tr>
+      <tr><td>Sanciones por tipo y medida</td><td>Leves y graves, y cuántas hay de cada medida correctora.</td></tr>
+      <tr><td>Fundamentos legales</td><td>Cuántas veces se ha aplicado cada fundamento, con su tipo y letra.</td></tr>
+      <tr><td>Motivos agrupados</td><td>Los motivos escritos a mano, agrupando textos parecidos, con la columna <i>Cómo se escribió</i> para ver las variantes.</td></tr>
+      <tr><td>Por sección</td><td>Refuerzos, rebajes, arrestos y sanciones de cada sección, para comparar.</td></tr>
+    </table>
+    <div class="nota">El jefe de estudios no cambia su contraseña desde su pantalla: si la olvida o quiere cambiarla, lo hace el Súper Administrador.</div>
+  </div>
+  <figure id="f-estudios"><img src="img/estudios.jpg" alt=""><figcaption>Estadísticas agregadas del jefe de estudios.</figcaption></figure>
+</div>
+
+<!-- ======================= ANEXO ======================= -->
+<div class="parte" data-parte="ANEXO" style="display:none">ANEXO</div>
+<h2 class="salto" id="s-anexo" data-anexo="A">Problemas frecuentes</h2>
+<table class="peq">
+  <tr><th style="width:36%">Problema</th><th>Solución</th></tr>
+  <tr><td>«Usuario o contraseña incorrectos»</td><td>Comprueba mayúsculas y que el usuario es el que te dieron. Si has olvidado la contraseña, pide una nueva a tu jefe de sección (o al Súper Administrador si eres jefe de sección).</td></tr>
+  <tr><td>«Demasiados intentos fallidos»</td><td>Espera los segundos que indica y vuelve a intentarlo.</td></tr>
+  <tr><td>Me echa de la aplicación o dice que no tengo acceso</td><td>La sesión dura 12 horas; vuelve a entrar. Si persiste, tu usuario puede haber sido dado de baja: consulta a tu jefe de sección.</td></tr>
+  <tr><td>El alumno no aparece al buscarlo</td><td>Prueba con el número o el primer apellido y pulsa el nombre en la lista. Si no está, puede estar dado de baja (Roster → Bajas) o faltar en el roster.</td></tr>
+  <tr><td>No me deja guardar el parte</td><td>Revisa los campos obligatorios (alumno, fecha, tipo de falta, fundamento y motivo) y que hayan firmado todos los alumnos.</td></tr>
+  <tr><td>No aparece la pestaña Ficha o Rebajes/Refuerzos (jefe de pelotón)</td><td>No tienes ese permiso; solicítalo a tu jefe de sección.</td></tr>
+  <tr><td>La foto no se hace con la cámara</td><td>Permite al navegador el uso de la cámara o utiliza <i>Subir foto</i>.</td></tr>
+  <tr><td>No se abre el PDF o el informe</td><td>Permite las ventanas emergentes para cefot.up.railway.app.</td></tr>
+  <tr><td>Un programa semanal no se carga</td><td>Lee el motivo que indica la pestaña: falta la columna «HORARIO» o las de sección (I SC, II SC…), o no aparecen las fechas de la semana ni en el nombre del archivo ni en el título.</td></tr>
+  <tr><td>Una respuesta del cuestionario no se adjunta</td><td>El número de protocolo que escribió el alumno no está en el listado (revísalo), el alumno está de baja o la respuesta no tiene número.</td></tr>
+  <tr><td>«Error de conexión»</td><td>Comprueba la conexión a Internet y vuelve a intentarlo. Recarga la página para ver si la operación llegó a guardarse antes de repetirla.</td></tr>
+</table>
+<h3>Buenas prácticas</h3>
+<ul>
+  <li>No compartas tu usuario ni tu contraseña y cambia la contraseña inicial.</li>
+  <li>Cierra la sesión en equipos compartidos.</li>
+  <li>Las copias exportadas y los documentos impresos contienen datos personales: guárdalos con la misma custodia que el resto de la documentación de personal.</li>
+  <li>Ante cualquier duda sobre el funcionamiento, consulta al responsable de la aplicación.</li>
+</ul>
+
+<script>
+// ---- Versión ----
+var VERSION = "18/11/2026";
+document.getElementById("version").textContent = VERSION;
+// ---- Numeración de apartados, figuras y referencias ----
+var n = 0, numSec = {};
+document.querySelectorAll("h2[data-sec]").forEach(function(h){
+  n++; numSec[h.id] = n; h.setAttribute("data-n", n);
+  h.textContent = n + ". " + h.textContent;
+  // subapartados «N.1», «N.2»… y referencias internas «ver N.2»
+  var el = h.nextElementSibling;
+  while (el && !(el.matches && (el.matches("h2") || el.matches(".parte")))){
+    el.querySelectorAll && el.querySelectorAll(".num, .sn").forEach(function(s){ s.textContent = n; });
+    if (el.matches(".num, .sn")) el.textContent = n;
+    el = el.nextElementSibling;
+  }
+});
+document.querySelectorAll("h3 > .num").forEach(function(s){ var h3 = s.parentNode; h3.innerHTML = h3.innerHTML.replace(/<span class="num">(\d+)<\/span>/, "$1"); });
+document.querySelectorAll("h2[data-anexo]").forEach(function(h){ h.textContent = "Anexo " + h.getAttribute("data-anexo") + ". " + h.textContent; });
+var f = 0, numFig = {};
+document.querySelectorAll("figure[id]").forEach(function(fig){
+  f++; numFig[fig.id] = f;
+  var c = fig.querySelector("figcaption"); c.textContent = "Figura " + f + ". " + c.textContent;
+});
+document.querySelectorAll("a.ap").forEach(function(a){ a.textContent = numSec[a.getAttribute("href").slice(1)] || "?"; a.removeAttribute("href"); });
+document.querySelectorAll("a.fg").forEach(function(a){ a.textContent = numFig[a.getAttribute("href").slice(1)] || "?"; a.removeAttribute("href"); });
+// ---- Índice (las páginas las pone generar_pdf.js en window.PAGINAS) ----
+var PAGINAS = window.PAGINAS || {};
+var ind = document.getElementById("indice"), html = "";
+function linea(txt, pag, grupo, id){ return '<a class="l' + (grupo ? " grupo" : "") + '" href="#' + id + '"><span class="t">' + txt + '</span><span class="p"></span><span>' + (pag || "") + "</span></a>"; }
+document.querySelectorAll(".parte").forEach(function(p, i){ if (!p.id) p.id = "parte-" + p.getAttribute("data-parte"); });
+document.querySelectorAll(".parte, h2[data-sec], h2[data-anexo]").forEach(function(e){
+  if (e.matches(".parte")){
+    // la banda ANEXO no se ve: su página y su enlace son los del anexo A
+    var dest = e.style.display === "none" ? e.nextElementSibling : e;
+    html += linea(e.textContent, PAGINAS[dest.id], true, dest.id);
+  }
+  else if (e.hasAttribute("data-anexo")) html += linea("<b>" + e.getAttribute("data-anexo") + ".</b> " + e.textContent.replace(/^Anexo \w+\. /, ""), PAGINAS[e.id], false, e.id);
+  else html += linea("<b>" + e.getAttribute("data-n") + ".</b> " + e.textContent.replace(/^\d+\. /, ""), PAGINAS[e.id], false, e.id);
+});
+// Para generar_pdf.js: qué texto buscar en el PDF para saber la página de cada entrada.
+window.ENTRADAS = Array.prototype.map.call(document.querySelectorAll(".parte, h2[data-sec], h2[data-anexo]"), function(e){
+  var dest = (e.matches(".parte") && e.style.display === "none") ? e.nextElementSibling : e;
+  return { id: dest.id, texto: dest.textContent.trim() };
+});
+ind.innerHTML = html;
+</script>
+</body>
+</html>

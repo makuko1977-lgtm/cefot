@@ -1357,6 +1357,62 @@ local pero no en el servidor y daban error, así que se han añadido.
 
 ---
 
+## 2026-11-18 — Manuales actualizados con la v48
+
+**Petición:** actualizar el manual en PDF y el manual interactivo con las
+novedades de la v48.
+
+**Manual interactivo** (`/manual.html`):
+- Seis demostraciones nuevas del jefe de sección: imprimir el listado, añadir
+  alumnos por reposición (con la consulta Reposiciones), cuestionario de inicio
+  de curso (QR), cargar otra hoja sin perder nada, programas semanales y pérdida
+  de horas.
+- Se han vuelto a grabar todas las demás, para que salgan las pestañas nuevas.
+- En total hay 29 demostraciones y 256 capturas, todas con datos ficticios.
+- Las referencias al PDF siguen la nueva numeración.
+
+**Manual PDF** (`docs/Manual_usuario_CEFOT2.pdf`, 25 páginas, versión 18/11/2026):
+- **Fuente.** La del PDF anterior ya no existía. Se ha rehecho con el mismo
+  diseño y el mismo texto en `docs/manual_fuente/` y ahora queda en el
+  repositorio. Se genera con:
+
+  `NODE_PATH=$(npm root -g) node docs/manual_fuente/generar_pdf.js`
+
+  Apartados, figuras, referencias e índice (con enlaces y marcadores) se
+  numeran solos.
+- **Comprobado.** Se ha cotejado frase a frase con el PDF anterior: no falta
+  nada. Solo cambian, a propósito:
+  - «Cargar otra hoja», que ya no sustituye;
+  - el cuestionario, que ya no va por enlace;
+  - las pestañas;
+  - el empleo TTE;
+  - la situación «por reposición»;
+  - el pie de la figura 2.
+- **Apartado 3 (Roster):** imprimir el listado, añadir por reposición,
+  cuestionario de inicio de curso (QR) y cargar otra hoja.
+- **Apartado 8 (Consultas):** consulta «Reposiciones».
+- **Apartado 11, nuevo:** programas semanales y pérdida de horas. Los
+  apartados siguientes suben un número y las referencias internas se han
+  actualizado.
+- **Apartado 13 (Exportar):** qué lleva la copia; los programas semanales no
+  se duplican.
+- **Apartado 18 (capitán):** puede trabajar con programas semanales, pérdida de
+  horas y el cuestionario; no puede añadir por reposición.
+- **Anexo A:** dos problemas nuevos (un programa que no se carga y una
+  respuesta del cuestionario que no se adjunta).
+
+**Ajuste en el servidor (capitán de compañía):**
+- Coherente con la regla del manual («todo salvo roster, usuarios y cierre de
+  curso»), el capitán puede guardar los programas semanales y las respuestas del
+  cuestionario dentro de una sección. Antes el servidor se lo impedía.
+- «Añadir por reposición» cambia el roster: sigue reservado al jefe de sección,
+  y al capitán ya no le aparece el botón.
+
+**Herramienta del manual interactivo:** si Pillow no funciona, las imágenes se
+pasan a WebP con ImageMagick.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí
