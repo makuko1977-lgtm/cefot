@@ -1265,6 +1265,57 @@ dos se complementan, así que no hay que mover ninguna fecha.
 
 ---
 
+## 2026-11-18 — HTML local: se incorporan las novedades de la v48 (fotos e impresión)
+
+`seccion3_48_fotos_impresion.html` se ha fusionado con la versión anterior
+del repositorio, solo **añadiendo** lo nuevo.
+
+**Base de la comparación:** la v40 que se subió a GitHub (la v41 ya no estaba
+disponible). Como la v41 solo añadía ajustes de campos, que también están en
+la v48, el resultado es el mismo.
+
+**Se conserva todo lo anterior:**
+- «Importar copia del servidor (añadir)».
+- La importación aditiva de «Importar copia».
+- Arresto y refuerzo de estudio/IFM compatibles.
+- Refuerzos manuales en Sanciones.
+- ANEXO sin límite de alumnos.
+- La «Cama» aparte en el rebaje total.
+
+**Novedades de la v48 que entran:**
+- **Roster:** «Imprimir» el listado filtrado con las columnas elegidas, y
+  «Añadir por reposición» desde un Excel sin cambiar lo cargado (filtro y
+  chapa «Reposición»).
+- **Pestañas nuevas:** «Programas semanales» y «Pérdida de horas».
+- **Consultas:** nueva consulta «Reposiciones».
+- **Cuestionario de inicio de curso:** el formulario ya existe y los alumnos
+  lo rellenan con un **código QR**. Aquí se carga la hoja de respuestas, con
+  filtro de pendientes y hechos. Desaparece el envío por WhatsApp, por
+  decisión del usuario.
+- **«Cargar otra hoja»:** ya no borra nada. Fusiona la hoja nueva y
+  conserva fotos, adjuntos, bajas y reposiciones.
+- **Empleo TTE.**
+- **Cabeceras de informes y del documento PDF:** llevan la compañía real de
+  los alumnos (antes, «3ª» fija). Se aceptan compañías y secciones del 1 al 9.
+- **Horas UA:** al fechar una hora solo se actualizan los contadores. La copia
+  de seguridad lleva las fechas de Horas UA y los programas semanales.
+
+**Ajuste para no sustituir datos:** la v48 hacía que «Importar copia»
+sobrescribiera también las fechas de Horas UA y los programas semanales. En
+la versión fusionada se **añaden** solo los que faltan:
+- Horas UA: por clave.
+- Programas: por identificador y semana; no se duplica una semana ya cargada.
+
+El resumen previo indica cuántos son nuevos y cuántos se omiten.
+
+**Comprobado en el navegador:**
+- Carga sin errores y las pestañas nuevas se abren.
+- La copia del servidor importada dos veces no duplica.
+- La copia local añade 1 hora UA y 1 programa nuevos, conserva los locales y
+  omite el de una semana ya cargada.
+
+---
+
 ## Cómo usar este documento
 
 Cada vez que se pida un cambio nuevo sobre `seccion3.html`, se añade aquí
